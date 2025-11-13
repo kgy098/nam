@@ -89,8 +89,8 @@ function array_map_deep($fn, $array)
 function sql_escape_string($str)
 {
     if(defined('G5_ESCAPE_PATTERN') && defined('G5_ESCAPE_REPLACE')) {
-        $pattern = G5_ESCAPE_PATTERN;
-        $replace = G5_ESCAPE_REPLACE;
+        $pattern = constant('G5_ESCAPE_PATTERN');;
+        $replace = constant('G5_ESCAPE_REPLACE');;
 
         if($pattern)
             $str = preg_replace($pattern, $replace, $str);
@@ -164,7 +164,10 @@ if (file_exists($dbconfig_file)) {
 
     sql_set_charset(G5_DB_CHARSET, $connect_db);
     if(defined('G5_MYSQL_SET_MODE') && G5_MYSQL_SET_MODE) sql_query("SET SESSION sql_mode = ''");
-    if (defined('G5_TIMEZONE')) sql_query(" set time_zone = '".G5_TIMEZONE."'");
+    // if (defined('G5_TIMEZONE')) sql_query(" set time_zone = '".G5_TIMEZONE."'");
+    if (defined('G5_TIMEZONE')) {
+      sql_query("SET time_zone = '" . constant('G5_TIMEZONE') . "'");
+    }
 } else {
 ?>
 
@@ -851,3 +854,189 @@ header('Cache-Control: pre-check=0, post-check=0, max-age=0'); // HTTP/1.1
 header('Pragma: no-cache'); // HTTP/1.0
 
 run_event('common_header');
+
+
+
+// 커넷 상수
+define('CN_PAGE_NUM', 10);
+define('CN_ADM_PAGE_NUM', 20);
+define('CN_ROW_NUM', 10); // 스토리메인 전체보기 한번에 가져올 갯수
+
+
+define('G5_SQL_PATH', '/home/connet/project/nam/theme/nam/mvc/model');
+
+define('NAM_IMG_URL', G5_THEME_IMG_URL.'/nam');
+
+// cn include
+// include_once(G5_LIB_PATH . '/cn_util.lib.php');
+
+include_once(G5_SQL_PATH . '/auth_code.php');
+include_once(G5_SQL_PATH . '/product.php');
+include_once(G5_SQL_PATH . '/member_product.php');
+include_once(G5_SQL_PATH . '/schedule.php');
+include_once(G5_SQL_PATH . '/lounge.php');
+include_once(G5_SQL_PATH . '/lounge_seat.php');
+include_once(G5_SQL_PATH . '/lounge_reservation.php');
+include_once(G5_SQL_PATH . '/teacher_time_block.php');
+include_once(G5_SQL_PATH . '/consult.php');
+include_once(G5_SQL_PATH . '/qna.php');
+include_once(G5_SQL_PATH . '/video.php');
+include_once(G5_SQL_PATH . '/study_report.php');
+include_once(G5_SQL_PATH . '/mock_test.php');
+include_once(G5_SQL_PATH . '/mock_subject.php');
+include_once(G5_SQL_PATH . '/mock_apply.php');
+include_once(G5_SQL_PATH . '/mock_result.php');
+include_once(G5_SQL_PATH . '/attendance.php');
+include_once(G5_SQL_PATH . '/attendance_type.php');
+include_once(G5_SQL_PATH . '/member_fee.php');
+include_once(G5_SQL_PATH . '/notify_log.php');
+
+
+/* ===== AJAX 요청 타입 상수 선언 ===== */
+// 출결
+define('AJAX_ATT_LIST',        'ATT_LIST');        // 출결 전체 목록
+define('AJAX_ATT_GET',         'ATT_GET');         // 단건 조회
+define('AJAX_ATT_BY_STUDENT',  'ATT_BY_STUDENT');  // 학생별 출결 목록
+define('AJAX_ATT_BETWEEN',     'ATT_BETWEEN');     // 기간별 조회
+define('AJAX_ATT_ADD',         'ATT_ADD');         // 출결 추가
+define('AJAX_ATT_UPD',         'ATT_UPD');         // 출결 수정
+define('AJAX_ATT_DEL',         'ATT_DEL');         // 출결 삭제
+
+// 반, 클래스
+define('AJAX_CLASS_LIST',   'CLASS_LIST');  // 반 리스트
+define('AJAX_CLASS_GET',    'CLASS_GET');
+define('AJAX_CLASS_ACTIVE', 'CLASS_ACTIVE');
+define('AJAX_CLASS_ADD',    'CLASS_ADD');
+define('AJAX_CLASS_UPD',    'CLASS_UPD');
+define('AJAX_CLASS_DEL',    'CLASS_DEL');
+
+// 인증번호
+define('AJAX_AUTH_LIST', 'AUTH_LIST');   // 인증번호 리스트
+define('AJAX_AUTH_GET',  'AUTH_GET');    // 단건 조회
+define('AJAX_AUTH_ADD',  'AUTH_ADD');    // 인증번호 생성
+define('AJAX_AUTH_USE',  'AUTH_USE');    // 사용 처리
+define('AJAX_AUTH_DEL',  'AUTH_DEL');    // 삭제
+
+// 상품
+define('AJAX_PRODUCT_LIST',   'PRODUCT_LIST');   // 상품 리스트
+define('AJAX_PRODUCT_GET',    'PRODUCT_GET');    // 단건 조회
+define('AJAX_PRODUCT_ACTIVE', 'PRODUCT_ACTIVE'); // 활성 여부로 조회
+define('AJAX_PRODUCT_ADD',    'PRODUCT_ADD');    // 상품 등록
+define('AJAX_PRODUCT_UPD',    'PRODUCT_UPD');    // 상품 수정
+define('AJAX_PRODUCT_DEL',    'PRODUCT_DEL');    // 상품 삭제
+
+// 회원-상품 매핑
+define('AJAX_MP_LIST', 'MP_LIST');   // 매핑 리스트
+define('AJAX_MP_GET',  'MP_GET');    // 단건 조회
+define('AJAX_MP_ADD',  'MP_ADD');    // 매핑 등록(입실)
+define('AJAX_MP_UPD',  'MP_UPD');    // 매핑 수정(퇴실/상태/방/메모)
+define('AJAX_MP_DEL',  'MP_DEL');    // 매핑 삭제
+
+// 학사일정
+define('AJAX_SCHEDULE_LIST',   'SCHEDULE_LIST');   // 일정 리스트
+define('AJAX_SCHEDULE_GET',    'SCHEDULE_GET');    // 단건 조회
+define('AJAX_SCHEDULE_ADD',    'SCHEDULE_ADD');    // 일정 등록
+define('AJAX_SCHEDULE_UPD',    'SCHEDULE_UPD');    // 일정 수정
+define('AJAX_SCHEDULE_DEL',    'SCHEDULE_DEL');    // 일정 삭제
+
+// 스터디 라운지
+define('AJAX_LOUNGE_LIST',   'LOUNGE_LIST');   // 라운지 리스트
+define('AJAX_LOUNGE_GET',    'LOUNGE_GET');    // 단건 조회
+define('AJAX_LOUNGE_ACTIVE', 'LOUNGE_ACTIVE'); // 활성 여부로 조회
+define('AJAX_LOUNGE_ADD',    'LOUNGE_ADD');    // 라운지 등록
+define('AJAX_LOUNGE_UPD',    'LOUNGE_UPD');    // 라운지 수정
+define('AJAX_LOUNGE_DEL',    'LOUNGE_DEL');    // 라운지 삭제
+
+// 스터디 라운지 좌석
+define('AJAX_LSEAT_LIST',      'LSEAT_LIST');      // 좌석 리스트
+define('AJAX_LSEAT_GET',       'LSEAT_GET');       // 단건 조회
+define('AJAX_LSEAT_BY_LOUNGE', 'LSEAT_BY_LOUNGE'); // 라운지별 조회(활성필터)
+define('AJAX_LSEAT_ADD',       'LSEAT_ADD');       // 좌석 등록
+define('AJAX_LSEAT_UPD',       'LSEAT_UPD');       // 좌석 수정
+define('AJAX_LSEAT_DEL',       'LSEAT_DEL');       // 좌석 삭제
+
+// 라운지 예약
+define('AJAX_LRES_LIST',       'LRES_LIST');        // 예약 리스트
+define('AJAX_LRES_GET',        'LRES_GET');         // 단건 조회
+define('AJAX_LRES_BY_STUDENT', 'LRES_BY_STUDENT');  // 학생별 예약 조회
+define('AJAX_LRES_BY_DATE',    'LRES_BY_DATE');     // 일자별(라운지/좌석) 조회
+define('AJAX_LRES_ADD',        'LRES_ADD');         // 예약 등록
+define('AJAX_LRES_UPD',        'LRES_UPD');         // 예약 수정
+define('AJAX_LRES_DEL',        'LRES_DEL');         // 예약 삭제
+
+// 교사 시간 블록
+define('AJAX_TTB_LIST', 'TTB_LIST');   // 블록 리스트
+define('AJAX_TTB_GET',  'TTB_GET');    // 단건 조회
+define('AJAX_TTB_ADD',  'TTB_ADD');    // 블록 등록
+define('AJAX_TTB_UPD',  'TTB_UPD');    // 블록 수정
+define('AJAX_TTB_DEL',  'TTB_DEL');    // 블록 삭제
+
+// 상담
+define('AJAX_CONSULT_LIST',   'CONSULT_LIST');    // 상담 리스트
+define('AJAX_CONSULT_GET',    'CONSULT_GET');     // 상담 단건 조회
+define('AJAX_CONSULT_CREATE', 'CONSULT_CREATE');  // 상담 생성
+define('AJAX_CONSULT_UPDATE', 'CONSULT_UPDATE');  // 상담 수정
+define('AJAX_CONSULT_DELETE', 'CONSULT_DELETE');  // 상담 삭제
+
+// 학원비(회원별)
+define('AJAX_MEMBER_FEE_LIST',   'MEMBER_FEE_LIST');    // 학원비 리스트
+define('AJAX_MEMBER_FEE_GET',    'MEMBER_FEE_GET');     // 학원비 단건 조회
+define('AJAX_MEMBER_FEE_CREATE', 'MEMBER_FEE_CREATE');  // 학원비 생성
+define('AJAX_MEMBER_FEE_UPDATE', 'MEMBER_FEE_UPDATE');  // 학원비 수정
+define('AJAX_MEMBER_FEE_DELETE', 'MEMBER_FEE_DELETE');  // 학원비 삭제
+
+// 모의고사 신청
+define('AJAX_MOCK_APPLY_LIST',   'MOCK_APPLY_LIST');    // 모의고사 신청 리스트
+define('AJAX_MOCK_APPLY_GET',    'MOCK_APPLY_GET');     // 모의고사 신청 단건 조회
+define('AJAX_MOCK_APPLY_CREATE', 'MOCK_APPLY_CREATE');  // 모의고사 신청 생성
+define('AJAX_MOCK_APPLY_UPDATE', 'MOCK_APPLY_UPDATE');  // 모의고사 신청 수정
+define('AJAX_MOCK_APPLY_DELETE', 'MOCK_APPLY_DELETE');  // 모의고사 신청 삭제
+
+// 모의고사 과목
+define('AJAX_MOCK_SUBJECT_LIST',   'MOCK_SUBJECT_LIST');    // 과목 리스트
+define('AJAX_MOCK_SUBJECT_GET',    'MOCK_SUBJECT_GET');     // 과목 단건 조회
+define('AJAX_MOCK_SUBJECT_CREATE', 'MOCK_SUBJECT_CREATE');  // 과목 생성
+define('AJAX_MOCK_SUBJECT_UPDATE', 'MOCK_SUBJECT_UPDATE');  // 과목 수정
+define('AJAX_MOCK_SUBJECT_DELETE', 'MOCK_SUBJECT_DELETE');  // 과목 삭제
+
+// 모의고사 시험
+define('AJAX_MOCK_TEST_LIST',   'MOCK_TEST_LIST');    // 시험 리스트
+define('AJAX_MOCK_TEST_GET',    'MOCK_TEST_GET');     // 시험 단건 조회
+define('AJAX_MOCK_TEST_CREATE', 'MOCK_TEST_CREATE');  // 시험 생성
+define('AJAX_MOCK_TEST_UPDATE', 'MOCK_TEST_UPDATE');  // 시험 수정
+define('AJAX_MOCK_TEST_DELETE', 'MOCK_TEST_DELETE');  // 시험 삭제
+
+// 알림 로그
+define('AJAX_NOTIFY_LOG_LIST',   'NOTIFY_LOG_LIST');    // 알림 리스트
+define('AJAX_NOTIFY_LOG_GET',    'NOTIFY_LOG_GET');     // 알림 단건 조회
+define('AJAX_NOTIFY_LOG_CREATE', 'NOTIFY_LOG_CREATE');  // 알림 생성
+define('AJAX_NOTIFY_LOG_UPDATE', 'NOTIFY_LOG_UPDATE');  // 알림 수정
+define('AJAX_NOTIFY_LOG_DELETE', 'NOTIFY_LOG_DELETE');  // 알림 삭제
+
+// Q&A
+define('AJAX_QNA_LIST',   'QNA_LIST');    // Q&A 리스트
+define('AJAX_QNA_GET',    'QNA_GET');     // Q&A 단건 조회
+define('AJAX_QNA_CREATE', 'QNA_CREATE');  // Q&A 생성
+define('AJAX_QNA_UPDATE', 'QNA_UPDATE');  // Q&A 수정
+define('AJAX_QNA_DELETE', 'QNA_DELETE');  // Q&A 삭제
+
+// 동영상
+define('AJAX_VIDEO_LIST',   'VIDEO_LIST');    // 동영상 리스트
+define('AJAX_VIDEO_GET',    'VIDEO_GET');     // 동영상 단건 조회
+define('AJAX_VIDEO_CREATE', 'VIDEO_CREATE');  // 동영상 생성
+define('AJAX_VIDEO_UPDATE', 'VIDEO_UPDATE');  // 동영상 수정
+define('AJAX_VIDEO_DELETE', 'VIDEO_DELETE');  // 동영상 삭제
+
+// 학습 리포트
+define('AJAX_STUDY_REPORT_LIST',   'STUDY_REPORT_LIST');    // 리포트 리스트
+define('AJAX_STUDY_REPORT_GET',    'STUDY_REPORT_GET');     // 리포트 단건 조회
+define('AJAX_STUDY_REPORT_CREATE', 'STUDY_REPORT_CREATE');  // 리포트 생성
+define('AJAX_STUDY_REPORT_UPDATE', 'STUDY_REPORT_UPDATE');  // 리포트 수정
+define('AJAX_STUDY_REPORT_DELETE', 'STUDY_REPORT_DELETE');  // 리포트 삭제
+
+// 출결 유형
+define('AJAX_ATTENDANCE_TYPE_LIST',   'ATTENDANCE_TYPE_LIST');    // 출결유형 리스트
+define('AJAX_ATTENDANCE_TYPE_GET',    'ATTENDANCE_TYPE_GET');     // 출결유형 단건 조회
+define('AJAX_ATTENDANCE_TYPE_CREATE', 'ATTENDANCE_TYPE_CREATE');  // 출결유형 생성
+define('AJAX_ATTENDANCE_TYPE_UPDATE', 'ATTENDANCE_TYPE_UPDATE');  // 출결유형 수정
+define('AJAX_ATTENDANCE_TYPE_DELETE', 'ATTENDANCE_TYPE_DELETE');  // 출결유형 삭제
