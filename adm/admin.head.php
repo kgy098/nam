@@ -1,4 +1,4 @@
-<?php
+<?
 if (!defined('_GNUBOARD_')) {
   exit;
 }
@@ -87,91 +87,19 @@ if (!empty($_COOKIE['g5_admin_btn_gnb'])) {
 ?>
 
 <style>
-  /* 상단 헤더 */
-  #hd_top {
-    text-align: right;
-  }
-  #btn_gnb.btn_gnb_open {
-    width: 140px;
-  }
 
-  #btn_gnb.btn_gnb_close {
-    width: 140px;
-  }
-
-  #logo {
-    margin-left: 90px;
-  }
-
-  #logo a {
-    color: #fff;
-    font-size: 14px;
-  }
-
-  /* 좌측 메뉴 */
-  #gnb .gnb_ul {
-    width: 140px;
-  }
-
-  #gnb .gnb_li {
-    width: 100%;
-  }
-
-  #gnb .gnb_li.on {
-    background: #fff;
-  }
-
-  #gnb .gnb_li button {
-    text-indent: unset;
-    width: 30px;
-  }
-
-  #gnb .gnb_oparea {
-    left: 100%;
-  }
-
-  #gnb .gnb_li .btn_op_2 {
-    cursor: pointer;
-  }
-
-  /* 우측 컨텐츠 */
-  #container {
-    padding-left: 310px;
-  }
-
-  #container #container_title {
-    padding-left: 330px;
-  }
-
-  #container.container-small {
-    padding-left: 140px;
-  }
-
-  #container.container-small #container_title {
-    padding-left: 160px;
-  }
-
-  .fold {
-    vertical-align: middle;
-    position: relative;
-    top: 50%;
-    transform: translateY(-50%);
-    margin-left: 10px;
-    cursor: pointer;
-  }
-  #logo {
-    width:170px;
-    margin-left:140px;
-    padding:10px 0;
-  }
-  #logo img {
-    width:70px;
-    height:auto;
-  }
 </style>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="<?= G5_ADMIN_URL ?>/css/admin_darkgold.css">
+
 <script>
-  var g5_admin_csrf_token_key = "<?php echo (function_exists('admin_csrf_token_key')) ? admin_csrf_token_key() : ''; ?>";
+  var g5_model_url = "<?= G5_MODEL_URL ?>";
+  var g5_api_url = "<?= G5_API_URL ?>";
+  var g5_ctrl_url = "<?= G5_CTRL_URL ?>";
+  var g5_view_url = "<?= G5_VIEW_URL ?>";
+
+  var g5_admin_csrf_token_key = "<?= (function_exists('admin_csrf_token_key')) ? admin_csrf_token_key() : ''; ?>";
   var tempX = 0;
   var tempY = 0;
 
@@ -196,36 +124,41 @@ if (!empty($_COOKIE['g5_admin_btn_gnb'])) {
 <div id="to_content"><a href="#container">본문 바로가기</a></div>
 
 <header id="hd">
-  <h1><?php echo $config['cf_title'] ?></h1>
+  <h1><?= $config['cf_title'] ?></h1>
   <div id="hd_top">
-    <button type="button" id="btn_gnb" class="btn_gnb_close <?php echo $adm_menu_cookie['btn_gnb']; ?>">메뉴</button>
+    <!-- <button type="button" id="btn_gnb" class="btn_gnb_close <?= $adm_menu_cookie['btn_gnb']; ?>">메뉴</button> -->
     <div id="logo">
-      <a href="<?php echo correct_goto_url(G5_ADMIN_URL); ?>">
-        <img src="<?php echo G5_ADMIN_URL ?>/img/logo.png" alt="<?php echo get_text($config['cf_title']); ?> 관리자">
+      <a href="<?= correct_goto_url(G5_ADMIN_URL); ?>">
+        <img src="/theme/nam/img/nam/logo.png" alt="<?= get_text($config['cf_title']); ?> 관리자">
       </a>
     </div>
+    <button type="button" id="btn_gnb" class="btn_gnb_close <?= $adm_menu_cookie['btn_gnb']; ?>">
+      <i class="bi bi-list"></i>
+    </button>
     <a class="btn btn_02 fold" id="fold">개발자메뉴</a>
 
     <div id="tnb">
       <ul>
-        <?php if (defined('G5_USE_SHOP') && G5_USE_SHOP) { ?>
-          <!-- <li class="tnb_li"><a href="<?php echo G5_SHOP_URL ?>/" class="tnb_shop" target="_blank" title="쇼핑몰 바로가기">쇼핑몰 바로가기</a></li> -->
-        <?php } ?>
-        <!-- <li class="tnb_li"><a href="<?php echo G5_URL ?>/" class="tnb_community" target="_blank" title="커뮤니티 바로가기">커뮤니티 바로가기</a></li>
-        <li class="tnb_li"><a href="<?php echo G5_ADMIN_URL ?>/service.php" class="tnb_service">부가서비스</a></li> -->
+        <? if (defined('G5_USE_SHOP') && G5_USE_SHOP) { ?>
+          <!-- <li class="tnb_li"><a href="<?= G5_SHOP_URL ?>/" class="tnb_shop" target="_blank" title="쇼핑몰 바로가기">쇼핑몰 바로가기</a></li> -->
+        <? } ?>
+        <!-- <li class="tnb_li"><a href="<?= G5_URL ?>/" class="tnb_community" target="_blank" title="커뮤니티 바로가기">커뮤니티 바로가기</a></li>
+        <li class="tnb_li"><a href="<?= G5_ADMIN_URL ?>/service.php" class="tnb_service">부가서비스</a></li> -->
         <li class="tnb_li"><button type="button" class="tnb_mb_btn">관리자<span class="./img/btn_gnb.png">메뉴열기</span></button>
           <ul class="tnb_mb_area">
-            <li><a href="<?php echo G5_ADMIN_URL ?>/member_form.php?w=u&amp;mb_id=<?php echo $member['mb_id'] ?>">관리자정보</a></li>
-            <li id="tnb_logout"><a href="<?php echo G5_BBS_URL ?>/logout.php">로그아웃</a></li>
+            <li><a href="<?= G5_ADMIN_URL ?>/member_form.php?w=u&amp;mb_id=<?= $member['mb_id'] ?>">관리자정보</a></li>
+            <li id="tnb_logout"><a href="<?= G5_BBS_URL ?>/logout.php">로그아웃</a></li>
           </ul>
         </li>
       </ul>
     </div>
   </div>
-  <nav id="gnb" class="gnb_large <?php echo $adm_menu_cookie['gnb']; ?>">
+
+
+  <nav id="gnb" class="gnb_large <?= $adm_menu_cookie['gnb']; ?>">
     <h2>관리자 주메뉴</h2>
     <ul class="gnb_ul">
-      <?php
+      <?
       $jj = 1;
       foreach ($amenu as $key => $value) {
         $href1 = $href2 = '';
@@ -244,16 +177,19 @@ if (!empty($_COOKIE['g5_admin_btn_gnb'])) {
 
         $button_title = $menu['menu' . $key][0][1];
       ?>
-        <li class="gnb_li<?php echo $current_class; ?>">
-          <button type="button" class="btn_op menu-<?php echo $key; ?> menu-order-<?php echo $jj; ?>" title="<?php echo $button_title; ?>"><?php echo $button_title; ?></button>
+        <li class="gnb_li<?= $current_class; ?> <?= $key >= 100 ? 'old' : '' ?>" >
+          <span class="btn_op_2">
+            <button type="button" class="btn_op menu-<?= $key; ?> menu-order-<?= $jj; ?>" title="<?= $button_title; ?>" style="width:5px;" ></button>
+            <?= $button_title; ?>
+          </span>
           <div class="gnb_oparea_wr">
             <div class="gnb_oparea">
-              <h3><?php echo $menu['menu' . $key][0][1]; ?></h3>
-              <?php echo print_menu1('menu' . $key, 1); ?>
+              <h3><?= $menu['menu' . $key][0][1]; ?></h3>
+              <?= print_menu1('menu' . $key, 1); ?>
             </div>
           </div>
         </li>
-      <?php
+      <?
         $jj++;
       }     //end foreach
       ?>
@@ -263,6 +199,15 @@ if (!empty($_COOKIE['g5_admin_btn_gnb'])) {
 </header>
 <script>
   jQuery(function($) {
+    $("#fold").on("click", function() {
+      $(".gnb_li").each(function(idx, item) {
+        if ($(this).hasClass("old") && $(this).hasClass("view")) {
+          $(this).removeClass("view");
+        } else if ($(this).hasClass("old") && !$(this).hasClass("view")) {
+          $(this).addClass("view");
+        }
+      });
+    });
 
     var menu_cookie_key = 'g5_admin_btn_gnb';
 
@@ -270,8 +215,23 @@ if (!empty($_COOKIE['g5_admin_btn_gnb'])) {
       $(".tnb_mb_area").toggle();
     });
 
-    $("#btn_gnb").click(function() {
+    // $("#btn_gnb").click(function() {
+    //   var $this = $(this);
+    //   try {
+    //     if (!$this.hasClass("btn_gnb_open")) {
+    //       set_cookie(menu_cookie_key, 1, 60 * 60 * 24 * 365);
+    //     } else {
+    //       delete_cookie(menu_cookie_key);
+    //     }
+    //   } catch (err) {}
 
+    //   $("#container").toggleClass("container-small");
+    //   $("#gnb").toggleClass("gnb_small");
+    //   $this.toggleClass("btn_gnb_open");
+    // });
+
+    // 상단 메뉴 접기 버튼
+    $("#btn_gnb").click(function() {
       var $this = $(this);
 
       try {
@@ -286,10 +246,21 @@ if (!empty($_COOKIE['g5_admin_btn_gnb'])) {
       $("#gnb").toggleClass("gnb_small");
       $this.toggleClass("btn_gnb_open");
 
+      // 🔽 아이콘 바꾸기
+      var $icon = $this.find("i");
+      if ($this.hasClass("btn_gnb_open")) {
+        $icon.removeClass("bi-list").addClass("bi-x");
+      } else {
+        $icon.removeClass("bi-x").addClass("bi-list");
+      }
     });
 
-    $(".gnb_ul li .btn_op").click(function() {
-      $(this).parent().addClass("on").siblings().removeClass("on");
+    // $(".gnb_ul li .btn_op").click(function() {
+    //   $(this).parent().addClass("on").siblings().removeClass("on");
+    // });
+    $(".gnb_ul li ").click(function() {
+      // $(this).parent().addClass("on").siblings().removeClass("on");
+      $(this).addClass("on").siblings().removeClass("on");
     });
 
   });
@@ -298,7 +269,7 @@ if (!empty($_COOKIE['g5_admin_btn_gnb'])) {
 
 <div id="wrapper">
 
-  <div id="container" class="<?php echo $adm_menu_cookie['container']; ?>">
+  <div id="container" class="<?= $adm_menu_cookie['container']; ?>">
 
-    <h1 id="container_title"><?php echo $g5['title'] ?></h1>
+    <h1 id="container_title"><?= $g5['title'] ?></h1>
     <div class="container_wr">

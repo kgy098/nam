@@ -1,0 +1,397 @@
+/* =========================================
+   Dark / Gold Admin Theme Override Layer
+   기존 레이아웃 유지, 색상만 교체
+========================================= */
+
+/* 전체 배경 */
+body {
+  background: #121212 !important;
+  color: #E5E5E5 !important;
+}
+
+/* 공통 텍스트 */
+a,
+th,
+td,
+label,
+span,
+p {
+  color: #E5E5E5 !important;
+}
+
+a:hover {
+  color: #D4AF37 !important;
+}
+
+/* 테두리 색 */
+table td,
+table th,
+input,
+select,
+textarea {
+  border-color: #2A2A2A !important;
+  background: #1E1E1E !important;
+  color: #E5E5E5 !important;
+}
+
+/* 헤더 */
+#hd_top {
+  background: #1A1A1A !important;
+  border-bottom: 1px solid #2A2A2A !important;
+  /* display: flex !important;
+  align-items: center !important; */
+}
+
+#logo {
+  background: transparent !important;
+  margin-left: 0px;
+  width: 140px;
+}
+
+#logo a {
+  color: #D4AF37 !important;
+}
+
+#logo img {
+  width: 70px;
+  height: auto;
+}
+
+#btn_gnb {
+  background: #1E1E1E !important;
+  border-right: 1px solid #2A2A2A !important;
+}
+
+/* 오른쪽 TNB */
+#tnb a,
+#tnb button,
+#tnb .tnb_service {
+  background: #1E1E1E !important;
+  color: #D4AF37 !important;
+  border: 1px solid #2A2A2A !important;
+}
+
+#tnb a:hover,
+#tnb button:hover {
+  background: #2A2A2A !important;
+}
+
+/* 왼쪽 메뉴 */
+#gnb .gnb_ul {
+  background: #1E1E1E !important;
+}
+
+#gnb .gnb_li {
+  border-bottom: 1px solid #2A2A2A !important;
+  color: #E5E5E5 !important;
+}
+
+#gnb .gnb_li:hover {
+  background: #2A2A2A !important;
+}
+
+#gnb .gnb_li.on {
+  background: #2A2A2A !important;
+}
+
+#gnb .gnb_li button {
+  background: transparent !important;
+  color: #D4AF37 !important;
+}
+
+#gnb .gnb_oparea {
+  background: #1E1E1E !important;
+  border-right: 1px solid #2A2A2A !important;
+}
+
+#gnb .gnb_oparea li a {
+  color: #E5E5E5 !important;
+}
+
+#gnb .gnb_oparea li a:hover {
+  color: #D4AF37 !important;
+}
+
+/* container */
+#container {
+  background: #121212 !important;
+}
+
+#container_title {
+  background: #1A1A1A !important;
+  border-bottom: 1px solid #2A2A2A !important;
+  color: #D4AF37 !important;
+}
+
+/* 테이블 헤더 */
+.tbl_head01 thead th {
+  background: #1E1E1E !important;
+  color: #D4AF37 !important;
+  border-color: #2A2A2A !important;
+}
+
+/* 테이블 행 */
+.tbl_head01 tbody tr:nth-child(even) {
+  background: #161616 !important;
+}
+
+.tbl_head01 tbody tr:nth-child(odd) {
+  background: #1E1E1E !important;
+}
+
+.tbl_head01 tbody td {
+  border-color: #2A2A2A !important;
+}
+
+/* ============================
+   버튼 색상 (로고와 어울리도록 변경)
+============================ */
+
+/* 주요 버튼 */
+.btn,
+button,
+.btn_submit,
+a.btn,
+a.btn_submit {
+  background: #C9A86A !important;
+  /* 기존보다 덜 노란 고급 골드 */
+  color: #121212 !important;
+  border: none !important;
+  font-weight: 600 !important;
+}
+
+.btn:hover,
+button:hover,
+.btn_submit:hover {
+  background: #B9975A !important;
+  /* hover 시 은은하게 어두운 골드 */
+}
+
+/* 회색/보조 버튼 */
+.btn_02,
+a.btn_02 {
+  background: #1E1E1E !important;
+  color: #C9A86A !important;
+  border: 1px solid #3A3A3A !important;
+}
+
+.btn_03,
+a.btn_03 {
+  background: #2A2A2A !important;
+  color: #C9A86A !important;
+  border: 1px solid #444 !important;
+}
+
+
+/* 페이지네이션 */
+.pg_page,
+.pg_current {
+  background: #1E1E1E !important;
+  color: #D4AF37 !important;
+  border: 1px solid #2A2A2A !important;
+}
+
+.pg_current {
+  background: #D4AF37 !important;
+  color: #121212 !important;
+}
+
+/* 팝업 */
+.popup-content {
+  background: #1E1E1E !important;
+  color: #E5E5E5 !important;
+}
+
+.popup-header,
+.popup-footer {
+  border-color: #2A2A2A !important;
+}
+
+/* 스크롤 탑 */
+.scroll_top {
+  background: #2A2A2A !important;
+}
+
+.scroll_top span.top_img {
+  border-bottom-color: #D4AF37 !important;
+}
+
+/* 총 회원수 스타일 커스텀 */
+.btn_ov01 {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* 왼쪽 라벨 (총 회원수) */
+.btn_ov01 .ov_txt {
+  background: #C9A86A !important;
+  /* 골드 */
+  color: #1E1E1E !important;
+  /* 다크 텍스트 */
+  padding: 0 10px !important;
+}
+
+/* 오른쪽 숫자 영역 */
+.btn_ov01 .ov_num {
+  background: #2A2A2A !important;
+  /* 다크 배경 */
+  color: #E2C385 !important;
+  /* 밝은 골드 */
+  padding: 0 10px !important;
+  border-left: 1px solid #C9A86A !important;
+  /* 골드 라인 */
+}
+
+/* 상단 우측 관리자 드롭다운 화살표 색상 변경 */
+#tnb button span {
+  background-color: #C9A86A !important;
+  /* 골드 */
+  border-radius: 3px;
+}
+
+/* hover 시 더 밝은 골드 */
+#tnb button:hover span {
+  background-color: #DAB97A !important;
+}
+
+/* 관리자 드롭다운(관리자정보/로그아웃) 외곽선 제거 */
+#tnb .tnb_mb_area {
+  border: none !important;
+  background: #1A1A1A !important;
+  /* 드롭다운 배경 다크 */
+  box-shadow: 0 0 0 !important;
+  /* 쉐도우 제거 */
+}
+
+/* 드롭다운 안의 버튼 hover 시에도 테두리 없게 */
+#tnb .tnb_mb_area a,
+#tnb .tnb_mb_area li {
+  border: none !important;
+}
+
+/* 하단 푸터 영역 다크 스타일 적용 */
+#ft {
+  background: #121212 !important;
+  /* 완전 다크 */
+  color: #C9A86A !important;
+  /* 골드 텍스트 */
+  border-top: 1px solid #2A2A2A !important;
+}
+
+/* 푸터 텍스트 */
+#ft p {
+  color: #C9A86A !important;
+}
+
+/* 2차 메뉴 접기 버튼 (햄버거 / X) - 아이콘 폰트 사용 */
+#btn_gnb,
+#btn_gnb.btn_gnb_open {
+  width: 170px;
+  height: 50px;
+  background-color: #1A1A1A !important;
+  /* 다크 배경 */
+  border-right: 1px solid #2A2A2A !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-indent: 0 !important;
+  /* 기본 css의 -999px 덮어쓰기 */
+  overflow: visible !important;
+  color: #C9A86A !important;
+  /* 골드 아이콘 */
+  font-size: 22px !important;
+  /* 아이콘 크기 */
+  /* position: relative; */
+  left:140px;
+}
+
+#btn_gnb:hover,
+#btn_gnb.btn_gnb_open:hover {
+  background-color: #232323 !important;
+}
+
+
+/* 기존 member_list.php 에 있던 css 통합 */
+/* 상단 헤더 */
+#hd_top {
+  text-align: right;
+}
+
+
+/* 좌측 메뉴 */
+#gnb .gnb_ul {
+  width: 140px;
+}
+
+#gnb .gnb_li {
+  width: 100%;
+}
+
+#gnb .gnb_li.on {
+  background: #fff;
+}
+
+#gnb .gnb_li button {
+  text-indent: unset;
+  width: 30px;
+}
+
+#gnb .gnb_oparea {
+  left: 100%;
+}
+
+#gnb .gnb_li .btn_op_2 {
+  cursor: pointer;
+}
+
+/* 우측 컨텐츠 */
+#container {
+  padding-left: 310px;
+}
+
+#container #container_title {
+  padding-left: 330px;
+}
+
+#container.container-small {
+  padding-left: 140px;
+}
+
+#container.container-small #container_title {
+  padding-left: 160px;
+}
+
+.fold {
+  vertical-align: middle;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+
+.gnb_li.old {
+  display: none;
+}
+
+.gnb_li.old.view {
+  display: block;
+}
+
+#btnDateReset {
+    margin-right: 30px;
+}
+
+/* 다크모드에서 입력폼 외곽선 선명하게 */
+.frm_input {
+    background-color: #1A1A1A !important;
+    border: 1px solid #555 !important;   /* 기존보다 확실하게 보이는 회색 */
+    color: #EEE !important;
+}
+
+.frm_input:focus {
+    border: 1px solid #C9A86A !important;  /* 골드 포인트 컬러로 강조 */
+    outline: none !important;
+    box-shadow: 0 0 4px rgba(201,168,106,0.4);
+}

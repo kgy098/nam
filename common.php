@@ -863,33 +863,43 @@ define('CN_ADM_PAGE_NUM', 20);
 define('CN_ROW_NUM', 10); // 스토리메인 전체보기 한번에 가져올 갯수
 
 
-define('G5_SQL_PATH', '/home/connet/project/nam/theme/nam/mvc/model');
+define('G5_MODEL_PATH', '/home/connet/project/nam/theme/nam/mvc/model');
+define('G5_API_PATH', '/home/connet/project/nam/theme/nam/mvc/controller/api');
+define('G5_CTRL_PATH', '/home/connet/project/nam/theme/nam/mvc/controller');
+define('G5_VIEW_PATH', '/home/connet/project/nam/theme/nam/mvc/view');
 
 define('NAM_IMG_URL', G5_THEME_IMG_URL.'/nam');
+define('G5_NAM_ADM_URL', G5_ADMIN_URL.'/namadm');
+
+define('G5_MODEL_URL', G5_URL.'/theme/nam/mvc/model');
+define('G5_API_URL', G5_URL.'/theme/nam/mvc/controller/api');
+define('G5_CTRL_URL', G5_URL.'/theme/nam/mvc/controller');
+define('G5_VIEW_URL', G5_URL.'/theme/nam/mvc/view');
 
 // cn include
 // include_once(G5_LIB_PATH . '/cn_util.lib.php');
 
-include_once(G5_SQL_PATH . '/auth_code.php');
-include_once(G5_SQL_PATH . '/product.php');
-include_once(G5_SQL_PATH . '/member_product.php');
-include_once(G5_SQL_PATH . '/schedule.php');
-include_once(G5_SQL_PATH . '/lounge.php');
-include_once(G5_SQL_PATH . '/lounge_seat.php');
-include_once(G5_SQL_PATH . '/lounge_reservation.php');
-include_once(G5_SQL_PATH . '/teacher_time_block.php');
-include_once(G5_SQL_PATH . '/consult.php');
-include_once(G5_SQL_PATH . '/qna.php');
-include_once(G5_SQL_PATH . '/video.php');
-include_once(G5_SQL_PATH . '/study_report.php');
-include_once(G5_SQL_PATH . '/mock_test.php');
-include_once(G5_SQL_PATH . '/mock_subject.php');
-include_once(G5_SQL_PATH . '/mock_apply.php');
-include_once(G5_SQL_PATH . '/mock_result.php');
-include_once(G5_SQL_PATH . '/attendance.php');
-include_once(G5_SQL_PATH . '/attendance_type.php');
-include_once(G5_SQL_PATH . '/member_fee.php');
-include_once(G5_SQL_PATH . '/notify_log.php');
+include_once(G5_MODEL_PATH . '/member.php');
+include_once(G5_MODEL_PATH . '/auth_code.php');
+include_once(G5_MODEL_PATH . '/product.php');
+include_once(G5_MODEL_PATH . '/member_product.php');
+include_once(G5_MODEL_PATH . '/schedule.php');
+include_once(G5_MODEL_PATH . '/lounge.php');
+include_once(G5_MODEL_PATH . '/lounge_seat.php');
+include_once(G5_MODEL_PATH . '/lounge_reservation.php');
+include_once(G5_MODEL_PATH . '/teacher_time_block.php');
+include_once(G5_MODEL_PATH . '/consult.php');
+include_once(G5_MODEL_PATH . '/qna.php');
+include_once(G5_MODEL_PATH . '/video.php');
+include_once(G5_MODEL_PATH . '/study_report.php');
+include_once(G5_MODEL_PATH . '/mock_test.php');
+include_once(G5_MODEL_PATH . '/mock_subject.php');
+include_once(G5_MODEL_PATH . '/mock_apply.php');
+include_once(G5_MODEL_PATH . '/mock_result.php');
+include_once(G5_MODEL_PATH . '/attendance.php');
+include_once(G5_MODEL_PATH . '/attendance_type.php');
+include_once(G5_MODEL_PATH . '/member_fee.php');
+include_once(G5_MODEL_PATH . '/notify_log.php');
 
 
 /* ===== AJAX 요청 타입 상수 선언 ===== */
@@ -1040,3 +1050,10 @@ define('AJAX_ATTENDANCE_TYPE_GET',    'ATTENDANCE_TYPE_GET');     // 출결유�
 define('AJAX_ATTENDANCE_TYPE_CREATE', 'ATTENDANCE_TYPE_CREATE');  // 출결유형 생성
 define('AJAX_ATTENDANCE_TYPE_UPDATE', 'ATTENDANCE_TYPE_UPDATE');  // 출결유형 수정
 define('AJAX_ATTENDANCE_TYPE_DELETE', 'ATTENDANCE_TYPE_DELETE');  // 출결유형 삭제
+
+// 회원관리
+define('AJAX_MEMBER_LIST',   'MEMBER_LIST');    // 회원 리스트
+define('AJAX_MEMBER_GET',    'MEMBER_GET');     // 회원 단건 조회
+define('AJAX_MEMBER_CREATE', 'MEMBER_CREATE');  // 회원 생성
+define('AJAX_MEMBER_UPDATE', 'MEMBER_UPDATE');  // 회원 수정
+define('AJAX_MEMBER_DELETE', 'MEMBER_DELETE');  // 회원 삭제
