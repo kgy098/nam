@@ -111,7 +111,7 @@ if ( !isset($w) ) {
 
     <div class="btn_fixed_top">
         <a href="./member_list.php" class="btn btn_02">목록</a>
-        <input type="submit" value="확인" class="btn_submit btn">
+        <input type="submit" value="저장" class="btn_submit btn">
     </div>
 </form>
 
