@@ -862,19 +862,20 @@ define('CN_PAGE_NUM', 10);
 define('CN_ADM_PAGE_NUM', 20);
 define('CN_ROW_NUM', 10); // 스토리메인 전체보기 한번에 가져올 갯수
 
+define('G5_NAM_ADM_APTH', G5_PATH.'/admnam');
 
-define('G5_MODEL_PATH', '/home/connet/project/nam/theme/nam/mvc/model');
-define('G5_API_PATH', '/home/connet/project/nam/theme/nam/mvc/controller/api');
-define('G5_CTRL_PATH', '/home/connet/project/nam/theme/nam/mvc/controller');
-define('G5_VIEW_PATH', '/home/connet/project/nam/theme/nam/mvc/view');
+define('G5_MODEL_PATH', '/home/connet/project/nam/mvc/model');
+define('G5_API_PATH', '/home/connet/project/nam/mvc/controller/api');
+define('G5_CTRL_PATH', '/home/connet/project/nam/mvc/controller');
+define('G5_VIEW_PATH', '/home/connet/project/nam/mvc/view');
 
 define('NAM_IMG_URL', G5_THEME_IMG_URL.'/nam');
-define('G5_NAM_ADM_URL', G5_ADMIN_URL.'/namadm');
+define('G5_NAM_ADM_URL', G5_URL.'/admnam');
 
-define('G5_MODEL_URL', G5_URL.'/theme/nam/mvc/model');
-define('G5_API_URL', G5_URL.'/theme/nam/mvc/controller/api');
-define('G5_CTRL_URL', G5_URL.'/theme/nam/mvc/controller');
-define('G5_VIEW_URL', G5_URL.'/theme/nam/mvc/view');
+define('G5_MODEL_URL', G5_URL.'/mvc/model');
+define('G5_API_URL', G5_URL.'/mvc/controller/api');
+define('G5_CTRL_URL', G5_URL.'/mvc/controller');
+define('G5_VIEW_URL', G5_URL.'/mvc/view');
 
 // cn include
 // include_once(G5_LIB_PATH . '/cn_util.lib.php');

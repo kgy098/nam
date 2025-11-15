@@ -303,8 +303,47 @@ border-bottom: 5px solid black;}
 .local_sch select{height:30px;margin-right:3px;border:1px solid #dcdcdc}
 .local_sch01{margin: 10px 0;}
 .local_sch02{}
-.local_sch01 .frm_input{height:30px;border:1px solid #dcdcdc;padding:0 5px;}
-.local_sch01 .btn_submit{width:30px;height:30px;border:1px solid #dcdcdc;padding:0;background:url(../img/sch_btn.png) no-repeat 50% 50% #eee;text-indent:-999px;overflow:hidden}
+.local_sch01 { margin: 10px 0; }
+.local_sch01 .sch_left { float: left; }
+.local_sch01 .sch_right { float: right; }
+
+.local_sch01 select,
+.local_sch01 .frm_input {
+  height: 28px;
+  line-height: 28px;
+  margin-right: 5px;
+}
+
+.local_sch01 button {
+  height: 30px;
+  padding: 0 12px;
+  border: none;           /* 🔸 외곽선 제거 */
+  background-color: #556ee6;  /* 🔸 관리자 버튼 컬러 (선택사항) */
+  color: #fff;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.local_sch01 button:hover {
+  background-color: #4358c7;  /* 🔹 hover 효과 */
+}
+
+.local_sch01 .btn_02 {
+  background-color: #3ac47d;
+}
+
+.local_sch01 .btn_02:hover {
+  background-color: #31a56a;
+}
+
+.local_sch01 .btn_03 {
+  background-color: #f1b44c;
+}
+
+.local_sch01 .btn_03:hover {
+  background-color: #d89e3f;
+}
+
 .local_sch03{padding:5px 15px;background:#e9ebf9;margin:10px 0}
 .local_sch div{margin:5px 0;}
 .local_sch03 strong{display:inline-block;width:70px;}
