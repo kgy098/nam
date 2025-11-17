@@ -878,7 +878,7 @@ define('G5_CTRL_URL', G5_URL.'/mvc/controller');
 define('G5_VIEW_URL', G5_URL.'/mvc/view');
 
 // cn include
-// include_once(G5_LIB_PATH . '/cn_util.lib.php');
+include_once(G5_LIB_PATH . '/cn_util.lib.php');
 
 include_once(G5_MODEL_PATH . '/member.php');
 include_once(G5_MODEL_PATH . '/auth_code.php');
@@ -901,6 +901,8 @@ include_once(G5_MODEL_PATH . '/attendance.php');
 include_once(G5_MODEL_PATH . '/attendance_type.php');
 include_once(G5_MODEL_PATH . '/member_fee.php');
 include_once(G5_MODEL_PATH . '/notify_log.php');
+include_once(G5_MODEL_PATH . '/notice.php');
+include_once(G5_MODEL_PATH . '/board_file.php');
 
 
 /* ===== AJAX 요청 타입 상수 선언 ===== */
@@ -1058,3 +1060,10 @@ define('AJAX_MEMBER_GET',    'MEMBER_GET');     // 회원 단건 조회
 define('AJAX_MEMBER_CREATE', 'MEMBER_CREATE');  // 회원 생성
 define('AJAX_MEMBER_UPDATE', 'MEMBER_UPDATE');  // 회원 수정
 define('AJAX_MEMBER_DELETE', 'MEMBER_DELETE');  // 회원 삭제
+
+// 공지사항
+define('AJAX_NOTICE_LIST', 'NOTICE_LIST');
+define('AJAX_NOTICE_GET',  'NOTICE_GET');
+define('AJAX_NOTICE_ADD',  'NOTICE_ADD');
+define('AJAX_NOTICE_UPD',  'NOTICE_UPD');
+define('AJAX_NOTICE_DEL',  'NOTICE_DEL');

@@ -1,7 +1,7 @@
 (function (global, $) {
   'use strict';
 
-  var ENDPOINT = 'ctrl_product.php';
+  var ENDPOINT = g5_ctrl_url + '/ctrl_product.php';
   var T = {
     LIST:   'PRODUCT_LIST',
     GET:    'PRODUCT_GET',

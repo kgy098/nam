@@ -1,7 +1,7 @@
 (function (global, $) {
   'use strict';
 
-  var ENDPOINT = 'ctrl_schedule.php';
+  var ENDPOINT = g5_ctrl_url + '/ctrl_schedule.php';
   var T = {
     LIST: 'SCHEDULE_LIST',
     GET:  'SCHEDULE_GET',

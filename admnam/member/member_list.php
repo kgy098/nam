@@ -3,7 +3,18 @@ include_once('./_common.php');
 $sub_menu = "010100";
 auth_check_menu($auth, $sub_menu, 'r');
 
-$g5['title'] = '회원관리';
+$mode = $_GET['mode'] ?? 'student'; // 기본은 학생
+if ($mode === 'teacher') {
+  $g5['title'] = '교사관리';
+  $regPage = './teacher_reg.php';
+  $listType = 'TEACHER_LIST';
+  $sub_menu = "010200";
+} else {
+  $g5['title'] = '학생관리';
+  $regPage = './member_reg.php';
+  $listType = 'MEMBER_LIST';
+}
+
 include_once(G5_NAM_ADM_APTH . '/admin.head.php');
 ?>
 
@@ -17,19 +28,23 @@ include_once(G5_NAM_ADM_APTH . '/admin.head.php');
   <form id="frmSearch" onsubmit="return false;">
 
     <div class="sch_left">
+      <? if ( $mode=='student' ) { ?>
       <input type="date" name="start_date" id="start_date" class="frm_input" style="width:140px">
       ~
       <input type="date" name="end_date" id="end_date" class="frm_input" style="width:140px">
       <button type="button" id="btnDateReset" class="btn btn_brown">날짜초기화</button>
+      <? } ?>
       <select name="field" id="field">
         <option value="mb_name">이름</option>
       </select>
       <input type="text" name="keyword" id="keyword" class="frm_input" placeholder="검색어 입력">
-      <button type="button" class="btn_submit" id="btnSearch">검색</button>
+      <button type="button" class="btn_submit " value="검색" id="btnSearch">검색</button>
     </div>
 
     <div class="sch_right">
+      <? if ( $mode=='student' ) { ?>
       <button type="button" class="btn_02" id="btnExcel">엑셀 다운로드</button>
+      <? } ?>
       <button type="button" class="btn_03" id="btnAddMember">회원등록</button>
     </div>
 
@@ -43,7 +58,9 @@ include_once(G5_NAM_ADM_APTH . '/admin.head.php');
     <thead>
       <tr>
         <th>이름</th>
+        <? if ( $mode=='student' ) { ?>
         <th>반</th>
+        <? } ?>
         <th>연락처</th>
         <th>가입일</th>
       </tr>
@@ -57,16 +74,19 @@ include_once(G5_NAM_ADM_APTH . '/admin.head.php');
 </div>
 
 <script>
+  var MODE = "<?= $mode ?>";
+
   $(function() {
-    loadMemberList();
+    console.log(MODE);
+    loadMemberList(MODE, 1);
 
     $("#btnSearch").on("click", function() {
-      loadMemberList();
+      loadMemberList(MODE, 1);
     });
 
     $('#keyword').on('keyup', function(e) {
       if (e.keyCode === 13) {
-        loadMemberList(1); // 엔터로 검색
+        loadMemberList(MODE, 1); // 엔터로 검색
       }
     });
 
@@ -75,7 +95,7 @@ include_once(G5_NAM_ADM_APTH . '/admin.head.php');
       $('input[name=start_date]').val('');
       $('input[name=end_date]').val('');
 
-      loadMemberList(1); // 1페이지부터 다시 조회
+      loadMemberList(MODE, 1); // 1페이지부터 다시 조회
     });
 
     $('#btnExcel').on('click', function() {
@@ -84,20 +104,19 @@ include_once(G5_NAM_ADM_APTH . '/admin.head.php');
     });
 
     $('#btnAddMember').on('click', function() {
-      location.href = './member_reg.php?';
+      location.href = "<?= $regPage ?>?";
     });
 
   });
 
-  function loadMemberList(page = 1) {
-    // const params = {
-    //   type: 'MEMBER_LIST',
-    //   page: page,
-    //   field: $("#field").val(),
-    //   keyword: $("#keyword").val()
-    // };
+  function loadMemberList(mode = 'student', page = 1) {
+
+    // mode에 따라 type 값 변경
+    const listType = (mode === 'student') ? 'STUDENT_LIST' : 'TEACHER_LIST' ;
+
     const params = {
-      type: 'MEMBER_LIST',
+      type: listType,
+      mode: "<?= $mode ?>",
       page: page,
       field: $("#field").val(),
       keyword: $("#keyword").val(),
@@ -105,10 +124,15 @@ include_once(G5_NAM_ADM_APTH . '/admin.head.php');
       end_date: $("#end_date").val()
     };
 
+    // console.log( JSON.stringify(params) ); 
+    // return;
+
     apiMemberList(params).done(function(res) {
       if (res.result === 'SUCCESS') {
+
         const list = res.data.list || [];
         const total = res.data.total || 0;
+
         $("#totalCount").text(total + '명');
 
         const tbody = $("#memberTable tbody");
@@ -120,30 +144,30 @@ include_once(G5_NAM_ADM_APTH . '/admin.head.php');
         }
 
         list.forEach(row => {
-          tbody.append(`
-          <tr class="item" data-id="${row.mb_id}">
-            <td>${row.mb_name}</td>
-            <td>${row.class}</td>
-            <td>${row.mb_hp || '-'}</td>
-            <td>${row.mb_datetime?.substring(0, 10) || '-'}</td>
-          </tr>
-        `);
-        });
 
-        $(".btnView").on("click", function() {
-          const id = $(this).data("id");
-          location.href = "./member_form.php?mb_id=" + id;
-        });
+          // ★ mode 분기: student / teacher
+          if (mode === 'teacher') {
+            // 교사 리스트
+            tbody.append(`
+                        <tr class="item" data-id="${row.mb_id}">
+                            <td>${row.mb_name}</td>
+                            <td>${row.mb_hp || '-'}</td>
+                            <td>${row.join_date?.substring(0,10) || '-'}</td>
+                        </tr>
+                    `);
 
-        $(".btnConfirm").on("click", function() {
-          const id = $(this).data("id");
-          const current = $(this).data("status");
-          const newStatus = current == 1 ? 0 : 1;
-          apiMemberUpdate(id, {
-            mb_confirm: newStatus
-          }).done(function(r) {
-            if (r.result === 'SUCCESS') loadMemberList(page);
-          });
+          } else {
+            // 학생 리스트
+            tbody.append(`
+                        <tr class="item" data-id="${row.mb_id}">
+                            <td>${row.mb_name}</td>
+                            <td>${row.class || '-'}</td>
+                            <td>${row.mb_hp || '-'}</td>
+                            <td>${row.mb_datetime?.substring(0,10) || '-'}</td>
+                        </tr>
+                    `);
+          }
+
         });
 
         setPagination(total, page);
