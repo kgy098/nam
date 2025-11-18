@@ -5,7 +5,7 @@ include_once('./_common.php');
 auth_check_menu($auth, $sub_menu, 'r');
 
 $g5['title'] = '수업영상';
-include_once(G5_NAM_ADM_APTH . '/admin.head.php');
+include_once(G5_NAM_ADM_PATH . '/admin.head.php');
 ?>
 
 <script src="<?= G5_API_URL ?>/api_video.js"></script>
@@ -101,5 +101,5 @@ $(function(){
 </script>
 
 <?php
-include_once(G5_NAM_ADM_APTH . '/admin.tail.php');
+include_once(G5_NAM_ADM_PATH . '/admin.tail.php');
 ?>

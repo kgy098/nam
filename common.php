@@ -862,7 +862,7 @@ define('CN_PAGE_NUM', 10);
 define('CN_ADM_PAGE_NUM', 20);
 define('CN_ROW_NUM', 10); // 스토리메인 전체보기 한번에 가져올 갯수
 
-define('G5_NAM_ADM_APTH', G5_PATH.'/admnam');
+define('G5_NAM_ADM_PATH', G5_PATH.'/admnam');
 
 define('G5_MODEL_PATH', '/home/connet/project/nam/mvc/model');
 define('G5_API_PATH', '/home/connet/project/nam/mvc/controller/api');
@@ -881,6 +881,7 @@ define('G5_VIEW_URL', G5_URL.'/mvc/view');
 include_once(G5_LIB_PATH . '/cn_util.lib.php');
 
 include_once(G5_MODEL_PATH . '/member.php');
+include_once(G5_MODEL_PATH . '/class.php');
 include_once(G5_MODEL_PATH . '/auth_code.php');
 include_once(G5_MODEL_PATH . '/product.php');
 include_once(G5_MODEL_PATH . '/member_product.php');
@@ -896,7 +897,6 @@ include_once(G5_MODEL_PATH . '/study_report.php');
 include_once(G5_MODEL_PATH . '/mock_test.php');
 include_once(G5_MODEL_PATH . '/mock_subject.php');
 include_once(G5_MODEL_PATH . '/mock_apply.php');
-include_once(G5_MODEL_PATH . '/mock_result.php');
 include_once(G5_MODEL_PATH . '/attendance.php');
 include_once(G5_MODEL_PATH . '/attendance_type.php');
 include_once(G5_MODEL_PATH . '/member_fee.php');
@@ -907,13 +907,15 @@ include_once(G5_MODEL_PATH . '/board_file.php');
 
 /* ===== AJAX 요청 타입 상수 선언 ===== */
 // 출결
-define('AJAX_ATT_LIST',        'ATT_LIST');        // 출결 전체 목록
-define('AJAX_ATT_GET',         'ATT_GET');         // 단건 조회
-define('AJAX_ATT_BY_STUDENT',  'ATT_BY_STUDENT');  // 학생별 출결 목록
-define('AJAX_ATT_BETWEEN',     'ATT_BETWEEN');     // 기간별 조회
-define('AJAX_ATT_ADD',         'ATT_ADD');         // 출결 추가
-define('AJAX_ATT_UPD',         'ATT_UPD');         // 출결 수정
-define('AJAX_ATT_DEL',         'ATT_DEL');         // 출결 삭제
+define('AJAX_ATT_LIST',         'ATT_LIST');         // 출결 리스트
+define('AJAX_ATT_GET',          'ATT_GET');          // 출결 단건
+define('AJAX_ATT_BY_STUDENT',   'ATT_BY_STUDENT');   // 학생별 출결
+define('AJAX_ATT_BETWEEN',      'ATT_BETWEEN');      // 기간별 출결
+define('AJAX_ATT_ADD',          'ATT_ADD');          // 출결 등록
+define('AJAX_ATT_UPD',          'ATT_UPD');          // 출결 수정
+define('AJAX_ATT_DEL',          'ATT_DEL');          // 출결 삭제
+define('AJAX_ATT_STATUS_LIST',  'ATT_STATUS_LIST');  // 출결현황 리스트(OUTER JOIN)
+define('AJAX_ATT_STATUS_CNT',   'ATT_STATUS_CNT');   // 출결현황 카운트
 
 // 반, 클래스
 define('AJAX_CLASS_LIST',   'CLASS_LIST');  // 반 리스트
@@ -921,7 +923,9 @@ define('AJAX_CLASS_GET',    'CLASS_GET');
 define('AJAX_CLASS_ACTIVE', 'CLASS_ACTIVE');
 define('AJAX_CLASS_ADD',    'CLASS_ADD');
 define('AJAX_CLASS_UPD',    'CLASS_UPD');
+define('AJAX_CLASS_ACTIVE_UPD',    'CLASS_ACTIVE_UPD');
 define('AJAX_CLASS_DEL',    'CLASS_DEL');
+
 
 // 인증번호
 define('AJAX_AUTH_LIST', 'AUTH_LIST');   // 인증번호 리스트

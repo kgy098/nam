@@ -1,97 +1,111 @@
 <?php
 include_once('./_common.php');
-header('Content-Type: application/json; charset=utf-8');
+// CRUD 함수는 공통에서 이미 include 되고 있으므로 별도 include 불필요
+// include_once('./cn_mock_subject_crud.php');
 
-$type  = isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
-$table = 'cn_mock_subject';
-$pk    = 'id';
-
-function jres($ok, $data=null){ echo json_encode(['result'=>$ok?'SUCCESS':'FAIL','data'=>$data], JSON_UNESCAPED_UNICODE); exit; }
-function esc($s){ if(function_exists('sql_escape_string')) return sql_escape_string($s); return addslashes($s); }
+$type = isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
 
 switch($type){
 
+/* ------------------------------------------------------
+ * 리스트
+ * ------------------------------------------------------ */
 case 'MOCK_SUBJECT_LIST':
-    $page   = isset($_REQUEST['page']) ? max(1,(int)$_REQUEST['page']) : 1;
-    $rows   = isset($_REQUEST['rows']) ? max(1,min(200,(int)$_REQUEST['rows'])) : 20;
-    $offset = ($page-1)*$rows;
 
-    $mock_id = isset($_REQUEST['mock_id']) ? (int)$_REQUEST['mock_id'] : 0;
-    $keyword = isset($_REQUEST['keyword']) ? trim($_REQUEST['keyword']) : '';
+    $page = isset($_REQUEST['page']) ? max(1, (int)$_REQUEST['page']) : 1;
+    $rows = isset($_REQUEST['rows']) ? max(1, min(200, (int)$_REQUEST['rows'])) : 20;
 
-    $where = '1';
-    if($mock_id>0) $where .= " AND mock_id={$mock_id}";
-    if($keyword!==''){ $k=esc($keyword); $where .= " AND subject_name LIKE '%{$k}%'"; }
+    $start = ($page - 1) * $rows;
 
-    $cnt = sql_fetch("SELECT COUNT(*) AS cnt FROM {$table} WHERE {$where}");
-    $total = (int)$cnt['cnt'];
+    // mock_id 삭제 → 관련 필터 없음
+    // keyword 필터도 화면 요구가 없다면 제거 (필요하면 추후 추가)
+    
+    $list  = select_mock_subject_list($start, $rows);
+    $total = select_mock_subject_listcnt();
 
-    $list = [];
-    $q = sql_query("SELECT {$pk}, mock_id, subject_name, max_score, description, created_at, updated_at
-                    FROM {$table}
-                    WHERE {$where}
-                    ORDER BY {$pk} DESC
-                    LIMIT {$offset}, {$rows}");
-    for($i=0; $row=sql_fetch_array($q); $i++) $list[] = $row;
-
-    jres(true, ['total'=>$total,'list'=>$list,'page'=>$page,'rows'=>$rows]);
+    jres(true, [
+        'total' => $total,
+        'list'  => $list,
+        'page'  => $page,
+        'rows'  => $rows
+    ]);
     break;
 
+
+/* ------------------------------------------------------
+ * 단건 조회
+ * ------------------------------------------------------ */
 case 'MOCK_SUBJECT_GET':
-    $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
-    if($id<=0) jres(false,'invalid id');
-    $row = sql_fetch("SELECT {$pk}, mock_id, subject_name, max_score, description, created_at, updated_at
-                      FROM {$table} WHERE {$pk}={$id}");
-    if(!$row) jres(false,'not found');
-    jres(true,$row);
+
+    $id = (int)($_REQUEST['id'] ?? 0);
+    if ($id <= 0) jres(false, 'invalid id');
+
+    $row = select_mock_subject_one($id);
+    if (!$row) jres(false, 'not found');
+
+    jres(true, $row);
     break;
 
+
+/* ------------------------------------------------------
+ * 등록
+ * ------------------------------------------------------ */
 case 'MOCK_SUBJECT_CREATE':
-    $mock_id = isset($_REQUEST['mock_id']) ? (int)$_REQUEST['mock_id'] : 0;
-    $subject_name = isset($_REQUEST['subject_name']) ? esc(trim($_REQUEST['subject_name'])) : '';
-    $max_score = isset($_REQUEST['max_score']) ? (int)$_REQUEST['max_score'] : 0;
-    $description = isset($_REQUEST['description']) ? esc(trim($_REQUEST['description'])) : '';
 
-    if($mock_id<=0 || $subject_name==='') jres(false,'required');
+    $subject_name = trim($_REQUEST['subject_name'] ?? '');
 
-    $ok = sql_query("INSERT INTO {$table}
-                    (mock_id, subject_name, max_score, description, created_at, updated_at)
-                    VALUES ({$mock_id}, '{$subject_name}', {$max_score}, '{$description}', NOW(), NOW())", false);
-    if(!$ok) jres(false,'insert fail');
+    if ($subject_name === '') {
+        jres(false, 'required');
+    }
 
-    $new = sql_fetch("SELECT {$pk}, mock_id, subject_name, max_score, description, created_at, updated_at
-                      FROM {$table} ORDER BY {$pk} DESC LIMIT 1");
-    jres(true,$new);
+    // CRUD 호출
+    $ok = insert_mock_subject($subject_name);
+    if (!$ok) jres(false, 'insert fail');
+
+    // 등록 직후 데이터 1건
+    $new = select_mock_subject_list(0, 1);
+    jres(true, $new[0]);
     break;
 
+
+/* ------------------------------------------------------
+ * 수정
+ * ------------------------------------------------------ */
 case 'MOCK_SUBJECT_UPDATE':
-    $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
-    if($id<=0) jres(false,'invalid id');
 
-    $sets = [];
-    if(isset($_REQUEST['mock_id']))       $sets[] = "mock_id=".(int)$_REQUEST['mock_id'];
-    if(isset($_REQUEST['subject_name']))  $sets[] = "subject_name='".esc(trim($_REQUEST['subject_name']))."'";
-    if(isset($_REQUEST['max_score']))     $sets[] = "max_score=".(int)$_REQUEST['max_score'];
-    if(isset($_REQUEST['description']))   $sets[] = "description='".esc(trim($_REQUEST['description']))."'";
-    $sets[] = "updated_at=NOW()";
+    $id = (int)($_REQUEST['id'] ?? 0);
+    if ($id <= 0) jres(false, 'invalid id');
 
-    $set_sql = implode(',', $sets);
-    $ok = sql_query("UPDATE {$table} SET {$set_sql} WHERE {$pk}={$id}", false);
-    if(!$ok) jres(false,'update fail');
+    $subject_name = isset($_REQUEST['subject_name'])
+        ? trim($_REQUEST['subject_name'])
+        : null;
 
-    $row = sql_fetch("SELECT {$pk}, mock_id, subject_name, max_score, description, created_at, updated_at
-                      FROM {$table} WHERE {$pk}={$id}");
-    jres(true,$row);
+    // CRUD 호출
+    $ok = update_mock_subject($id, $subject_name);
+    if (!$ok) jres(false, 'update fail');
+
+    $row = select_mock_subject_one($id);
+    jres(true, $row);
     break;
 
+
+/* ------------------------------------------------------
+ * 삭제 (soft delete)
+ * ------------------------------------------------------ */
 case 'MOCK_SUBJECT_DELETE':
-    $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
-    if($id<=0) jres(false,'invalid id');
-    $ok = sql_query("DELETE FROM {$table} WHERE {$pk}={$id}", false);
-    if(!$ok) jres(false,'delete fail');
-    jres(true,'deleted');
+
+    $id = (int)($_REQUEST['id'] ?? 0);
+    if ($id <= 0) jres(false, 'invalid id');
+
+    // CRUD 호출
+    $ok = soft_delete_mock_subject($id);
+    if (!$ok) jres(false, 'delete fail');
+
+    jres(true, 'deleted');
     break;
 
+
+/* ------------------------------------------------------ */
 default:
-    jres(false,'invalid type');
+    jres(false, 'invalid type');
 }

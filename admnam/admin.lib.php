@@ -321,7 +321,7 @@ function icon($act, $link = '', $target = '_parent')
   global $g5;
 
   $img = array('입력' => 'insert', '추가' => 'insert', '생성' => 'insert', '수정' => 'modify', '삭제' => 'delete', '이동' => 'move', '그룹' => 'move', '보기' => 'view', '미리보기' => 'view', '복사' => 'copy');
-  $icon = '<img src="' . G5_NAM_ADM_APTH . '/img/icon_' . $img[$act] . '.gif" title="' . $act . '">';
+  $icon = '<img src="' . G5_NAM_ADM_PATH . '/img/icon_' . $img[$act] . '.gif" title="' . $act . '">';
   if ($link) {
     $s = '<a href="' . $link . '">' . $icon . '</a>';
   } else {
@@ -651,7 +651,7 @@ if (isset($auth) && is_array($auth)) {
 unset($auth_menu);
 unset($menu);
 unset($amenu);
-$tmp = dir(G5_NAM_ADM_APTH);
+$tmp = dir(G5_NAM_ADM_PATH);
 $menu_files = array();
 while ($entry = $tmp->read()) {
   if (!preg_match('/^admin.menu([0-9]{3}).*\.php$/', $entry, $m)) {
@@ -659,7 +659,7 @@ while ($entry = $tmp->read()) {
   }
 
   $amenu[$m[1]] = $entry;
-  $menu_files[] = G5_NAM_ADM_APTH . '/' . $entry;
+  $menu_files[] = G5_NAM_ADM_PATH . '/' . $entry;
 }
 @asort($menu_files);
 foreach ($menu_files as $file) {

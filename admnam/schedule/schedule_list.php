@@ -5,7 +5,7 @@ include_once('./_common.php');
 auth_check_menu($auth, $sub_menu, 'r');
 
 $g5['title'] = '학사일정';
-include_once(G5_NAM_ADM_APTH . '/admin.head.php');
+include_once(G5_NAM_ADM_PATH . '/admin.head.php');
 ?>
 
 <script src="<?= G5_API_URL ?>/api_schedule.js"></script>
@@ -393,5 +393,5 @@ include_once(G5_NAM_ADM_APTH . '/admin.head.php');
 </script>
 
 <?php
-include_once(G5_NAM_ADM_APTH . '/admin.tail.php');
+include_once(G5_NAM_ADM_PATH . '/admin.tail.php');
 ?>

@@ -15,7 +15,7 @@ if ($mode === 'teacher') {
   $listType = 'MEMBER_LIST';
 }
 
-include_once(G5_NAM_ADM_APTH . '/admin.head.php');
+include_once(G5_NAM_ADM_PATH . '/admin.head.php');
 ?>
 
 <script src="<?= G5_API_URL ?>/api_member.js"></script>
@@ -191,5 +191,5 @@ include_once(G5_NAM_ADM_APTH . '/admin.head.php');
 </script>
 
 <?php
-include_once(G5_NAM_ADM_APTH . '/admin.tail.php');
+include_once(G5_NAM_ADM_PATH . '/admin.tail.php');
 ?>

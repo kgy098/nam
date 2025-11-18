@@ -158,6 +158,7 @@ a.btn_submit {
   color: #121212 !important;
   border: none !important;
   font-weight: 600 !important;
+  padding: 0 10px !important;
 }
 
 .btn:hover,
@@ -302,7 +303,7 @@ a.btn_03 {
   font-size: 22px !important;
   /* 아이콘 크기 */
   /* position: relative; */
-  left:140px;
+  left: 140px;
 }
 
 #btn_gnb:hover,
@@ -344,6 +345,13 @@ a.btn_03 {
   cursor: pointer;
 }
 
+/* 선택된 2차 메뉴 - 텍스트 색만 골드 */
+#gnb .gnb_2dli.on>a,
+#gnb .gnb_2da.on {
+  color: #d8b464 !important;
+  /* 현재 화면에서 사용중인 골드 컬러 */
+}
+
 /* 우측 컨텐츠 */
 #container {
   padding-left: 310px;
@@ -380,41 +388,44 @@ a.btn_03 {
 }
 
 #btnDateReset {
-    margin-right: 30px;
+  margin-right: 30px;
 }
 
 /* 다크모드에서 입력폼 외곽선 선명하게 */
 .frm_input {
-    background-color: #1A1A1A !important;
-    border: 1px solid #555 !important;   /* 기존보다 확실하게 보이는 회색 */
-    color: #EEE !important;
+  background-color: #1A1A1A !important;
+  border: 1px solid #555 !important;
+  /* 기존보다 확실하게 보이는 회색 */
+  color: #EEE !important;
 }
 
 .frm_input:focus {
-    border: 1px solid #C9A86A !important;  /* 골드 포인트 컬러로 강조 */
-    outline: none !important;
-    box-shadow: 0 0 4px rgba(201,168,106,0.4);
+  border: 1px solid #C9A86A !important;
+  /* 골드 포인트 컬러로 강조 */
+  outline: none !important;
+  box-shadow: 0 0 4px rgba(201, 168, 106, 0.4);
 }
 
 /* 검색/버튼영역 레이아웃 복원 */
 .local_sch01 {
-    margin: 10px 0;
-    overflow: hidden; /* float 클리어 */
+  margin: 10px 0;
+  overflow: hidden;
+  /* float 클리어 */
 }
 
 .local_sch01 .sch_left {
-    float: left;
+  float: left;
 }
 
 .local_sch01 .sch_right {
-    float: right;
+  float: right;
 }
 
 /* 내부 요소 정렬 */
-.local_sch01 .sch_left > *,
-.local_sch01 .sch_right > * {
-    vertical-align: middle;
-    margin-right: 5px;
+.local_sch01 .sch_left>*,
+.local_sch01 .sch_right>* {
+  vertical-align: middle;
+  margin-right: 5px;
 }
 
 /* 버튼 스타일 보정 – 다크모드 가독성 */
@@ -422,27 +433,30 @@ a.btn_03 {
 .local_sch01 select,
 .local_sch01 input[type="date"],
 .local_sch01 input[type="text"] {
-    height: 32px;
-    line-height: 32px;
+  height: 32px;
+  line-height: 32px;
 }
+
 /* 버튼 스타일 날짜초기화 버튼(btn_brown)과 동일하게 통일 */
 .local_sch01 .btn_brown,
 .local_sch01 .btn_submit,
 .local_sch01 .btn_02,
 .local_sch01 .btn_03,
 .local_sch01 button {
-    border-radius: 4px !important;   /* 날짜 초기화 버튼과 동일 */
-    padding: 0 12px !important;      /* 좌우 여백 통일 */
-    height: 32px !important;
-    line-height: 32px !important;
-    text-indent: 0;
-    width:auto;
+  border-radius: 4px !important;
+  /* 날짜 초기화 버튼과 동일 */
+  padding: 0 12px !important;
+  /* 좌우 여백 통일 */
+  height: 32px !important;
+  line-height: 32px !important;
+  text-indent: 0;
+  width: auto;
 }
 
 /* 버튼 사이 간격 조절 */
 .local_sch01 .sch_right button,
 .local_sch01 .sch_left button {
-    margin-right: 5px;
+  margin-right: 5px;
 }
 
 .se2_inputarea,
@@ -453,6 +467,24 @@ a.btn_03 {
 .se2_inputarea iframe,
 .smarteditor2 iframe,
 textarea[name=content] {
-    background-color: #ffffff !important;
-    color: #000000 !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.btn_small {
+  display: inline-block;
+  padding: 3px 7px;
+  font-size: 11px;
+  line-height: 1.2;
+  border: 1px solid #888;
+  background: #f7f7f7;
+  color: #333;
+  border-radius: 3px;
+  cursor: pointer;
+  height: 21px;
+}
+
+.btn_small:hover {
+  background: #e9e9e9;
+  border-color: #666;
 }

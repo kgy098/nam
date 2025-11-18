@@ -4,7 +4,7 @@ $sub_menu = "020100"; // 공지사항 메뉴코드(원하면 변경)
 auth_check_menu($auth, $sub_menu, 'r');
 
 $g5['title'] = '공지사항';
-include_once(G5_NAM_ADM_APTH . '/admin.head.php');
+include_once(G5_NAM_ADM_PATH . '/admin.head.php');
 ?>
 
 <script src="<?= G5_API_URL ?>/api_notice.js"></script>
@@ -149,5 +149,5 @@ include_once(G5_NAM_ADM_APTH . '/admin.head.php');
 </script>
 
 <?php
-include_once(G5_NAM_ADM_APTH . '/admin.tail.php');
+include_once(G5_NAM_ADM_PATH . '/admin.tail.php');
 ?>

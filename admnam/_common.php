@@ -1,7 +1,7 @@
 <?php
 define('G5_IS_ADMIN', true);
 require_once '../common.php';
-require_once G5_NAM_ADM_APTH . '/admin.lib.php';
+require_once G5_NAM_ADM_PATH . '/admin.lib.php';
 
 if (isset($token)) {
     $token = @htmlspecialchars(strip_tags($token), ENT_QUOTES);

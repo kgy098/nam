@@ -31,7 +31,7 @@ if ($w === 'u') {
 $page_title  = ($w === 'u') ? '공지사항 수정' : '공지사항 등록';
 $g5['title'] = $page_title;
 
-include_once(G5_NAM_ADM_APTH . '/admin.head.php');
+include_once(G5_NAM_ADM_PATH . '/admin.head.php');
 ?>
 
 <script src="<?= G5_API_URL ?>/api_notice.js"></script>
@@ -209,5 +209,5 @@ function deleteNotice() {
 </script>
 
 <?php
-include_once(G5_NAM_ADM_APTH . '/admin.tail.php');
+include_once(G5_NAM_ADM_PATH . '/admin.tail.php');
 ?>

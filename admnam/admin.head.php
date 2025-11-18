@@ -5,7 +5,7 @@ if (!defined('_GNUBOARD_')) {
 
 $g5_debug['php']['begin_time'] = $begin_time = get_microtime();
 
-$files = glob(G5_NAM_ADM_APTH . '/css/admin_extend_*');
+$files = glob(G5_NAM_ADM_PATH . '/css/admin_extend_*');
 if (is_array($files)) {
   foreach ((array) $files as $k => $css_file) {
 
@@ -16,7 +16,7 @@ if (is_array($files)) {
       continue;
     }
 
-    $css_file = str_replace(G5_NAM_ADM_APTH, G5_NAM_ADM_URL, $css_file);
+    $css_file = str_replace(G5_NAM_ADM_PATH, G5_NAM_ADM_URL, $css_file);
     add_stylesheet('<link rel="stylesheet" href="' . $css_file . '">', $k);
   }
 }

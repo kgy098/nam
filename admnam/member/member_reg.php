@@ -5,7 +5,7 @@ include_once('./_common.php');
 auth_check_menu($auth, $sub_menu, "w");
 
 $g5['title'] = '회원등록';
-include_once(G5_NAM_ADM_APTH . '/admin.head.php');
+include_once(G5_NAM_ADM_PATH . '/admin.head.php');
 
 // 파람
 $w  = $_REQUEST['w'] ?? '';
@@ -232,5 +232,5 @@ if (!isset($w)) {
 </script>
 
 <?
-include_once(G5_NAM_ADM_APTH . '/admin.tail.php');
+include_once(G5_NAM_ADM_PATH . '/admin.tail.php');
 ?>
