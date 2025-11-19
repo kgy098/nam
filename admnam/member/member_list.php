@@ -104,7 +104,11 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
     });
 
     $('#btnAddMember').on('click', function() {
-      location.href = "<?= $regPage ?>?";
+      if ( "<?=$mode?>"=="teacher" ) {
+        location.href = "<?= $regPage?>?&mode=teacher";
+      } else {
+        location.href = "<?= $regPage ?>?";
+      }
     });
 
   });
