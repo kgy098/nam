@@ -99,6 +99,6 @@
     _T: T
   };
 
-  global.ClassAPI = API;
+  global.apiClass = API;
 
 })(window, jQuery);

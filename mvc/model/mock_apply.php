@@ -1,71 +1,206 @@
 <?php
 
-function select_mock_apply_list($start=0, $num=CN_PAGE_NUM) {
-    $sql = "select * from cn_mock_apply
-            order by applied_at desc, id desc
-            limit $start, $num";
+/* ============================================================
+   모의고사 응시현황 리스트
+   - mock_id / subject_id / class_id / status / 기간 검색 지원
+   - member/class/mock_test/mock_subject 조인
+============================================================ */
+function select_mock_apply_list($params = []) {
+
+    $start      = intval($params['start'] ?? 0);
+    $rows       = intval($params['rows'] ?? 20);
+
+    $mock_id    = $params['mock_id'] ?? '';
+    $subject_id = $params['subject_id'] ?? '';
+    $class_id   = $params['class_id'] ?? '';
+    $status     = $params['status'] ?? '';
+    $sdate      = $params['sdate'] ?? '';
+    $edate      = $params['edate'] ?? '';
+
+    $where = " WHERE 1=1 ";
+
+    // 시험
+    if ($mock_id !== '' && $mock_id !== null)
+        $where .= " AND a.mock_id = '{$mock_id}' ";
+
+    // 과목
+    if ($subject_id !== '' && $subject_id !== null)
+        $where .= " AND a.subject_id = '{$subject_id}' ";
+
+    // 반
+    if ($class_id !== '' && $class_id !== null)
+        $where .= " AND m.class = '{$class_id}' ";
+
+    // 응시여부
+    if ($status !== '' && $status !== null)
+        $where .= " AND a.status = '{$status}' ";
+
+    // 기간 검색
+    if ($sdate !== '')
+        $where .= " AND a.applied_at >= '{$sdate} 00:00:00' ";
+
+    if ($edate !== '')
+        $where .= " AND a.applied_at <= '{$edate} 23:59:59' ";
+
+    $sql = "
+        SELECT 
+            a.*,
+            m.mb_name,
+            c.name as class_name,
+            mt.name AS mock_name,
+            ms.subject_name
+        FROM cn_mock_apply AS a
+        JOIN g5_member AS m ON a.mb_id = m.mb_id
+        LEFT JOIN cn_class AS c ON m.class = c.id
+        LEFT JOIN cn_mock_test AS mt ON a.mock_id = mt.id
+        LEFT JOIN cn_mock_subject AS ms ON a.subject_id = ms.id
+        $where
+        ORDER BY a.id DESC
+        LIMIT $start, $rows
+    ";
+    // error_log(__FILE__.__LINE__."\n SQL: " . $sql);
+
     $result = sql_query($sql);
     $list = [];
     while ($row = sql_fetch_array($result)) $list[] = $row;
+
     return $list;
 }
 
-function select_mock_apply_listcnt() {
-    $row = sql_fetch("select count(id) as cnt from cn_mock_apply");
-    return $row['cnt'];
+/* ============================================================
+   모의고사 응시현황 리스트 개수
+============================================================ */
+function select_mock_apply_listcnt($params = []) {
+
+    $mock_id    = $params['mock_id'] ?? '';
+    $subject_id = $params['subject_id'] ?? '';
+    $class_id   = $params['class_id'] ?? '';
+    $status     = $params['status'] ?? '';
+    $sdate      = $params['sdate'] ?? '';
+    $edate      = $params['edate'] ?? '';
+
+    $where = " WHERE 1=1 ";
+
+    if ($mock_id !== '' && $mock_id !== null)
+        $where .= " AND a.mock_id = '{$mock_id}' ";
+
+    if ($subject_id !== '' && $subject_id !== null)
+        $where .= " AND a.subject_id = '{$subject_id}' ";
+
+    if ($class_id !== '' && $class_id !== null)
+        $where .= " AND m.class = '{$class_id}' ";
+
+    if ($status !== '' && $status !== null)
+        $where .= " AND a.status = '{$status}' ";
+
+    if ($sdate !== '')
+        $where .= " AND a.applied_at >= '{$sdate} 00:00:00' ";
+
+    if ($edate !== '')
+        $where .= " AND a.applied_at <= '{$edate} 23:59:59' ";
+
+    $sql = "
+        SELECT COUNT(*) AS cnt
+        FROM cn_mock_apply AS a
+        JOIN g5_member AS m ON a.mb_id = m.mb_id
+        LEFT JOIN cn_class AS c ON m.class = c.id
+        LEFT JOIN cn_mock_test AS mt ON a.mock_id = mt.id
+        LEFT JOIN cn_mock_subject AS ms ON a.subject_id = ms.id
+        $where
+    ";
+
+    $row = sql_fetch($sql);
+    return (int)($row['cnt'] ?? 0);
 }
 
+/* ============================================================
+   단건 조회
+============================================================ */
 function select_mock_apply_one($id) {
-    return sql_fetch("select * from cn_mock_apply where id = {$id}");
+    $id = intval($id);
+
+    $sql = "
+        SELECT 
+            a.*,
+            m.mb_name,
+            c.name as class_name,
+            mt.name AS mock_name,
+            ms.subject_name
+        FROM cn_mock_apply AS a
+        JOIN g5_member AS m ON a.mb_id = m.mb_id
+        LEFT JOIN cn_class AS c ON m.class = c.id
+        LEFT JOIN cn_mock_test AS mt ON a.mock_id = mt.id
+        LEFT JOIN cn_mock_subject AS ms ON a.subject_id = ms.id
+        WHERE a.id = '{$id}'
+        LIMIT 1
+    ";
+
+    return sql_fetch($sql);
 }
 
-function select_mock_apply_by_mock($mock_id, $status=null, $start=0, $num=CN_PAGE_NUM) {
-    $where = "mock_id = {$mock_id}";
-    if (!is_null($status)) $where .= " and status = '{$status}'";
-    $sql = "select * from cn_mock_apply
-            where {$where}
-            order by applied_at desc, id desc
-            limit $start, $num";
-    $result = sql_query($sql);
-    $list = [];
-    while ($row = sql_fetch_array($result)) $list[] = $row;
-    return $list;
+/* ============================================================
+   등록
+============================================================ */
+function insert_mock_apply($data = []) {
+
+    $mock_id    = $data['mock_id'];
+    $mb_id      = $data['mb_id'];
+    $subject_id = $data['subject_id'] ?? null;
+    $status     = $data['status'] ?? '신청';
+
+    $sql = "
+        INSERT INTO cn_mock_apply
+        SET 
+            mock_id    = '{$mock_id}',
+            mb_id      = '{$mb_id}',
+            subject_id = " . ($subject_id ? "'{$subject_id}'" : "NULL") . ",
+            status     = '{$status}',
+            reg_dt     = NOW()
+    ";
+
+    sql_query($sql);
+    return sql_insert_id();
 }
 
-function select_mock_apply_by_student($mb_id, $start=0, $num=CN_PAGE_NUM) {
-    $sql = "select * from cn_mock_apply
-            where mb_id = '{$mb_id}'
-            order by applied_at desc, id desc
-            limit $start, $num";
-    $result = sql_query($sql);
-    $list = [];
-    while ($row = sql_fetch_array($result)) $list[] = $row;
-    return $list;
-}
+/* ============================================================
+   수정
+============================================================ */
+function update_mock_apply($id, $data = []) {
+    $id = intval($id);
 
-function count_mock_apply_by_mock_status($mock_id, $status='신청') {
-    $row = sql_fetch("select count(id) as cnt
-                      from cn_mock_apply
-                      where mock_id = {$mock_id} and status = '{$status}'");
-    return $row['cnt'];
-}
+    $set = [];
 
-function insert_mock_apply($mock_id, $mb_id, $status='신청') {
-    $sql = "insert into cn_mock_apply
-            set mock_id = {$mock_id},
-                mb_id = '{$mb_id}',
-                status = '{$status}'";
+    if (isset($data['mock_id']))
+        $set[] = " mock_id = '{$data['mock_id']}' ";
+
+    if (isset($data['mb_id']))
+        $set[] = " mb_id = '{$data['mb_id']}' ";
+
+    if (isset($data['subject_id']))
+        $set[] = " subject_id = " . ($data['subject_id'] ? "'{$data['subject_id']}'" : "NULL");
+
+    if (isset($data['status']))
+        $set[] = " status = '{$data['status']}' ";
+
+    if (!$set) return false;
+
+    $sql = "
+        UPDATE cn_mock_apply
+        SET " . implode(',', $set) . ",
+            mod_dt = NOW()
+        WHERE id = '{$id}'
+    ";
+
     return sql_query($sql);
 }
 
-function update_mock_apply($id, $status) {
-    $sql = "update cn_mock_apply
-            set status = '{$status}'
-            where id = {$id}";
-    return sql_query($sql);
-}
-
+/* ============================================================
+   삭제
+============================================================ */
 function delete_mock_apply($id) {
-    return sql_query("delete from cn_mock_apply where id = {$id}");
+    $id = intval($id);
+    $sql = "DELETE FROM cn_mock_apply WHERE id = '{$id}' ";
+    return sql_query($sql);
 }
+
 ?>

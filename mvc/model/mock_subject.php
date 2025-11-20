@@ -14,6 +14,7 @@ function select_mock_subject_list($start = 0, $num = CN_PAGE_NUM)
             ORDER BY id DESC
             LIMIT {$start}, {$num}";
     $result = sql_query($sql);
+    error_log(__FILE__.__LINE__."\n SQL: " . $sql);
 
     $list = [];
     while ($row = sql_fetch_array($result)) {

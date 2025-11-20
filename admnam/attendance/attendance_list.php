@@ -216,7 +216,7 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
     loadClassList();
     // 반 목록 불러오기
     function loadClassList() {
-      ClassAPI.list(1, 100) // 최대 100개까지 반 가져오기
+      apiClass.list(1, 100) // 최대 100개까지 반 가져오기
         .then(function(res) {
           const list = res.data || [];
           const $sel = $('#class');

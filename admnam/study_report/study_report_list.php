@@ -106,7 +106,7 @@ $(function() {
 
 // 반 목록 불러오기
 function loadClassList() {
-  ClassAPI.list(1, 100)
+  apiClass.list(1, 100)
     .then(function(res) {
       const list = res.data || [];
       const $sel = $('#class');

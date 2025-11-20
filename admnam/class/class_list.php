@@ -124,7 +124,7 @@ $total_count = count(select_class_active(1, 0, 999999));
         return;
       }
 
-      ClassAPI.add(name, null, useYn)
+      apiClass.add(name, null, useYn)
         .done(function() {
           alert('등록되었습니다.');
           location.reload();
@@ -193,7 +193,7 @@ $total_count = count(select_class_active(1, 0, 999999));
         return;
       }
 
-      ClassAPI.update(id, {
+      apiClass.update(id, {
           name: name
         })
         .done(function() {
@@ -222,7 +222,7 @@ $total_count = count(select_class_active(1, 0, 999999));
         return;
       }
 
-      ClassAPI.setActive(id, 0)
+      apiClass.setActive(id, 0)
         .done(function() {
           alert('삭제(비활성)되었습니다.');
           location.reload();

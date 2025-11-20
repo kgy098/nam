@@ -1,44 +1,49 @@
-function apiMockApplyList(params = {}) {
-  return $.ajax({
-    url: './ctrl_mock_apply.php',
-    type: 'POST',
-    dataType: 'json',
-    data: Object.assign({ type: 'MOCK_APPLY_LIST' }, params)
-  });
-}
+(function (global, $) {
+  'use strict';
 
-function apiMockApplyGet(id) {
-  return $.ajax({
-    url: './ctrl_mock_apply.php',
-    type: 'POST',
-    dataType: 'json',
-    data: { type: 'MOCK_APPLY_GET', id }
-  });
-}
+  var ENDPOINT = g5_ctrl_url + '/ctrl_mock_apply.php';
 
-function apiMockApplyCreate(payload) {
-  return $.ajax({
-    url: './ctrl_mock_apply.php',
-    type: 'POST',
-    dataType: 'json',
-    data: Object.assign({ type: 'MOCK_APPLY_CREATE' }, payload)
-  });
-}
+  var T = {
+    LIST: 'MOCK_APPLY_LIST',
+    GET: 'MOCK_APPLY_GET',
+    ADD: 'MOCK_APPLY_CREATE',
+    UPD: 'MOCK_APPLY_UPDATE',
+    DEL: 'MOCK_APPLY_DELETE'
+  };
 
-function apiMockApplyUpdate(id, payload) {
-  return $.ajax({
-    url: './ctrl_mock_apply.php',
-    type: 'POST',
-    dataType: 'json',
-    data: Object.assign({ type: 'MOCK_APPLY_UPDATE', id }, payload)
-  });
-}
+  function call(params) {
+    return $.ajax({
+      url: ENDPOINT,
+      method: 'POST',
+      data: params,
+      dataType: 'json'
+    }).then(function (res) {
+      if (res && res.result === 'SUCCESS') return res;
+      return $.Deferred().reject(res || { result: 'FAIL' }).promise();
+    });
+  }
 
-function apiMockApplyDelete(id) {
-  return $.ajax({
-    url: './ctrl_mock_apply.php',
-    type: 'POST',
-    dataType: 'json',
-    data: { type: 'MOCK_APPLY_DELETE', id }
-  });
-}
+  global.apiMockApply = {
+
+    list: function (params) {
+      return call($.extend({ type: T.LIST }, params));
+    },
+
+    get: function (id) {
+      return call({ type: T.GET, id: id });
+    },
+
+    add: function (payload) {
+      return call($.extend({ type: T.ADD }, payload));
+    },
+
+    update: function (id, payload) {
+      return call($.extend({ type: T.UPD, id: id }, payload));
+    },
+
+    delete: function (id) {
+      return call({ type: T.DEL, id: id });
+    }
+  };
+
+})(window, jQuery);
