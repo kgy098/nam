@@ -5,30 +5,30 @@
  * ---------------------------------------------------------- */
 function select_mock_subject_list($start = 0, $num = CN_PAGE_NUM)
 {
-    $start = (int)$start;
-    $num   = (int)$num;
+  $start = (int)$start;
+  $num   = (int)$num;
 
-    $sql = "SELECT *
+  $sql = "SELECT *
             FROM cn_mock_subject
             WHERE is_deleted = 0
             ORDER BY id DESC
             LIMIT {$start}, {$num}";
-    $result = sql_query($sql);
-    error_log(__FILE__.__LINE__."\n SQL: " . $sql);
+  $result = sql_query($sql);
+  error_log(__FILE__ . __LINE__ . "\n SQL: " . $sql);
 
-    $list = [];
-    while ($row = sql_fetch_array($result)) {
-        $list[] = $row;
-    }
-    return $list;
+  $list = [];
+  while ($row = sql_fetch_array($result)) {
+    $list[] = $row;
+  }
+  return $list;
 }
 
 function select_mock_subject_listcnt()
 {
-    $row = sql_fetch("SELECT COUNT(id) AS cnt
+  $row = sql_fetch("SELECT COUNT(id) AS cnt
                       FROM cn_mock_subject
                       WHERE is_deleted = 0");
-    return (int)$row['cnt'];
+  return (int)$row['cnt'];
 }
 
 
@@ -37,9 +37,9 @@ function select_mock_subject_listcnt()
  * ---------------------------------------------------------- */
 function select_mock_subject_one($id)
 {
-    $id = (int)$id;
+  $id = (int)$id;
 
-    return sql_fetch("SELECT *
+  return sql_fetch("SELECT *
                       FROM cn_mock_subject
                       WHERE id = {$id}
                         AND is_deleted = 0");
@@ -56,12 +56,12 @@ function select_mock_subject_one($id)
  * ---------------------------------------------------------- */
 function insert_mock_subject($subject_name)
 {
-    $subject_name = esc($subject_name);
+  $subject_name = esc($subject_name);
 
-    $sql = "INSERT INTO cn_mock_subject
+  $sql = "INSERT INTO cn_mock_subject
             SET subject_name = '{$subject_name}'";
 
-    return sql_query($sql);
+  return sql_query($sql);
 }
 
 
@@ -70,22 +70,22 @@ function insert_mock_subject($subject_name)
  * ---------------------------------------------------------- */
 function update_mock_subject($id, $subject_name = null)
 {
-    $id = (int)$id;
-    $sets = [];
+  $id = (int)$id;
+  $sets = [];
 
-    if (!is_null($subject_name)) {
-        $sets[] = "subject_name = '" . esc($subject_name) . "'";
-    }
+  if (!is_null($subject_name)) {
+    $sets[] = "subject_name = '" . esc($subject_name) . "'";
+  }
 
-    if (empty($sets)) return true;
+  if (empty($sets)) return true;
 
-    $sql = "UPDATE cn_mock_subject
+  $sql = "UPDATE cn_mock_subject
             SET " . implode(',', $sets) . ",
                 mod_dt = NOW()
             WHERE id = {$id}
               AND is_deleted = 0";
 
-    return sql_query($sql);
+  return sql_query($sql);
 }
 
 
@@ -94,8 +94,8 @@ function update_mock_subject($id, $subject_name = null)
  * ---------------------------------------------------------- */
 function delete_mock_subject($id)
 {
-    $id = (int)$id;
-    return sql_query("DELETE FROM cn_mock_subject WHERE id = {$id}");
+  $id = (int)$id;
+  return sql_query("DELETE FROM cn_mock_subject WHERE id = {$id}");
 }
 
 
@@ -104,12 +104,12 @@ function delete_mock_subject($id)
  * ---------------------------------------------------------- */
 function soft_delete_mock_subject($id)
 {
-    $id = (int)$id;
+  $id = (int)$id;
 
-    $sql = "UPDATE cn_mock_subject
+  $sql = "UPDATE cn_mock_subject
             SET is_deleted = 1,
                 mod_dt = NOW()
             WHERE id = {$id}";
 
-    return sql_query($sql);
+  return sql_query($sql);
 }

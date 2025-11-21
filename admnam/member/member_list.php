@@ -18,8 +18,6 @@ if ($mode === 'teacher') {
 include_once(G5_NAM_ADM_PATH . '/admin.head.php');
 ?>
 
-<script src="<?= G5_API_URL ?>/api_member.js"></script>
-
 <div class="local_ov01 local_ov">
   <span class="btn_ov01"><span class="ov_txt">총 회원수 </span><span class="ov_num" id="totalCount">0명</span></span>
 </div>
@@ -73,29 +71,29 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
   <div id="pagination"></div>
 </div>
 
+
+<script src="<?= G5_API_URL ?>/api_member.js"></script>
+
 <script>
   var MODE = "<?= $mode ?>";
 
   $(function() {
-    console.log(MODE);
-    loadMemberList(MODE, 1);
+
+    // 최초 로딩
+    listMember(1);
 
     $("#btnSearch").on("click", function() {
-      loadMemberList(MODE, 1);
+      listMember(1);
     });
 
     $('#keyword').on('keyup', function(e) {
-      if (e.keyCode === 13) {
-        loadMemberList(MODE, 1); // 엔터로 검색
-      }
+      if (e.keyCode === 13) listMember(1);
     });
 
     $('#btnDateReset').on('click', function() {
-      // 날짜만 초기화
-      $('input[name=start_date]').val('');
-      $('input[name=end_date]').val('');
-
-      loadMemberList(MODE, 1); // 1페이지부터 다시 조회
+      $('#start_date').val('');
+      $('#end_date').val('');
+      listMember(1);
     });
 
     $('#btnExcel').on('click', function() {
@@ -104,23 +102,25 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
     });
 
     $('#btnAddMember').on('click', function() {
-      if ( "<?=$mode?>"=="teacher" ) {
-        location.href = "<?= $regPage?>?&mode=teacher";
+      if (MODE === "teacher") {
+        location.href = "<?= $regPage ?>?mode=teacher";
       } else {
-        location.href = "<?= $regPage ?>?";
+        location.href = "<?= $regPage ?>";
       }
     });
 
   });
 
-  function loadMemberList(mode = 'student', page = 1) {
+  /* ==========================================================
+     회원 목록 조회 (loadMemberList → listMember)
+  ========================================================== */
+  function listMember(page = 1) {
 
-    // mode에 따라 type 값 변경
-    const listType = (mode === 'student') ? 'STUDENT_LIST' : 'TEACHER_LIST' ;
+    const listType = (MODE === 'student') ? 'STUDENT_LIST' : 'TEACHER_LIST';
 
     const params = {
       type: listType,
-      mode: "<?= $mode ?>",
+      mode: MODE,
       page: page,
       field: $("#field").val(),
       keyword: $("#keyword").val(),
@@ -128,70 +128,80 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
       end_date: $("#end_date").val()
     };
 
-    // console.log( JSON.stringify(params) ); 
-    // return;
-
-    apiMemberList(params).done(function(res) {
-      if (res.result === 'SUCCESS') {
-
-        const list = res.data.list || [];
-        const total = res.data.total || 0;
-
-        $("#totalCount").text(total + '명');
-
-        const tbody = $("#memberTable tbody");
-        tbody.empty();
-
-        if (!list.length) {
-          tbody.append('<tr><td colspan="8" class="empty_table">자료가 없습니다.</td></tr>');
-          return;
-        }
-
-        list.forEach(row => {
-
-          // ★ mode 분기: student / teacher
-          if (mode === 'teacher') {
-            // 교사 리스트
-            tbody.append(`
-                        <tr class="item" data-id="${row.mb_id}">
-                            <td>${row.mb_name}</td>
-                            <td>${row.mb_hp || '-'}</td>
-                            <td>${row.join_date?.substring(0,10) || '-'}</td>
-                        </tr>
-                    `);
-
-          } else {
-            // 학생 리스트
-            tbody.append(`
-                        <tr class="item" data-id="${row.mb_id}">
-                            <td>${row.mb_name}</td>
-                            <td>${row.class || '-'}</td>
-                            <td>${row.mb_hp || '-'}</td>
-                            <td>${row.mb_datetime?.substring(0,10) || '-'}</td>
-                        </tr>
-                    `);
-          }
-
-        });
-
-        setPagination(total, page);
-      }
-    });
+    memberAPI.list(params);  // ⭐ 핵심 변경: apiMemberList 제거
   }
 
+
+  /* ==========================================================
+     리스트 콜백
+     (api_member.js → memberListCallback(res))
+  ========================================================== */
+  function memberListCallback(res) {
+
+    if (!res || res.result !== 'SUCCESS') {
+      alert("목록 불러오기 실패");
+      return;
+    }
+
+    const list  = res.data.list  || [];
+    const total = res.data.total || 0;
+
+    $("#totalCount").text(total + '명');
+
+    const tbody = $("#memberTable tbody");
+    tbody.empty();
+
+    if (!list.length) {
+      tbody.append('<tr><td colspan="8" class="empty_table">자료가 없습니다.</td></tr>');
+      return;
+    }
+
+    list.forEach(row => {
+
+      if (MODE === 'teacher') {
+        tbody.append(`
+          <tr class="item" data-id="${row.mb_id}">
+            <td>${row.mb_name}</td>
+            <td>${row.mb_hp || '-'}</td>
+            <td>${row.join_date?.substring(0,10) || '-'}</td>
+          </tr>
+        `);
+      } else {
+        tbody.append(`
+          <tr class="item" data-id="${row.mb_id}">
+            <td>${row.mb_name}</td>
+            <td>${row.class || '-'}</td>
+            <td>${row.mb_hp || '-'}</td>
+            <td>${row.mb_datetime?.substring(0,10) || '-'}</td>
+          </tr>
+        `);
+      }
+    });
+
+    setPagination(total, res.data.page || 1);
+  }
+
+
+  /* ==========================================================
+     페이지네이션
+  ========================================================== */
   function setPagination(total, currentPage = 1) {
     const rows = 20;
     const totalPage = Math.ceil(total / rows);
     let html = '';
+
     for (let i = 1; i <= totalPage; i++) {
-      html += `<a href="#" class="pg_page ${i == currentPage ? 'on' : ''}" data-page="${i}">${i}</a>`;
+      html += `<a href="#" class="pg_page ${i==currentPage?'on':''}" data-page="${i}">${i}</a>`;
     }
+
     $("#pagination").html(html);
+
     $(".pg_page").on("click", function(e) {
       e.preventDefault();
-      loadMemberList($(this).data("page"));
+      listMember($(this).data("page"));
     });
   }
+
 </script>
 
 <?php

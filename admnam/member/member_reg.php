@@ -24,8 +24,7 @@ if (!isset($w)) {
 }
 ?>
 
-<script src="<?= G5_API_URL ?>/api_member.js"></script>
-<script src="<?= G5_API_URL ?>/api_product.js"></script>
+<span>첫달금액을 입력하지 않으면 상품의 금액이 자동으로 저장됩니다.<br></span>
 
 <form name="m_form" id="m_form" method="post" autocomplete="off">
   <input type="hidden" name="w" value="<?= $w; ?>">
@@ -63,13 +62,17 @@ if (!isset($w)) {
           <td>
             <select name="gender" class="frm_input">
               <option value="">선택</option>
-              <option value="M" <?= $row['gender'] == 'M' ? 'selected' : ''; ?>>남</option>
-              <option value="F" <?= $row['gender'] == 'F' ? 'selected' : ''; ?>>여</option>
+              <option value="남" <?= $row['gender'] == '남' ? 'selected' : ''; ?>>남</option>
+              <option value="여" <?= $row['gender'] == '여' ? 'selected' : ''; ?>>여</option>
             </select>
           </td>
 
           <th scope="row">반</th>
-          <td><input type="text" class="frm_input" name="ban" value="<?= $row['ban']; ?>"></td>
+          <td>
+            <select name="class" id="class" class="frm_input" data-selected="<?= $row['class']; ?>">
+              <option value="">선택</option>
+            </select>
+          </td>
         </tr>
 
         <tr>
@@ -83,7 +86,7 @@ if (!isset($w)) {
         </tr>
 
         <tr>
-          <th scope="row">가입일</th>
+          <th scope="row">입실일</th>
           <td><input type="date" class="frm_input" name="join_date" value="<?= $row['join_date']; ?>"></td>
 
           <th scope="row">퇴실일</th>
@@ -116,120 +119,183 @@ if (!isset($w)) {
 
   <div class="btn_fixed_top">
     <a href="./member_list.php" class="btn btn_02">목록</a>
-    <input type="submit" value="등록" class="btn_submit btn" onclick="createMember();">
+    <input type="button" value="등록" class="btn_submit btn" onclick="createMember();">
   </div>
 </form>
 
+<script src="<?= G5_API_URL ?>/api_member.js"></script>
+<script src="<?= G5_API_URL ?>/api_product.js"></script>
+<script src="<?= G5_API_URL ?>/api_class.js"></script>
+
 <script>
-  $(document).ready(function() {
+$(document).ready(function () {
     loadProductList();
-  });
+    loadClassList();
+});
 
-  function loadProductList() {
+/* ==========================================================
+   1) 상품 목록 로딩
+========================================================== */
+function loadProductList() {
+
     var $product = $('#product');
-    if (!$product.length) return; // HTML이 아직 없으면 종료
-
     var selectedValue = $product.data('selected') || '';
-    // PHP에서 selected 적용한 경우를 대비해서 가져옴
 
-    ProductAPI.list(1, 100).then(function(res) {
-      if (!res || res.result !== 'SUCCESS') return;
+    productAPI.list({}, 1, 100).then(function (res) {
 
-      var html = '<option value="">선택하세요</option>';
+        if (!res || res.result !== 'SUCCESS') return;
 
-      $.each(res.data, function(i, row) {
-        var sel = (String(selectedValue) === String(row.id)) ? ' selected' : '';
-        html += '<option value="' + row.id + '"' + sel + '>' + row.name + '</option>';
-      });
+        var html = '<option value="">선택</option>';
 
-      $product.html(html);
-
-      // 이벤트 중복 방지 후 다시 바인딩
-      $product.off('change').on('change', function() {
-        var productId = $(this).val();
-        if (!productId) {
-          $('#price').val('');
-          return;
-        }
-
-        // 단일 상품 조회 API 호출
-        ProductAPI.get(productId).then(function(res2) {
-          if (res2 && res2.result === 'SUCCESS') {
-            var amount = res2.data.base_amount ? res2.data.base_amount : 0;
-            $('#price').val(number_format(amount));
-          }
+        $.each(res.data, function (i, row) {
+            var sel = (String(selectedValue) === String(row.id)) ? ' selected' : '';
+            html += `<option value="${row.id}" ${sel}>${row.name}</option>`;
         });
-      });
-    });
-  }
 
-  function createMember() {
-    // if (!validateMemberForm()) return;
+        $product.html(html);
+
+        // 상품 선택 시 금액 자동 세팅
+        $product.on('change', function () {
+            var productId = $(this).val();
+            if (!productId) {
+                $('#price').val('');
+                return;
+            }
+
+            productAPI.get(productId).then(function (res2) {
+                if (res2 && res2.result === 'SUCCESS') {
+                    var amount = res2.data.base_amount || 0;
+                    $('#price').val(number_format(amount));
+                }
+            });
+        });
+    });
+}
+
+/* ==========================================================
+   2) 반 목록 로딩
+========================================================== */
+function loadClassList() {
+
+    var $class = $('#class');
+    var selected = $class.data('selected') || '';
+
+    apiClass.list(1, 100).done(function (res) {
+
+        if (!res || res.result !== 'SUCCESS') return;
+
+        var html = '<option value="">선택</option>';
+
+        $.each(res.data.list || res.data, function (i, row) {
+            var sel = (String(selected) === String(row.id)) ? ' selected' : '';
+            html += `<option value="${row.id}" ${sel}>${row.name}</option>`;
+        });
+
+        $class.html(html);
+
+    });
+}
+
+/* ==========================================================
+   3) 회원 등록 처리
+========================================================== */
+function createMember() {
 
     var paramStr = $("#m_form").serialize();
-    // console.log(JSON.stringify(paramStr)); alert("TEST");
 
-    $.post(g5_ctrl_url + '/ctrl_member.php', paramStr + '&type=MEMBER_CHECK_DUP', function(res) {
+    // 0) 등록 버튼이 submit이라면 폼이 제출됨 → 방지
+    event.preventDefault();
 
-      if (res.data.duplicate) {
-        alert("동일 이름/전화번호 회원이 이미 존재합니다.");
-        return; // 🔥 등록 중단
-      }
+    // 1) 중복 체크
+    $.post(g5_ctrl_url + '/ctrl_member.php', paramStr + '&type=MEMBER_CHECK_DUP', function (res) {
 
-      // 중복 아님 → 정상 등록
-      apiMemberCreate(paramStr);
+        if (res.data.duplicate) {
+            alert("동일 이름/전화번호 회원이 이미 존재합니다.");
+            return false;
+        }
+
+        // 2) first_price 공백이면 → price 값 그대로 자동 세팅
+        let price = $("input[name='price']").val();
+        let first_price = $("input[name='first_price']").val();
+        if (first_price.trim() === "" && price.trim() !== "") {
+            $("input[name='first_price']").val(price);
+        }
+
+        // 3) 실제 등록
+        memberAPI.create(paramStr).then(function (r) {
+
+            if (!r) {
+                alert("등록 실패(응답 없음)");
+                return false;
+            }
+
+            if (r.result === "SUCCESS") {
+                alert("저장되었습니다.");
+                location.href = './member_list.php';
+            } else {
+                alert("저장 실패: " + (r.data || "오류"));
+            }
+
+        }).catch(function () {
+            alert("등록 중 오류가 발생했습니다.");
+        });
 
     }, 'json');
 
-  }
+    return false; // 폼 submit 차단
+}
 
-  function validateMemberForm() {
+/* ==========================================================
+   4) 필수값 검증
+========================================================== */
+function validateMemberForm() {
 
     if ($("input[name='mb_name']").val().trim() === "") {
-      alert("이름은 필수 입력 항목입니다.");
-      $("input[name='mb_name']").focus();
-      return false;
+        alert("이름은 필수 입력 항목입니다.");
+        $("input[name='mb_name']").focus();
+        return false;
     }
 
     if ($("input[name='mb_hp']").val().trim() === "") {
-      alert("전화번호는 필수 입력 항목입니다.");
-      $("input[name='mb_hp']").focus();
-      return false;
+        alert("전화번호는 필수 입력 항목입니다.");
+        $("input[name='mb_hp']").focus();
+        return false;
     }
 
     if ($("select[name='gender']").val().trim() === "") {
-      alert("성별을 선택해 주세요.");
-      $("select[name='gender']").focus();
-      return false;
+        alert("성별을 선택해 주세요.");
+        $("select[name='gender']").focus();
+        return false;
     }
 
     if ($("input[name='auth_no']").val().trim() === "") {
-      alert("인증번호는 필수 입력 항목입니다.");
-      $("input[name='auth_no']").focus();
-      return false;
+        alert("인증번호는 필수 입력 항목입니다.");
+        $("input[name='auth_no']").focus();
+        return false;
     }
 
     if ($("input[name='join_date']").val().trim() === "") {
-      alert("가입일(입실일시)은 필수 입력 항목입니다.");
-      $("input[name='join_date']").focus();
-      return false;
+        alert("입실일은 필수 입력 항목입니다.");
+        $("input[name='join_date']").focus();
+        return false;
     }
 
     if ($("select[name='product']").val().trim() === "") {
-      alert("상품을 선택해 주세요.");
-      $("select[name='product']").focus();
-      return false;
+        alert("상품을 선택해 주세요.");
+        $("select[name='product']").focus();
+        return false;
     }
 
     if ($("input[name='price']").val().trim() === "") {
-      alert("금액은 필수 입력 항목입니다.");
-      $("input[name='price']").focus();
-      return false;
+        alert("금액은 필수 입력 항목입니다.");
+        $("input[name='price']").focus();
+        return false;
     }
 
-    return true; // 모든 검증 통과 → 등록 가능
-  }
+    return true;
+}
 </script>
+
 
 <?
 include_once(G5_NAM_ADM_PATH . '/admin.tail.php');

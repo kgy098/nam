@@ -3,102 +3,118 @@
    모든 화면은 serialize() 결과만 전달한다.
    ========================================================== */
 
-// 목록 조회
-function apiMemberList(params) {
-  console.log( JSON.stringify(params) ); 
-  return $.ajax({
-    url: g5_ctrl_url + '/ctrl_member.php',
-    type: 'POST',
-    dataType: 'json',
-    data: params,
-    success: function(res) {
-      if (typeof memberListCallback === 'function') {
-        memberListCallback(res);
-      }
-    },
-    error: function() {
-      alert('통신 오류가 발생했습니다.');
-    }
-  });
-}
+(function (global, $) {
+  'use strict';
 
-// 단건 조회
-function apiMemberGet(paramStr) {
-  return $.ajax({
-    url: g5_ctrl_url + '/ctrl_member.php',
-    type: 'POST',
-    dataType: 'json',
-    data: paramStr,
-    success: function(res) {
-      if (typeof memberGetCallback === 'function') {
-        memberGetCallback(res);
-      }
-    },
-    error: function() {
-      alert('통신 오류가 발생했습니다.');
-    }
-  });
-}
+  var ENDPOINT = g5_ctrl_url + '/ctrl_member.php';
 
-// 생성
-function apiMemberCreate(paramStr) {
-  return $.ajax({
-    url: g5_ctrl_url + '/ctrl_member.php',
-    type: 'POST',
-    dataType: 'json',
-    data: paramStr,
-    success: function(res) {
-      if (res.result === 'SUCCESS') {
-        alert('저장되었습니다.');
-        location.href = './member_list.php';
+  /* ----------------------------------------------------------
+     공통 AJAX
+     (alert 제거, res 직접 반환)
+  ---------------------------------------------------------- */
+  function call(params, onSuccess) {
+
+    return $.ajax({
+      url: ENDPOINT,
+      type: 'POST',
+      dataType: 'json',
+      data: params
+    })
+    .done(function(res) {
+      if (typeof onSuccess === 'function') {
+        onSuccess(res);
+      }
+      return res;
+    })
+    .fail(function(xhr) {
+      console.error("통신 오류 발생", xhr);
+      return {
+        result: 'FAIL',
+        data: 'NETWORK_ERROR'
+      };
+    });
+  }
+
+  /* ==========================================================
+     Member API
+     (ctrl_member.php 의 type 구조와 완전히 일치)
+  ========================================================== */
+  var API = {
+
+    /* --------------------------------------
+       1) 회원 목록 조회
+       type = MEMBER_LIST
+       → memberListCallback(res)
+    -------------------------------------- */
+    list: function(params) {
+      params.type = 'MEMBER_LIST';
+
+      return call(params, function(res) {
+        if (typeof memberListCallback === 'function') {
+          memberListCallback(res);
+        }
+      });
+    },
+
+    /* --------------------------------------
+       2) 단건 조회
+       type = MEMBER_GET
+       → memberGetCallback(res)
+    -------------------------------------- */
+    get: function(params) {
+      params.type = 'MEMBER_GET';
+
+      return call(params, function(res) {
+        if (typeof memberGetCallback === 'function') {
+          memberGetCallback(res);
+        }
+      });
+    },
+
+    /* --------------------------------------
+       3) 생성
+       type = MEMBER_ADD
+       (결과는 화면에서 처리)
+    -------------------------------------- */
+    create: function(params) {
+      // serialize 문자열 전달 가능함
+      if (typeof params === 'string') {
+        params += '&type=MEMBER_ADD';
       } else {
-        alert('저장 실패: ' + res.data);
+        params.type = 'MEMBER_ADD';
       }
+      return call(params);
     },
-    error: function() {
-      alert('통신 오류가 발생했습니다.');
-    }
-  });
-}
 
-// 수정
-function apiMemberUpdate(paramStr) {
-  return $.ajax({
-    url: g5_ctrl_url + '/ctrl_member.php',
-    type: 'POST',
-    dataType: 'json',
-    data: paramStr,
-    success: function(res) {
-      if (res.result === 'SUCCESS') {
-        alert('수정되었습니다.');
-        location.href = './member_list.php';
+    /* --------------------------------------
+       4) 수정
+       type = MEMBER_UPD
+    -------------------------------------- */
+    update: function(params) {
+      if (typeof params === 'string') {
+        params += '&type=MEMBER_UPD';
       } else {
-        alert('수정 실패: ' + res.data);
+        params.type = 'MEMBER_UPD';
       }
+      return call(params);
     },
-    error: function() {
-      alert('통신 오류가 발생했습니다.');
-    }
-  });
-}
 
-// 삭제
-function apiMemberDelete(paramStr) {
-  return $.ajax({
-    url: g5_ctrl_url + '/ctrl_member.php',
-    type: 'POST',
-    dataType: 'json',
-    data: paramStr,
-    success: function(res) {
-      if (res.result === 'SUCCESS') {
-        alert('삭제되었습니다.');
-        location.reload();
+    /* --------------------------------------
+       5) 삭제
+       type = MEMBER_DEL
+    -------------------------------------- */
+    delete: function(params) {
+      if (typeof params === 'string') {
+        params += '&type=MEMBER_DEL';
       } else {
-        alert('삭제 실패: ' + res.data);
+        params.type = 'MEMBER_DEL';
       }
+      return call(params);
     },
-    error: function() {
-      alert('통신 오류가 발생했습니다.');
-    }
-  });
-}
+
+    _endpoint: ENDPOINT
+  };
+
+  global.memberAPI = API;
+
+})(window, jQuery);

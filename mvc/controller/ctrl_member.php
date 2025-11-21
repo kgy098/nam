@@ -2,60 +2,150 @@
 include_once('./_common.php');
 header('Content-Type: application/json; charset=utf-8');
 
-$type = isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
+// type
+$type = $_REQUEST['type'] ?? '';
+$req  = $_REQUEST;
 
-switch($type){
+$res = [
+    'result' => 'FAIL',
+    'data'   => null
+];
 
-case 'MEMBER_LIST':
-    $data = select_member_list_search($_REQUEST);
-    jres(true, $data);
-break;
+/* ==========================================================
+    SWITCH
+========================================================== */
+switch ($type) {
 
-case 'STUDENT_LIST':
-    $data = select_member_list_search($_REQUEST);
-    jres(true, $data);
-break;
+    /* ------------------------------------------------------
+        1) 회원 목록 조회 (학생/교사)
+        type = MEMBER_LIST
+        파라미터: mode, page, rows, keyword, start_date, end_date 등
+    ------------------------------------------------------ */
+    case 'MEMBER_LIST':
+        $list = select_member_list_search($req);
 
-case 'TEACHER_LIST':
-    $data = select_member_list_search($_REQUEST);
-    jres(true, $data);
-break;
+        $res = [
+            'result' => 'SUCCESS',
+            'data'   => [
+                'total' => $list['total'],
+                'list'  => $list['list'],
+                'page'  => $list['page'],
+                'rows'  => $list['rows']
+            ]
+        ];
+        break;
 
-case 'MEMBER_CHECK_DUP':
-    $mb_name = esc($_POST['mb_name']);
-    $mb_hp   = esc($_POST['mb_hp']);
 
-    $exists = select_member_dup($mb_name, $mb_hp);
-    jres(true, ['duplicate' => $exists]);
-break;
+    /* ------------------------------------------------------
+        2) 단건 조회
+        type = MEMBER_GET
+        파라미터: mb_id
+    ------------------------------------------------------ */
+    case 'MEMBER_GET':
+        $mb_id = trim($req['mb_id'] ?? '');
 
-case 'MEMBER_GET':
-    $id = isset($_REQUEST['mb_id']) ? trim($_REQUEST['mb_id']) : '';
-    if ($id==='') jres(false, 'invalid mb_id');
-    $row = select_member_one_by_id($id);
-    if (!$row) jres(false, 'not found');
-    jres(true, $row);
-break;
+        if ($mb_id === '') {
+            $res['data'] = 'invalid mb_id';
+            break;
+        }
 
-case 'MEMBER_CREATE':
-    $res = insert_member_full($_REQUEST);
-    if (!$res['ok']) jres(false, $res['error']);
-    jres(true, $res['data']);
-break;
+        $row = select_member_one_by_id($mb_id);
 
-case 'MEMBER_UPDATE':
-    $res = update_member_full($_REQUEST);
-    if (!$res['ok']) jres(false, $res['error']);
-    jres(true, $res['data']);
-break;
+        $res = [
+            'result' => 'SUCCESS',
+            'data'   => $row
+        ];
+        break;
 
-case 'MEMBER_DELETE':
-    $id = isset($_REQUEST['mb_id']) ? trim($_REQUEST['mb_id']) : '';
-    $res = delete_member_by_id($id);
-    if (!$res['ok']) jres(false, $res['error']);
-    jres(true, $res['data']);
-break;
 
-default:
-    jres(false,'invalid type');
+    /* ------------------------------------------------------
+        3) 중복 체크
+        type = MEMBER_CHECK_DUP
+        파라미터: mb_name, mb_hp
+    ------------------------------------------------------ */
+    case 'MEMBER_CHECK_DUP':
+
+        $mb_name = trim($req['mb_name'] ?? '');
+        $mb_hp   = trim($req['mb_hp'] ?? '');
+
+        $dup = select_member_dup($mb_name, $mb_hp);
+
+        $res = [
+            'result' => 'SUCCESS',
+            'data'   => ['duplicate' => $dup]
+        ];
+        break;
+
+
+    /* ------------------------------------------------------
+        4) 회원 등록 (INSERT)
+        type = MEMBER_ADD
+    ------------------------------------------------------ */
+    case 'MEMBER_ADD':
+        $ret = insert_member_full($req);
+
+        if ($ret['ok']) {
+            $res = [
+                'result' => 'SUCCESS',
+                'data'   => $ret['data']
+            ];
+        } else {
+            $res['data'] = $ret['error'];
+        }
+        break;
+
+
+    /* ------------------------------------------------------
+        5) 회원 수정 (UPDATE)
+        type = MEMBER_UPD
+    ------------------------------------------------------ */
+    case 'MEMBER_UPD':
+        $ret = update_member_full($req);
+
+        if ($ret['ok']) {
+            $res = [
+                'result' => 'SUCCESS',
+                'data'   => $ret['data']
+            ];
+        } else {
+            $res['data'] = $ret['error'];
+        }
+        break;
+
+
+    /* ------------------------------------------------------
+        6) 회원 삭제
+        type = MEMBER_DEL
+        파라미터: mb_id
+    ------------------------------------------------------ */
+    case 'MEMBER_DEL':
+        $mb_id = trim($req['mb_id'] ?? '');
+
+        if ($mb_id === '') {
+            $res['data'] = 'invalid mb_id';
+            break;
+        }
+
+        $ret = delete_member_by_id($mb_id);
+
+        if ($ret['ok']) {
+            $res = [
+                'result' => 'SUCCESS',
+                'data'   => $ret['data']
+            ];
+        } else {
+            $res['data'] = $ret['error'];
+        }
+        break;
+
+
+    /* ------------------------------------------------------
+        기본: 잘못된 type
+    ------------------------------------------------------ */
+    default:
+        $res['data'] = "Invalid type: {$type}";
+        break;
 }
+
+echo json_encode($res, JSON_UNESCAPED_UNICODE);
+exit;

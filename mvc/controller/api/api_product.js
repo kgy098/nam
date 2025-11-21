@@ -82,6 +82,6 @@
     _T: T
   };
 
-  global.ProductAPI = API;
+  global.productAPI = API;
 
 })(window, jQuery);

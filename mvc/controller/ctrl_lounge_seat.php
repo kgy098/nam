@@ -1,50 +1,115 @@
 <?php
 /* ctrl_lounge_seat.php */
 include_once('./_common.php');
-include_once('./cn_lounge_seat.php');
 
-define('AJAX_LSEAT_LIST',      'LSEAT_LIST');
-define('AJAX_LSEAT_GET',       'LSEAT_GET');
-define('AJAX_LSEAT_BY_LOUNGE', 'LSEAT_BY_LOUNGE');
-define('AJAX_LSEAT_ADD',       'LSEAT_ADD');
-define('AJAX_LSEAT_UPD',       'LSEAT_UPD');
-define('AJAX_LSEAT_DEL',       'LSEAT_DEL');
+$type = isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
 
-$type  = isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
+$start = isset($_REQUEST['start']) ? (int)$_REQUEST['start'] : 0;
+$num   = isset($_REQUEST['num'])   ? (int)$_REQUEST['num']   : (defined('CN_PAGE_NUM') ? CN_PAGE_NUM : 20);
 
-$start = isset($_REQUEST['start']) ? intval($_REQUEST['start']) : 0;
-$num   = isset($_REQUEST['num'])   ? intval($_REQUEST['num'])   : (defined('CN_PAGE_NUM') ? CN_PAGE_NUM : 20);
+$id        = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
+$lounge_id = isset($_REQUEST['lounge_id']) && $_REQUEST['lounge_id'] !== '' ? (int)$_REQUEST['lounge_id'] : 0;
+$cell_no   = isset($_REQUEST['cell_no'])   && $_REQUEST['cell_no']   !== '' ? (int)$_REQUEST['cell_no']   : 0;
 
-$id         = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
-$lounge_id  = isset($_REQUEST['lounge_id']) && $_REQUEST['lounge_id'] !== '' ? intval($_REQUEST['lounge_id']) : null;
-$seat_no    = array_key_exists('seat_no', $_REQUEST) ? $_REQUEST['seat_no'] : null;
-$is_active  = isset($_REQUEST['is_active']) && $_REQUEST['is_active'] !== '' ? intval($_REQUEST['is_active']) : null;
+$seat_no   = isset($_REQUEST['seat_no']) ? trim($_REQUEST['seat_no']) : '';
+$is_active = isset($_REQUEST['is_active']) && $_REQUEST['is_active'] !== '' ? (int)$_REQUEST['is_active'] : 1;
 
+
+/* -----------------------------------------
+   1) 전체 좌석 리스트
+----------------------------------------- */
 if ($type === AJAX_LSEAT_LIST) {
+
     $list = select_lounge_seat_list($start, $num);
-    echo json_encode(!empty($list) ? ['result'=>'SUCCESS','data'=>$list] : ['result'=>'FAIL']);
 
+    if ($list === false) {
+        echo json_encode(['result' => 'FAIL']);
+    } else {
+        echo json_encode([
+            'result' => 'SUCCESS',
+            'data'   => $list
+        ]);
+    }
+
+
+/* -----------------------------------------
+   2) 단건 조회
+----------------------------------------- */
 } else if ($type === AJAX_LSEAT_GET) {
+
     $row = select_lounge_seat_one($id);
-    echo json_encode(!empty($row) ? ['result'=>'SUCCESS','data'=>$row] : ['result'=>'FAIL']);
 
+    if (!empty($row)) {
+        echo json_encode(['result' => 'SUCCESS', 'data' => $row]);
+    } else {
+        echo json_encode(['result' => 'FAIL']);
+    }
+
+
+/* -----------------------------------------
+   3) 특정 라운지 좌석 목록
+      - only_active: is_active === 1 인 경우만 true
+      - 결과 0건이어도 SUCCESS + data:[]
+----------------------------------------- */
 } else if ($type === AJAX_LSEAT_BY_LOUNGE) {
-    $only_active = (!is_null($is_active) ? (intval($is_active) === 1) : false);
-    $list = select_lounge_seat_by_lounge(intval($lounge_id), $only_active, $start, $num);
-    echo json_encode(!empty($list) ? ['result'=>'SUCCESS','data'=>$list] : ['result'=>'FAIL']);
 
+    $only_active = ($is_active === 1 ? true : false);
+
+    $list = select_lounge_seat_by_lounge($lounge_id, $only_active, $start, $num);
+
+    if ($list === false) {
+        echo json_encode(['result' => 'FAIL']);
+    } else {
+        echo json_encode([
+            'result' => 'SUCCESS',
+            'data'   => $list ?: []
+        ]);
+    }
+
+
+/* -----------------------------------------
+   4) 좌석 등록
+   - lounge_id, cell_no, seat_no 사용
+----------------------------------------- */
 } else if ($type === AJAX_LSEAT_ADD) {
-    $ok = insert_lounge_seat(intval($lounge_id), $seat_no, is_null($is_active)?1:$is_active);
-    echo json_encode($ok ? ['result'=>'SUCCESS'] : ['result'=>'FAIL']);
 
+    $ok = insert_lounge_seat($lounge_id, $cell_no, $seat_no, $is_active);
+
+    echo json_encode($ok
+        ? ['result' => 'SUCCESS']
+        : ['result' => 'FAIL']
+    );
+
+
+/* -----------------------------------------
+   5) 좌석 수정
+----------------------------------------- */
 } else if ($type === AJAX_LSEAT_UPD) {
-    $ok = update_lounge_seat($id, intval($lounge_id), $seat_no, is_null($is_active)?1:$is_active);
-    echo json_encode($ok ? ['result'=>'SUCCESS'] : ['result'=>'FAIL']);
 
+    $ok = update_lounge_seat($id, $lounge_id, $cell_no, $seat_no, $is_active);
+
+    echo json_encode($ok
+        ? ['result' => 'SUCCESS']
+        : ['result' => 'FAIL']
+    );
+
+
+/* -----------------------------------------
+   6) 좌석 삭제 (hard delete)
+----------------------------------------- */
 } else if ($type === AJAX_LSEAT_DEL) {
-    $ok = delete_lounge_seat($id);
-    echo json_encode($ok ? ['result'=>'SUCCESS'] : ['result'=>'FAIL']);
 
+    $ok = delete_lounge_seat($id);
+
+    echo json_encode($ok
+        ? ['result' => 'SUCCESS']
+        : ['result' => 'FAIL']
+    );
+
+
+/* -----------------------------------------
+   7) 정의되지 않은 type
+----------------------------------------- */
 } else {
-    echo json_encode(['result'=>'FAIL']);
+    echo json_encode(['result' => 'FAIL']);
 }
