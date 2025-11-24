@@ -23,7 +23,7 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
 <div class="local_ov01 local_ov">
   <span class="btn_ov01"><span class="ov_txt">총 회원수 </span><span class="ov_num" id="totalCount">0명</span></span>
 </div>
-
+<img src="<?=G5_THEME_IMG_URL?>/nam/ico/menu.png" alt="menu">
 <div class="local_sch01 local_sch">
   <form id="frmSearch" onsubmit="return false;">
 

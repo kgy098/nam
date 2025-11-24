@@ -19,20 +19,76 @@ body {
   height: 28px;
 }
 
-.menu-btn img {
+.menu-btn {
   width: 26px;
-  filter: invert(100%);
+  cursor: pointer;
+  display: block;
 }
 
 /* 캘린더 헤더 */
 .calendar-header {
-  margin-top: 6px;
+  width: 90%;
+  margin: 16px auto 8px;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 18px;
-  font-size: 18px;   /* 시안과 거의 동일 */
+}
+.month-text {
+  font-size: 18px;    /* 기존 22px → 18px로 감소 */
   font-weight: 600;
+  color: #ffffff;     /* 하얀색으로 변경 */
+}
+.event-label {
+  position: absolute;
+  bottom: 4px;              /* 🔥 셀 바닥에 붙이기 */
+  left: 50%;
+  transform: translateX(-50%);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  padding: 1px 4px;         /* ← 네가 요청해서 기억해 둔 값 적용 */
+  background: #2a2a31;
+  color: #e5c784;
+  font-size: 11px;
+  border-radius: 4px;
+  font-weight: 500;
+  line-height: 1.1;
+
+  width: auto;
+  max-width: 95%;           /* 셀 안에서만 표시되게 */
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 왼쪽 세로선 */
+.event-label::before {
+  content: "";
+  width: 2px;
+  height: 10px;
+  background-color: #e5c784;
+  border-radius: 2px;
+  flex-shrink: 0;    /* 아이콘/세로선은 줄어들지 않게 */
+}
+
+.arrow-wrap {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-arrow {
+  background: none;
+  border: none;
+  padding: 6px;
+}
+
+.nav-arrow img {
+  width: 20px;
+  filter: invert(80%) sepia(40%) saturate(800%) hue-rotate(10deg);
+  /* 아이콘 금색 */
 }
 
 .nav-btn {
@@ -45,8 +101,10 @@ body {
 
 /* 캘린더 */
 .calendar {
-  width: 88%;
+  width: 100%;
+  max-width: 420px;
   margin: 14px auto 0;
+  padding: 0;
 }
 
 .calendar-weekdays {
@@ -57,34 +115,71 @@ body {
   opacity: 0.75;
   font-size: 14px;   /* 요일 폰트 */
   font-weight: 400;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .calendar-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
+  gap: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .calendar-day {
-  height: 42px;
-  text-align: center;
-  line-height: 42px;
-  cursor: pointer;
-  border-radius: 50%;
-  font-size: 16px;   /* 날짜 텍스트 크기 */
-  transition: 0.15s;
+  aspect-ratio: 1 / 1;      /* 🟩 자동 정사각형! (핵심) */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  position: relative; 
+
+  padding: 0;               /* 요청사항 */
+  box-sizing: border-box;
+  min-width: 0; 
+  /* overflow: hidden;  */
+}
+.calendar-day.empty {
+  background: transparent;
 }
 
+.day-number {
+  font-size: 16px;
+  margin-bottom: 3px;         /* 숫자와 라벨 간격 */
+  position: relative;
+  z-index: 2;
+}
 .calendar-day:hover {
   background: rgba(255, 215, 0, 0.1);
 }
 
-/* 오늘 날짜 (골드) */
-.today {
-  background: linear-gradient(135deg, #caa455, #e7d39a);
-  color: #000;
-  font-weight: 700;
+.today-cell .event-label {
+  bottom: -6px;   /* 기존보다 아래로 내림 (값은 조절 가능) */
 }
+.today-circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+
+    background: radial-gradient(circle at 50% 50%,
+        #f6d690 0%,
+        #e3c178 35%,
+        #cfa85a 60%,
+        #a67d39 100%
+    );
+
+    color: #1a1a1a;
+    font-weight: 600;
+    font-size: 16px;
+}
+
 
 /* 선택 날짜 */
 .selected {
@@ -137,16 +232,16 @@ body {
   text-align: center;
   flex: 1;
   padding-top: 10px;
-  opacity: 0.65;
+  /* opacity: 0.65; */
 }
 
 .nav-item.active {
-  opacity: 1;
+  /* opacity: 1; */
 }
 
 .nav-item img {
   width: 22px;
-  filter: invert(90%);
+  /* filter: invert(90%); */
 }
 
 .nav-item span {
@@ -154,4 +249,92 @@ body {
   font-size: 12px;
   margin-top: 3px;
   font-weight: 400;
+}
+
+/* 공지 영역 */
+.notice-bar {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: #1a1a1f;
+  border-bottom: 1px solid #2d2d34;
+}
+
+.notice-icon {
+  width: 22px;
+  margin-right: 8px;
+  /* filter: invert(80%) sepia(40%) saturate(800%) hue-rotate(10deg); */
+  /* 금색 계열 표현 */
+}
+
+.notice-text {
+  font-size: 15px;
+  color: #d8c08c;
+  font-weight: 500;
+}
+
+
+
+/* dimmed background */
+.schedule-dim {
+  display: none;
+  position: fixed;
+  z-index: 900;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+}
+
+/* popup sheet */
+.schedule-popup {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  bottom: -60%;
+  width: 100%;
+  max-height: 60%;
+  background: #1b1b20;
+  border-radius: 14px 14px 0 0;
+  padding: 16px 18px 30px;
+  box-shadow: 0 -3px 15px rgba(0,0,0,0.35);
+
+  transition: bottom 0.25s ease;
+}
+
+/* popup header */
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.popup-header span {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e5c784;
+}
+
+.popup-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+}
+
+/* 일정 리스트 */
+.popup-list {
+  max-height: calc(60vh - 60px);
+  overflow-y: auto;
+}
+
+.schedule-item {
+  padding: 12px 10px;
+  border-radius: 8px;
+  background: #26262d;
+  border: 1px solid #323238;
+  margin-bottom: 10px;
+
+  font-size: 15px;
+  color: #ddd;
 }
