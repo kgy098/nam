@@ -2,7 +2,6 @@
 include_once('./_common.php');
 header('Content-Type: application/json; charset=utf-8');
 
-// type
 $type = $_REQUEST['type'] ?? '';
 $req  = $_REQUEST;
 
@@ -17,11 +16,10 @@ $res = [
 switch ($type) {
 
     /* ------------------------------------------------------
-        1) 회원 목록 조회 (학생/교사)
-        type = MEMBER_LIST
-        파라미터: mode, page, rows, keyword, start_date, end_date 등
+        1) 회원 목록 조회
     ------------------------------------------------------ */
     case 'MEMBER_LIST':
+
         $list = select_member_list_search($req);
 
         $res = [
@@ -35,13 +33,12 @@ switch ($type) {
         ];
         break;
 
-
     /* ------------------------------------------------------
         2) 단건 조회
-        type = MEMBER_GET
-        파라미터: mb_id
+        (mb_id 기준)
     ------------------------------------------------------ */
     case 'MEMBER_GET':
+
         $mb_id = trim($req['mb_id'] ?? '');
 
         if ($mb_id === '') {
@@ -49,7 +46,12 @@ switch ($type) {
             break;
         }
 
-        $row = select_member_one_by_id($mb_id);
+        $row = select_member_one($mb_id);
+
+        if (!$row) {
+            $res['data'] = 'not_found';
+            break;
+        }
 
         $res = [
             'result' => 'SUCCESS',
@@ -57,11 +59,8 @@ switch ($type) {
         ];
         break;
 
-
     /* ------------------------------------------------------
         3) 중복 체크
-        type = MEMBER_CHECK_DUP
-        파라미터: mb_name, mb_hp
     ------------------------------------------------------ */
     case 'MEMBER_CHECK_DUP':
 
@@ -76,49 +75,45 @@ switch ($type) {
         ];
         break;
 
-
     /* ------------------------------------------------------
         4) 회원 등록 (INSERT)
-        type = MEMBER_ADD
     ------------------------------------------------------ */
     case 'MEMBER_ADD':
-        $ret = insert_member_full($req);
 
-        if ($ret['ok']) {
+        $row = insert_member_full($req);
+
+        if ($row) {
             $res = [
                 'result' => 'SUCCESS',
-                'data'   => $ret['data']
+                'data'   => $row
             ];
         } else {
-            $res['data'] = $ret['error'];
+            $res['data'] = 'insert_fail';
         }
         break;
-
 
     /* ------------------------------------------------------
         5) 회원 수정 (UPDATE)
-        type = MEMBER_UPD
     ------------------------------------------------------ */
     case 'MEMBER_UPD':
-        $ret = update_member_full($req);
 
-        if ($ret['ok']) {
+        $row = update_member_full($req);
+
+        if ($row) {
             $res = [
                 'result' => 'SUCCESS',
-                'data'   => $ret['data']
+                'data'   => $row
             ];
         } else {
-            $res['data'] = $ret['error'];
+            $res['data'] = 'update_fail';
         }
         break;
 
-
     /* ------------------------------------------------------
-        6) 회원 삭제
-        type = MEMBER_DEL
-        파라미터: mb_id
+        6) 회원 삭제 (DELETE)
     ------------------------------------------------------ */
     case 'MEMBER_DEL':
+
         $mb_id = trim($req['mb_id'] ?? '');
 
         if ($mb_id === '') {
@@ -126,21 +121,20 @@ switch ($type) {
             break;
         }
 
-        $ret = delete_member_by_id($mb_id);
+        $ok = delete_member_by_id($mb_id);
 
-        if ($ret['ok']) {
+        if ($ok) {
             $res = [
                 'result' => 'SUCCESS',
-                'data'   => $ret['data']
+                'data'   => 'deleted'
             ];
         } else {
-            $res['data'] = $ret['error'];
+            $res['data'] = 'delete_fail';
         }
         break;
 
-
     /* ------------------------------------------------------
-        기본: 잘못된 type
+        7) 잘못된 TYPE
     ------------------------------------------------------ */
     default:
         $res['data'] = "Invalid type: {$type}";

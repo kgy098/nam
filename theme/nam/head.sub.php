@@ -80,7 +80,7 @@ header("Pragma: no-cache"); // HTTP/1.0
     <? } ?>
     <? if (defined('G5_IS_ADMIN')) { ?>
       var g5_admin_url = "<?= G5_ADMIN_URL; ?>";
-      var g5_admin_nam_url = "<?= G5_NAM_ADMIN_URL; ?>";
+      var g5_admin_nam_url = "<?= G5_NAM_ADM_URL; ?>";
     <? } ?>
   </script>
 

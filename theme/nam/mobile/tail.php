@@ -11,11 +11,9 @@ if(G5_COMMUNITY_USE === false) {
 </div>
 
 
-<?php echo poll('theme/basic'); // 설문조사 ?>
-<?php echo visit('theme/basic'); // 방문자수 ?>
 
 
-<div id="ft">
+<!-- <div id="ft">
     <div id="ft_copy">
         <div id="ft_company">
             <a href="<?php echo get_pretty_url('content', 'company'); ?>">회사소개</a>
@@ -46,7 +44,7 @@ if(G5_COMMUNITY_USE === false) {
         echo $config['cf_analytics'];
     }
     ?>
-</div>
+</div> -->
 <script>
 jQuery(function($) {
 

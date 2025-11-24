@@ -1,405 +1,319 @@
-<?
+<?php
 
+/* ==========================================================
+   기본값
+========================================================== */
 function get_member_form_defaults()
 {
   return [
-    'mb_name'        => '',
-    'class'          => '',
-    'mb_hp'          => '',
-    'mb_email'       => '',
-    'mb_addr'        => '',
-    'gender'         => '',
-    'auth_no'        => '',
-    'join_date'      => '',
-    'out_date'       => '',
-    'product'        => '',
-    'price'          => '',
-    'first_price'    => '',
-    'last_price'     => '',
+    'mb_id'           => '',
+    'mb_name'         => '',
+    'class'           => '',
+    'mb_hp'           => '',
+    'mb_email'        => '',
+    'mb_addr1'        => '',   // ← 수정됨
+    'mb_sex'          => '',
+    'auth_no'         => '',
+    'join_date'       => '',
+    'out_date'        => '',
+    'product_id'         => '',
+    'product_price'           => '',
+    'product_price_first'     => '',
+    'product_price_last'      => '',
   ];
 }
 
 
-
-/* ------------------------------------------------------
- * SELECT (조회)
- * ------------------------------------------------------ */
-
-function select_member_list($start = 0, $num = CN_PAGE_NUM)
-{
-  $sql = "select *
-            from g5_member
-            order by mb_no desc
-            limit $start, $num";
-  $result = sql_query($sql);
-  $list = [];
-  while ($row = sql_fetch_array($result)) $list[] = $row;
-  return $list;
-}
-
-function select_member_listcnt()
-{
-  $row = sql_fetch("select count(mb_no) as cnt from g5_member");
-  return $row['cnt'];
-}
-
-function select_member_one($mb_no)
-{
-  return sql_fetch("select * from g5_member where mb_no = {$mb_no}");
-}
-
-function select_member_by_role($role, $start = 0, $num = CN_PAGE_NUM)
-{
-  $sql = "select mb_no, mb_id, mb_name, role, auth_no, mb_hp, mb_email, mb_datetime
-            from g5_member
-            where role = '{$role}'
-            order by mb_no desc
-            limit $start, $num";
-  $result = sql_query($sql);
-  $list = [];
-  while ($row = sql_fetch_array($result)) $list[] = $row;
-  return $list;
-}
-
-/* 상세 조회 by mb_id */
+/* ==========================================================
+   1) 단건 조회 (mb_id)
+========================================================== */
 function select_member_one_by_id($mb_id)
 {
-  $id = trim($mb_id);
-  if ($id === '') return null;
+  $mb_id = trim($mb_id);
+  if ($mb_id === '') return null;
 
-  $row = sql_fetch("
-      SELECT *
-      FROM g5_member
-      WHERE mb_id='" . sql_escape_string($id) . "'
-      LIMIT 1
-    ");
-  return $row ?: null;
+  $sql = "
+        SELECT 
+            mb_id,
+            mb_name,
+            role,
+            class,
+            mb_hp,
+            mb_email,
+            mb_addr1 ,
+            mb_sex,
+            auth_no,
+            DATE_FORMAT(join_date,'%Y-%m-%d') AS join_date,
+            DATE_FORMAT(out_date,'%Y-%m-%d') AS out_date,
+            product_id ,
+            product_price,
+            product_price_first,
+            product_price_last,
+            mb_datetime
+        FROM g5_member
+        WHERE mb_id = '{$mb_id}'
+        LIMIT 1
+    ";
+  return sql_fetch($sql);
 }
 
-/* 검색 + 페이징 조회 */
+
+/* ==========================================================
+   2) 회원 목록 조회 + 검색 + 페이징
+========================================================== */
 function select_member_list_search($req)
 {
-  global $g5;
-  $table = $g5['member_table'] ?? 'g5_member';
-  // error_log(__FILE__.__LINE__ . "\n data: " . print_r($req, true));
+    $table = 'g5_member';
 
-  // mode: student | teacher
-  $mode = $req['mode'] ?? 'student';   // 기본값 student
+    $mode   = $req['mode'] ?? 'student';
+    $page   = isset($req['page']) ? max(1, (int)$req['page']) : 1;
+    $rows   = isset($req['rows']) ? max(1, min(200, (int)$req['rows'])) : 20;
+    $offset = ($page - 1) * $rows;
 
-  $page   = isset($req['page']) ? max(1, (int)$req['page']) : 1;
-  $rows   = isset($req['rows']) ? max(1, min(200, (int)$req['rows'])) : 20;
-  $offset = ($page - 1) * $rows;
+    $field      = $req['field'] ?? '';
+    $keyword    = $req['keyword'] ?? '';
+    $start_date = $req['start_date'] ?? '';
+    $end_date   = $req['end_date'] ?? '';
 
-  $field   = $req['field']   ?? '';
-  $keyword = $req['keyword'] ?? '';
-  $role    = $req['role']    ?? '';   // 외부 role 조건
-  $class   = $req['class']   ?? '';
-  $left_yn = $req['left_yn'] ?? '';
+    $where = "1";
 
-  $dt_from = $req['dt_from'] ?? ($req['start_date'] ?? '');
-  $dt_to   = $req['dt_to']   ?? ($req['end_date'] ?? '');
+    // 역할 자동 결정
+    if ($mode === 'teacher') {
+        $where .= " AND m.role='TEACHER'";
+    } else {
+        $where .= " AND m.role='STUDENT'";
+    }
 
-  if ($dt_from !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dt_from)) $dt_from = '';
-  if ($dt_to   !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dt_to))   $dt_to   = '';
+    // 검색 조건
+    if ($field && $keyword) {
+        $f = preg_replace('/[^a-z0-9_]/i', '', $field);
+        $k = sql_escape_string($keyword);
+        $where .= " AND m.{$f} LIKE '%{$k}%'";
+    }
 
-  if ($dt_from && $dt_to && $dt_from > $dt_to) {
-    $tmp = $dt_from;
-    $dt_from = $dt_to;
-    $dt_to = $tmp;
-  }
+    // 날짜 조건 (mb_datetime 기준 = 가입일)
+    if ($start_date && $end_date) {
+        $where .= " AND m.mb_datetime >= '{$start_date} 00:00:00'
+                    AND m.mb_datetime <= '{$end_date} 23:59:59'";
+    } else if ($start_date) {
+        $where .= " AND m.mb_datetime >= '{$start_date} 00:00:00'";
+    } else if ($end_date) {
+        $where .= " AND m.mb_datetime <= '{$end_date} 23:59:59'";
+    }
 
-  $where = "1";
+    /* ---------- 총 카운트 ---------- */
+    $cnt_sql = "
+        SELECT COUNT(*) AS cnt
+        FROM g5_member AS m
+        WHERE {$where}
+    ";
+    $cnt = sql_fetch($cnt_sql);
+    $total = (int)$cnt['cnt'];
 
-  /* ---------------------------------------------------------
-       1) mode 값으로 role 자동 적용 (핵심)
-    --------------------------------------------------------- */
-  if ($mode === 'teacher') {
-    $where .= " AND role='TEACHER'";
-  } else {
-    $where .= " AND role='STUDENT'";   // 기본
-  }
-
-  /* ---------------------------------------------------------
-       2) 추가 검색 조건들 (기존 그대로 유지)
-    --------------------------------------------------------- */
-
-  if ($field && $keyword) {
-    $f = preg_replace('/[^a-z0-9_]/i', '', $field);
-    $k = sql_escape_string($keyword);
-    $where .= " AND {$f} LIKE '%{$k}%'";
-  }
-
-  if ($role)  $where .= " AND role='" . sql_escape_string($role) . "'";
-  if ($class) $where .= " AND class=" . (int)$class;
-
-  if ($left_yn === 'Y') $where .= " AND mb_leave_date<>''";
-  if ($left_yn === 'N') $where .= " AND mb_leave_date=''";
-
-  if ($dt_from && $dt_to) {
-    $where .= " AND mb_datetime>='{$dt_from} 00:00:00' AND mb_datetime<='{$dt_to} 23:59:59'";
-  } else if ($dt_from) {
-    $where .= " AND mb_datetime>='{$dt_from} 00:00:00'";
-  } else if ($dt_to) {
-    $where .= " AND mb_datetime<='{$dt_to} 23:59:59'";
-  }
-
-  /* ---------------------------------------------------------
-       3) SQL 실행
-    --------------------------------------------------------- */
-
-  $cnt = sql_fetch("SELECT COUNT(*) AS cnt FROM {$table} WHERE {$where}");
-  $total = (int)$cnt['cnt'];
-
-  $sql = "
-      SELECT *
-      FROM {$table}
-      WHERE {$where}
-      ORDER BY mb_datetime DESC, mb_id DESC
-      LIMIT {$offset}, {$rows}
+    /* ---------- 리스트 ---------- */
+    $sql = "
+        SELECT
+            m.mb_id,
+            m.mb_name,
+            m.class,
+            m.mb_hp,
+            m.mb_email,
+            m.product_id,
+            m.product_price,
+            DATE_FORMAT(m.join_date,'%Y-%m-%d') AS join_date,
+            DATE_FORMAT(m.out_date,'%Y-%m-%d') AS out_date,
+            DATE_FORMAT(m.mb_datetime,'%Y-%m-%d') AS mb_datetime,
+            p.name AS product_name
+        FROM g5_member AS m
+        LEFT OUTER JOIN cn_product AS p
+              ON m.product_id = p.id
+        WHERE {$where}
+        ORDER BY m.mb_datetime DESC
+        LIMIT {$offset}, {$rows}
     ";
 
-  // error_log(__FILE__.__LINE__ . "\nSQL: " . $sql);
+    $result = sql_query($sql);
+    $list = [];
+    while ($row = sql_fetch_array($result)) {
+        $list[] = $row;
+    }
 
-  $list = [];
-  $q = sql_query($sql);
-  while ($row = sql_fetch_array($q)) $list[] = $row;
-
-  return ['total' => $total, 'list' => $list, 'page' => $page, 'rows' => $rows];
+    return [
+        'total' => $total,
+        'list'  => $list,
+        'page'  => $page,
+        'rows'  => $rows
+    ];
 }
 
-
-function select_member_excel_list($params = [])
+function select_member_excel_list($req)
 {
-  global $g5;
-  $table = isset($g5['member_table']) ? $g5['member_table'] : 'g5_member';
+  // 기존 검색 함수를 그대로 사용
+  // 단, rows를 매우 크게 주어 전체 조회
+  $req_for_excel = $req;
+  $req_for_excel['page'] = 1;
+  $req_for_excel['rows'] = 50000;  // 충분히 큰 값
 
-  $field   = trim($params['field']   ?? '');
-  $keyword = trim($params['keyword'] ?? '');
-  $role    = trim($params['role']    ?? '');
-  $class   = trim($params['class']   ?? '');
-  $left_yn = trim($params['left_yn'] ?? '');
-
-  $dt_from = '';
-  $dt_to   = '';
-
-  if (!empty($params['dt_from']))        $dt_from = trim($params['dt_from']);
-  else if (!empty($params['start_date'])) $dt_from = trim($params['start_date']);
-
-  if (!empty($params['dt_to']))          $dt_to = trim($params['dt_to']);
-  else if (!empty($params['end_date']))   $dt_to = trim($params['end_date']);
-
-  if ($dt_from !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dt_from)) $dt_from = '';
-  if ($dt_to   !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dt_to))   $dt_to   = '';
-
-  if ($dt_from !== '' && $dt_to !== '' && $dt_from > $dt_to) {
-    $tmp     = $dt_from;
-    $dt_from = $dt_to;
-    $dt_to   = $tmp;
-  }
-
-  $where = "1";
-
-  if ($field !== '' && $keyword !== '') {
-    $f = preg_replace('/[^a-z0-9_]/i', '', $field);
-    $k = esc($keyword);
-    $where .= " AND {$f} LIKE '%{$k}%'";
-  }
-  if ($role !== '')   $where .= " AND role='" . esc($role) . "'";
-  if ($class !== '')  $where .= " AND class=" . (int)$class;
-  if ($left_yn === 'Y') $where .= " AND mb_leave_date<>''";
-  if ($left_yn === 'N') $where .= " AND mb_leave_date=''";
-
-  if ($dt_from !== '' && $dt_to !== '') {
-    $where .= " AND mb_datetime>='" . esc($dt_from) . " 00:00:00' AND mb_datetime<='" . esc($dt_to) . " 23:59:59'";
-  } else if ($dt_from !== '') {
-    $where .= " AND mb_datetime>='" . esc($dt_from) . " 00:00:00'";
-  } else if ($dt_to !== '') {
-    $where .= " AND mb_datetime<='" . esc($dt_to) . " 23:59:59'";
-  }
-
-  $sql = "
-      SELECT mb_id, mb_name, role, class, mb_hp, mb_email,
-             product_id, product_price, product_price_first, product_price_last,
-             mb_datetime, mb_leave_date
-      FROM {$table}
-      WHERE {$where}
-      ORDER BY mb_datetime DESC, mb_id DESC
-    ";
-  $result = sql_query($sql);
+  $result = select_member_list_search($req_for_excel);
 
   $list = [];
-  while ($row = sql_fetch_array($result)) $list[] = $row;
+
+  foreach ($result['list'] as $row) {
+
+    $list[] = [
+      'mb_id'        => $row['mb_id'],
+      'mb_name'      => $row['mb_name'],
+      'role'         => $row['role'],
+      'class'        => $row['class'],
+      'mb_hp'        => $row['mb_hp'],
+      'mb_email'     => $row['mb_email'],
+
+      'product_name'   => $row['product_name']   ?? '',
+      'product_price' => $row['product_price'] ?? '',
+
+      // 선납금 / 잔금은 엑셀에서 빈 칸 유지
+      'join_date'    => $row['join_date'],
+      'out_date'     => $row['out_date'],
+    ];
+  }
 
   return $list;
 }
 
+/* ==========================================================
+   3) 중복 체크 (이름 + 휴대폰)
+========================================================== */
 function select_member_dup($mb_name, $mb_hp)
 {
+  $mb_name = sql_escape_string($mb_name);
+  $mb_hp   = sql_escape_string($mb_hp);
+
   $sql = "
-        SELECT COUNT(*) AS cnt 
+        SELECT COUNT(*) AS cnt
         FROM g5_member
-        WHERE mb_name = '" . esc($mb_name) . "'
-          AND mb_hp = '" . esc($mb_hp) . "'
+        WHERE mb_name = '{$mb_name}'
+          AND mb_hp = '{$mb_hp}'
     ";
-  error_log(__FILE__ . __LINE__ . "\n SQL: " . $sql);
+
   $row = sql_fetch($sql);
   return $row['cnt'] > 0;
 }
 
 
-/* ------------------------------------------------------
- * INSERT (추가)
- * ------------------------------------------------------ */
-function insert_member_full($req)
-{
-    global $g5;
-    $table = $g5['member_table'] ?? 'g5_member';
-
-    /* -----------------------------------------------------------
-       1) mb_id 생성 (총 8자리 / 접두어 + 7자리 숫자)
-    ----------------------------------------------------------- */
-    $role = trim($req['role'] ?? 'STUDENT');
-    $mb_id = make_new_member_id($role);
-
-    /* -----------------------------------------------------------
-       2) 필수값
-    ----------------------------------------------------------- */
-    $mb_name = trim($req['mb_name'] ?? '');
-    if (!$mb_id || $mb_name === '') {
-        return ['ok' => false, 'error' => 'required'];
-    }
-
-    /* -----------------------------------------------------------
-       3) 기본 정보 매핑
-    ----------------------------------------------------------- */
-    $class = ($req['class'] === '' || !isset($req['class']))
-           ? 'NULL'
-           : (int)$req['class'];
-
-    $mb_hp    = trim($req['mb_hp'] ?? '');
-    $mb_email = trim($req['mb_email'] ?? '');
-
-    /* -----------------------------------------------------------
-       4) 성별 (HTML은 gender=M/F, DB는 mb_sex=남/여)
-    ----------------------------------------------------------- */
-    $gender = trim($req['gender'] ?? '');
-    if ($gender === 'M') $mb_sex = '남';
-    else if ($gender === 'F') $mb_sex = '여';
-    else $mb_sex = '';
-
-    /* -----------------------------------------------------------
-       5) 주소 (추후 사용 가능)
-    ----------------------------------------------------------- */
-    $mb_addr = trim($req['mb_addr'] ?? '');
-
-    /* -----------------------------------------------------------
-       6) 인증번호 (auth_no)
-    ----------------------------------------------------------- */
-    $auth_no = trim($req['auth_no'] ?? '');
-    $auth_no_sql = $auth_no !== '' ? "'" . $auth_no . "'" : "NULL";
-
-    /* -----------------------------------------------------------
-       7) 입실일 / 퇴실일
-    ----------------------------------------------------------- */
-    $join_date = trim($req['join_date'] ?? '');
-    $out_date  = trim($req['out_date'] ?? '');
-
-    $join_date_sql = ($join_date !== '') ? "'" . $join_date . "'" : "NULL";
-    $out_date_sql  = ($out_date  !== '') ? "'" . $out_date  . "'" : "NULL";
-
-    /* -----------------------------------------------------------
-       8) 상품 (price → product_price)
-       ▶ 가격은 "1,200,000" → 1200000 으로 변환
-       ▶ first/last 값 없으면 NULL
-    ----------------------------------------------------------- */
-
-    // 상품 ID
-    $product_id = isset($req['product']) && $req['product'] !== ''
-                ? (int)$req['product']
-                : 'NULL';
-
-    // 기본 상품 금액
-    $product_price = str_replace(',', '', ($req['price'] ?? '0'));
-    $product_price = (int)$product_price;
-
-    // 첫달 금액
-    if (!isset($req['first_price']) || trim($req['first_price']) === '') {
-        $product_price_first_sql = "NULL";
-    } else {
-        $product_price_first_sql = (int)str_replace(',', '', $req['first_price']);
-    }
-
-    // 마지막달 금액
-    if (!isset($req['last_price']) || trim($req['last_price']) === '') {
-        $product_price_last_sql = "NULL";
-    } else {
-        $product_price_last_sql = (int)str_replace(',', '', $req['last_price']);
-    }
-
-    /* -----------------------------------------------------------
-       9) SQL INSERT
-    ----------------------------------------------------------- */
-
-    $sql = "
-        INSERT INTO {$table}
-        (
-          mb_id, mb_name, role, class,
-          mb_hp, mb_email, mb_sex,
-          mb_addr, auth_no,
-          product_id, product_price, product_price_first, product_price_last,
-          mb_datetime, join_date, out_date
-        )
-        VALUES
-        (
-          '{$mb_id}', '{$mb_name}', '{$role}', {$class},
-          '{$mb_hp}', '{$mb_email}', '{$mb_sex}',
-          '{$mb_addr}', {$auth_no_sql},
-          {$product_id}, {$product_price}, {$product_price_first_sql}, {$product_price_last_sql},
-          NOW(), {$join_date_sql}, {$out_date_sql}
-        )
-    ";
-
-    $ok = sql_query($sql, false);
-    if (!$ok) {
-        return ['ok' => false, 'error' => 'insert fail'];
-    }
-
-    $row = sql_fetch("SELECT * FROM {$table} WHERE mb_id='{$mb_id}' LIMIT 1");
-    return ['ok' => true, 'data' => $row];
-}
-
-
-
-
+/* ==========================================================
+   4) mb_id 생성
+========================================================== */
 function make_new_member_id($role = 'STUDENT')
 {
-  $prefix = 'S';
-  if ($role == 'TEACHER') $prefix = 'T';
-  if ($role == 'ADMIN')   $prefix = 'A';
+  if ($role === 'TEACHER') $prefix = 'T';
+  else if ($role === 'ADMIN') $prefix = 'A';
+  else $prefix = 'S';
 
-  $row = sql_fetch("SELECT mb_id FROM g5_member 
-                      WHERE mb_id LIKE '{$prefix}%' 
-                      ORDER BY mb_id DESC LIMIT 1");
+  $row = sql_fetch("
+        SELECT mb_id 
+        FROM g5_member
+        WHERE mb_id LIKE '{$prefix}%'
+        ORDER BY mb_id DESC
+        LIMIT 1
+    ");
 
   if (!$row) {
-    return $prefix . "000001";
+    return $prefix . "0000001";
   }
 
   $num = intval(substr($row['mb_id'], 1)) + 1;
-  // error_log(__FILE__.__LINE__."\n SQL : " . $num);
-
   return $prefix . sprintf("%07d", $num);
 }
 
 
-/* ------------------------------------------------------
- * UPDATE (수정)
- * ------------------------------------------------------ */
+/* ==========================================================
+   5) INSERT
+========================================================== */
+function insert_member_full($req)
+{
+  $table = 'g5_member';
 
+  /* mb_id 생성 */
+  $role  = trim($req['role'] ?? 'STUDENT');
+  $mb_id = make_new_member_id($role);
+
+  /* 필수값 */
+  $mb_name = trim($req['mb_name'] ?? '');
+  if ($mb_name === '') {
+    return ['ok' => false, 'error' => 'required'];
+  }
+
+  /* 기본 정보 */
+  $class = ($req['class'] === '' || !isset($req['class']))
+    ? 'NULL'
+    : (int)$req['class'];
+
+  $mb_hp     = trim($req['mb_hp'] ?? '');
+  $mb_email  = trim($req['mb_email'] ?? '');
+  $mb_addr1  = trim($req['mb_addr1'] ?? '');   // ← 수정됨
+
+  /* 성별 */
+  $mb_sex = trim($req['mb_sex'] ?? '');
+
+  /* 인증번호 */
+  $auth_no = trim($req['auth_no'] ?? '');
+  $auth_no_sql = ($auth_no !== '') ? "'{$auth_no}'" : "NULL";
+
+  /* 입실 / 퇴실 */
+  $join_date = trim($req['join_date'] ?? '');
+  $join_sql  = ($join_date !== '') ? "'{$join_date}'" : "NULL";
+
+  $out_date = trim($req['out_date'] ?? '');
+  $out_sql  = ($out_date !== '') ? "'{$out_date}'" : "NULL";
+
+  /* 상품 */
+  $product_id = ($req['product_id'] !== '' && isset($req['product_id']))
+    ? (int)$req['product_id']
+    : 'NULL';
+
+  /* 가격 */
+  $product_price = (int)str_replace(',', '', ($req['product_price'] ?? 0));
+
+  $product_price_first = trim($req['product_price_first'] ?? '');
+  $first_sql   = ($product_price_first === '') ? "NULL" : (int)str_replace(',', '', $product_price_first);
+
+  $product_price_last = trim($req['product_price_last'] ?? '');
+  $last_sql   = ($product_price_last === '') ? "NULL" : (int)str_replace(',', '', $product_price_last);
+
+  /* INSERT */
+  $sql = "
+        INSERT INTO {$table}
+        (
+            mb_id, mb_name, role, class,
+            mb_hp, mb_email, mb_sex, mb_addr1,
+            auth_no,
+            product_id, product_price, product_price_first, product_price_last,
+            mb_datetime, join_date, out_date
+        )
+        VALUES
+        (
+            '{$mb_id}', '{$mb_name}', '{$role}', {$class},
+            '{$mb_hp}', '{$mb_email}', '{$mb_sex}', '{$mb_addr1}',
+            {$auth_no_sql},
+            {$product_id}, {$product_price}, {$first_sql}, {$last_sql},
+            NOW(), {$join_sql}, {$out_sql}
+        )
+    ";
+
+  $ok = sql_query($sql, false);
+  if (!$ok) return ['ok' => false, 'error' => 'insert fail'];
+
+  $row = select_member_one_by_id($mb_id);
+  return ['ok' => true, 'data' => $row];
+}
+
+
+/* ==========================================================
+   6) UPDATE
+========================================================== */
 function update_member_full($req)
 {
-  global $g5;
-  $table = $g5['member_table'] ?? 'g5_member';
+  $table = 'g5_member';
 
   $mb_id = trim($req['mb_id'] ?? '');
   if ($mb_id === '') return ['ok' => false, 'error' => 'invalid mb_id'];
@@ -408,36 +322,49 @@ function update_member_full($req)
 
   if (isset($req['mb_name']))   $sets[] = "mb_name='" . trim($req['mb_name']) . "'";
   if (isset($req['role']))      $sets[] = "role='" . trim($req['role']) . "'";
-  if (isset($req['class']))
+
+  if (isset($req['class'])) {
     $sets[] = "class=" . (trim($req['class']) === '' ? "NULL" : (int)$req['class']);
+  }
 
   if (isset($req['mb_hp']))     $sets[] = "mb_hp='" . trim($req['mb_hp']) . "'";
   if (isset($req['mb_email']))  $sets[] = "mb_email='" . trim($req['mb_email']) . "'";
-  if (isset($req['gender']))    $sets[] = "mb_sex='" . trim($req['gender']) . "'";
-  if (isset($req['mb_addr']))   $sets[] = "mb_addr1='" . trim($req['mb_addr']) . "'";
 
-  if (isset($req['product']))
-    $sets[] = "product_id=" . ((string)$req['product'] === '' ? 'NULL' : (int)$req['product']);
+  /** 여기 수정됨 — mb_addr → mb_addr1 */
+  if (isset($req['mb_addr1']))  $sets[] = "mb_addr1='" . trim($req['mb_addr1']) . "'";
+  if (isset($req['mb_sex']))  $sets[] = "mb_sex='" . trim($req['mb_sex']) . "'";
 
-  if (isset($req['price']))        $sets[] = "product_price=" . (int)$req['price'];
-  // 첫달
-  if ($req['product_price_first'] === '' || !isset($req['product_price_first'])) {
-    $product_price_first_sql = "NULL";
-  } else {
-    $product_price_first_sql = (int)str_replace(',', '', $req['product_price_first']);
+  if (isset($req['auth_no'])) {
+    $sets[] = "auth_no='" . trim($req['auth_no']) . "'";
   }
 
-  // 마지막달
-  if ($req['product_price_last'] === '' || !isset($req['product_price_last'])) {
-    $product_price_last_sql = "NULL";
-  } else {
-    $product_price_last_sql = (int)str_replace(',', '', $req['product_price_last']);
+  if (isset($req['product_id'])) {
+    $sets[] = "product_id=" . ((string)$req['product_id'] === '' ? 'NULL' : (int)$req['product_id']);
   }
-  if (isset($req['join_date']))
+
+  if (isset($req['product_price'])) {
+    $sets[] = "product_price=" . (int)str_replace(',', '', $req['product_price']);
+  }
+
+  if (isset($req['product_price_first']) && trim($req['product_price_first']) !== '') {
+    $sets[] = "product_price_first=" . (int)str_replace(',', '', $req['product_price_first']);
+  } else if (isset($req['product_price_first'])) {
+    $sets[] = "product_price_first=NULL";
+  }
+
+  if (isset($req['product_price_last']) && trim($req['product_price_last']) !== '') {
+    $sets[] = "product_price_last=" . (int)str_replace(',', '', $req['product_price_last']);
+  } else if (isset($req['product_price_last'])) {
+    $sets[] = "product_price_last=NULL";
+  }
+
+  if (isset($req['join_date'])) {
     $sets[] = "join_date=" . (($req['join_date'] === '') ? "NULL" : ("'" . trim($req['join_date']) . "'"));
+  }
 
-  if (isset($req['out_date']))
+  if (isset($req['out_date'])) {
     $sets[] = "out_date=" . (($req['out_date'] === '') ? "NULL" : ("'" . trim($req['out_date']) . "'"));
+  }
 
   if (empty($sets)) return ['ok' => false, 'error' => 'nothing to update'];
 
@@ -446,24 +373,22 @@ function update_member_full($req)
   $ok = sql_query($sql, false);
   if (!$ok) return ['ok' => false, 'error' => 'update fail'];
 
-  $row = sql_fetch("SELECT * FROM {$table} WHERE mb_id='{$mb_id}' LIMIT 1");
+  $row = select_member_one_by_id($mb_id);
   return ['ok' => true, 'data' => $row];
 }
 
 
-/* ------------------------------------------------------
- * DELETE (삭제)
- * ------------------------------------------------------ */
-
+/* ==========================================================
+   7) DELETE
+========================================================== */
 function delete_member_by_id($mb_id)
 {
-  global $g5;
-  $table = $g5['member_table'] ?? 'g5_member';
+  $table = 'g5_member';
 
-  $id = trim($mb_id);
-  if ($id === '') return ['ok' => false, 'error' => 'invalid mb_id'];
+  $mb_id = trim($mb_id);
+  if ($mb_id === '') return ['ok' => false, 'error' => 'invalid mb_id'];
 
-  $ok = sql_query("DELETE FROM {$table} WHERE mb_id='{$id}'", false);
+  $ok = sql_query("DELETE FROM {$table} WHERE mb_id='{$mb_id}'", false);
   if (!$ok) return ['ok' => false, 'error' => 'delete fail'];
 
   return ['ok' => true, 'data' => 'deleted'];
