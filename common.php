@@ -867,7 +867,7 @@ define('G5_NAM_ADM_PATH', G5_PATH.'/admnam');
 define('G5_MODEL_PATH', '/home/connet/project/nam/mvc/model');
 define('G5_API_PATH', '/home/connet/project/nam/mvc/controller/api');
 define('G5_CTRL_PATH', '/home/connet/project/nam/mvc/controller');
-define('G5_VIEW_PATH', '/home/connet/project/nam/mvc/view');
+define('G5_VIEW_PATH', '/home/connet/project/nam/view');
 
 define('NAM_IMG_URL', G5_THEME_IMG_URL.'/nam');
 define('G5_NAM_ADM_URL', G5_URL.'/admnam');
