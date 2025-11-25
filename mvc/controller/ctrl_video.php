@@ -3,7 +3,6 @@ include_once('./_common.php');
 header('Content-Type: application/json; charset=utf-8');
 
 $type = $_REQUEST['type'] ?? '';
-error_log(__FILE__.__LINE__."\nData1: " . print_r($list, true));
 switch($type){
 
 /*******************************************************
@@ -41,7 +40,7 @@ case 'VIDEO_LIST':
 
     // 페이지네이션
     $list = array_slice($filtered, $offset, $rows);
-    error_log(__FILE__.__LINE__."\nData: " . $list);
+    // error_log(__FILE__.__LINE__."\nData: " . $list);
 
     jres(true, [
         'total' => $total,

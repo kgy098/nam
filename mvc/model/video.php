@@ -5,7 +5,6 @@ function select_video_list($start=0, $num=CN_PAGE_NUM) {
             order by id desc
             limit $start, $num";
     $result = sql_query($sql);
-    error_log(__FILE__.__LINE__."\n SQL: " . $sql);
     $list = [];
     while ($row = sql_fetch_array($result)) $list[] = $row;
     return $list;
