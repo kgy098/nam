@@ -1,6 +1,26 @@
 <?
 if (!defined('_GNUBOARD_')) exit;
 
+$no_login_check = [
+  '/view/login/login.php',
+  '/view/login/login_check.php'
+];
+
+// 현재 요청 URI (쿼리스트링 제거)
+$current_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$current_full = $_SERVER['REQUEST_URI']; // 쿼리스트링 포함
+
+// 로그인 체크 제외 페이지가 아닌 경우
+if (!in_array($current_path, $no_login_check, true)) {
+
+  // 로그인 세션 없으면 로그인 페이지로 이동
+  if (empty($_SESSION['ss_mb_id']) || !$is_member) {
+    goto_url('/view/login/login.php?redirect=' . urlencode($current_full));
+    exit;
+  }
+}
+
+
 // 기본 제목 처리
 $g5_debug['php']['begin_time'] = $begin_time = get_microtime();
 
@@ -65,17 +85,21 @@ if (strstr($g5['lo_url'], '/' . G5_ADMIN_DIR . '/') || $is_admin == 'super')
 
 <body>
 
-  <? if ( $g5['title']=="main" ) { ?>
-  <header class="top-bar">
-    <img src="<?= G5_THEME_IMG_URL ?>/nam/logo.png" class="top-logo">
-    <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/menu.png" id="hamburgerBtn" class="menu-btn">
-  </header>
+  <? if ($g5['title'] == "main") { ?>
+    <header class="top-bar">
+      <img src="<?= G5_THEME_IMG_URL ?>/nam/logo.png" class="top-logo">
+      <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/menu.png" id="hamburgerBtn" class="menu-btn">
+    </header>
+  <? } else if ($g5['title'] == "인증") { ?>
+    <header class="top-bar sub-header">
+      <span class="sub-header-title">인증</span>
+    </header>
   <? } else { ?>
-  <header class="top-bar sub-header">
-    <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/left.png" class="top-logo" onclick="history.back();">
-    <span class="sub-header-title"><?= $g5['title'] ?></span>
-    <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/menu.png" id="hamburgerBtn" class="menu-btn">
-  </header>
+    <header class="top-bar sub-header">
+      <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/left.png" class="top-logo" onclick="history.back();">
+      <span class="sub-header-title"><?= $g5['title'] ?></span>
+      <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/menu.png" id="hamburgerBtn" class="menu-btn">
+    </header>
   <? } ?>
 
 

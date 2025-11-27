@@ -18,8 +18,43 @@ case 'STUDY_REPORT_LIST':
     
     $total = select_study_report_listcnt($mb_id, $class, $date_from, $date_to, $keyword);
     $list = select_study_report_list($start, $rows, $mb_id, $class, $date_from, $date_to, $keyword);
-    
+    foreach ($list as &$row) {
+
+        $file = get_board_file('cn_study_report', $row['id'], 0); // bf_no = 0 기준 파일
+
+        if ($file && $file['bf_file']) {
+            $row['result_image'] = G5_DATA_URL . "/file/cn_study_report/" . $file['bf_file'];
+        } else {
+            $row['result_image'] = null;
+        }
+    }
+    unset($row);
+
+
     jres(true, ['total'=>$total, 'list'=>$list, 'page'=>$page, 'rows'=>$rows]);
+break;
+
+case 'STUDY_REPORT_MY_LIST':
+    $page = max(1, (int)($_REQUEST['page']??1));
+    $rows = max(1, min(200, (int)($_REQUEST['rows']??20)));
+    $start = ($page - 1) * $rows;
+
+    $mb_id = $member['mb_id']; // 로그인한 학생 고정
+
+    $subject_id = trim($_REQUEST['subject_id']??'');
+    $date_from  = trim($_REQUEST['date_from']??'');
+    $date_to    = trim($_REQUEST['date_to']??'');
+
+    // 학생 전용 함수 사용
+    $total = select_study_report_listcnt_app($mb_id, $subject_id, $date_from, $date_to);
+    $list  = select_study_report_list_app($mb_id, $start, $rows, $subject_id, $date_from, $date_to);
+
+    jres(true, [
+        'total' => $total,
+        'list'  => $list,
+        'page'  => $page,
+        'rows'  => $rows
+    ]);
 break;
 
 case 'STUDY_REPORT_GET':
@@ -71,7 +106,7 @@ case 'STUDY_REPORT_UPDATE':
     $content = isset($_REQUEST['content']) ? trim($_REQUEST['content']) : $old['content'];
     $report_date = isset($_REQUEST['report_date']) ? trim($_REQUEST['report_date']) : $old['report_date'];
     
-    $ok = update_study_report($id, $subject, $title, $content, $report_date);
+    $ok = update_study_report($id, $mb_id, $subject, $title, $content, $report_date);
     if(!$ok) jres(false, 'update fail');
     
     $row = select_study_report_one($id);

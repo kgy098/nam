@@ -172,7 +172,7 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
                         <td>${row.class_name ?? ''}</td>
                         <td>${row.mb_name ?? ''}</td>
                         <td>${row.status === '신청' ? '응시' : '미응시'}</td>
-                        <td>${row.applied_at ?? ''}</td>
+                        <td>${row.exam_date ?? ''}</td>
                     </tr>
                     `;
           });

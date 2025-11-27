@@ -4,6 +4,7 @@
   var ENDPOINT = g5_ctrl_url + '/ctrl_study_report.php';
   var T = {
     LIST: 'STUDY_REPORT_LIST',
+    MY_LIST: 'STUDY_REPORT_MY_LIST',          // 앱/학생용 (신규)
     GET: 'STUDY_REPORT_GET',
     CREATE: 'STUDY_REPORT_CREATE',
     UPDATE: 'STUDY_REPORT_UPDATE',
@@ -46,6 +47,20 @@
 
       return call(payload);
     },
+
+    myList: function (page, num, filters) {
+      var pg = pageParams(page, num);
+      var payload = { type: T.MY_LIST, page: pg.page, rows: pg.rows };
+
+      if (filters) {
+        if (filters.subject_id) payload.subject_id = filters.subject_id;
+        if (filters.date_from) payload.date_from = filters.date_from;
+        if (filters.date_to) payload.date_to = filters.date_to;
+      }
+
+      return call(payload);
+    },
+
 
     get: function (id) {
       return call({ type: T.GET, id: id });

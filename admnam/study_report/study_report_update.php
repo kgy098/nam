@@ -7,8 +7,9 @@ $bo_table = $_POST['bo_table'] ?? 'cn_study_report';
 
 $mb_id = $_POST['mb_id'] ?? '';
 $title = $_POST['title'] ?? '';
+$subject_id = $_POST['subject_id'] ?? '';
 $content = $_POST['content'] ?? '';
-$report_date = date('Y-m-d');
+$report_date = $_POST['report_date'] ?? date('Y-m-d');
 
 // 파일 삭제 여부
 $file_del = $_POST['file_del'] ?? '';
@@ -47,7 +48,7 @@ if (empty($mb_id) || empty($title)) {
 
 // 등록
 if ($w === '' ) {
-  $result = insert_study_report($mb_id, '', $title, $content, $report_date);
+  $result = insert_study_report($mb_id, $subject_id, $title, $content, $report_date);
   
   if (!$result) {
     json_response(false, '등록 실패');
@@ -83,7 +84,7 @@ if ($w === '' ) {
 if ($w === 'u') {
   if ($id <= 0) json_response(false, 'ID가 유효하지 않습니다.');
   
-  $result = update_study_report($id, '', $title, $content, $report_date);
+  $result = update_study_report($id, $mb_id, $subject_id, $title, $content, $report_date);
   
   if (!$result) {
     json_response(false, '수정 실패');

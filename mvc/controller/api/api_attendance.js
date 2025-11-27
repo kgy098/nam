@@ -19,7 +19,8 @@
     DEL: 'ATT_DEL',
 
     STATUS_LIST: 'ATT_STATUS_LIST',   // ★ 출결현황 (학생×출결구분 OUTER JOIN)
-    STATUS_CNT: 'ATT_STATUS_CNT'     // ★ 출결현황 카운트
+    STATUS_CNT: 'ATT_STATUS_CNT',     // ★ 출결현황 카운트
+
   };
 
   // 공통 Ajax 호출

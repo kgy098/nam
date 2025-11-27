@@ -8,7 +8,13 @@
     GET: 'MOCK_APPLY_GET',
     ADD: 'MOCK_APPLY_CREATE',
     UPD: 'MOCK_APPLY_UPDATE',
-    DEL: 'MOCK_APPLY_DELETE'
+    DEL: 'MOCK_APPLY_DELETE',
+
+    // 학생 전용
+    MY_LIST: 'MOCK_APPLY_MY_LIST',
+    MY_STATUS: 'MOCK_APPLY_MY_STATUS',
+    TOGGLE: 'MOCK_APPLY_TOGGLE',
+    OVERVIEW_LIST: 'MOCK_APPLY_MY_OVERVIEW_LIST'
   };
 
   function call(params) {
@@ -43,6 +49,30 @@
 
     delete: function (id) {
       return call({ type: T.DEL, id: id });
+    },
+
+    myList: function () {
+      return call({ type: T.MY_LIST });
+    },
+
+    myStatus: function (mock_id) {
+      return call({ type: T.MY_STATUS, mock_id: mock_id });
+    },
+
+    toggle: function (mock_id, subject_id) {
+      return call({
+        type: T.TOGGLE,
+        mock_id: mock_id,
+        subject_id: subject_id
+      });
+    },
+
+    overviewList: function (page, rows) {
+      return call({
+        type: T.OVERVIEW_LIST,
+        page: page,
+        rows: rows
+      });
     }
   };
 

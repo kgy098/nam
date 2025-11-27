@@ -11,8 +11,8 @@ switch($type){
 case 'VIDEO_LIST':
 
     $page = max(1, (int)($_REQUEST['page'] ?? 1));
-    $rows = max(1, min(200, (int)($_REQUEST['rows'] ?? 20)));
-    $offset = ($page - 1) * $rows;
+    $num = max(1, min(200, (int)($_REQUEST['num'] ?? 20)));
+    $offset = ($page - 1) * $num;
 
     $keyword = trim($_REQUEST['keyword'] ?? '');
     $class   = trim($_REQUEST['class_name'] ?? '');
@@ -39,14 +39,14 @@ case 'VIDEO_LIST':
     $total = count($filtered);
 
     // 페이지네이션
-    $list = array_slice($filtered, $offset, $rows);
+    $list = array_slice($filtered, $offset, $num);
     // error_log(__FILE__.__LINE__."\nData: " . $list);
 
     jres(true, [
         'total' => $total,
         'list'  => $list,
         'page'  => $page,
-        'rows'  => $rows
+        'num'  => $num
     ]);
     break;
 

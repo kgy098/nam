@@ -11,20 +11,20 @@
     DEL:   'MOCK_SUBJECT_DELETE'
   };
 
-  // 공통 Ajax 호출 함수
+  // 공통 Ajax 호출
   function call(params) {
     return $.ajax({
       url: ENDPOINT,
       method: 'POST',
       data: params,
       dataType: 'json'
-    }).then(function(res){
-      if (res && (res.result === 'SUCCESS' || res.result === true)) return res;
+    }).then(function (res) {
+      if (res && res.result === 'SUCCESS') return res;
       return $.Deferred().reject(res || { result: 'FAIL' }).promise();
     });
   }
 
-  // 페이지 파라미터 계산
+  // 페이지 계산
   function pageParams(page, num) {
     var p = parseInt(page || 1, 10);
     var n = parseInt(num || 20, 10);
@@ -34,22 +34,34 @@
     };
   }
 
-  // API 정의
+
+  /* -------------------------------------------------------------
+   * API
+   * ------------------------------------------------------------- */
+
   var API = {
 
-    // 목록 조회
+    /* --------------------------------------------------
+     * 목록 조회
+     * extraParams = { subject_type: 'MOCK', keyword: ... }
+     * -------------------------------------------------- */
     list: function (page, num, extraParams) {
+
       var pg = pageParams(page, num);
+
       var params = Object.assign({
         type: T.LIST,
         start: pg.start,
         num: pg.num
-      }, extraParams || {});
+      }, extraParams);
 
       return call(params);
     },
 
-    // 단건 조회
+
+    /* --------------------------------------------------
+     * 단건 조회
+     * -------------------------------------------------- */
     get: function (id) {
       return call({
         type: T.GET,
@@ -57,26 +69,47 @@
       });
     },
 
-    // 등록 (mock_id 제거 → subject_name만 필요)
+
+    /* --------------------------------------------------
+     * 등록
+     * payload = { subject_name: '국어', subject_type: 'MOCK' }
+     * -------------------------------------------------- */
     add: function (payload) {
+
+      if (!payload || !payload.subject_name || !payload.subject_type) {
+        console.error("subject_name & subject_type required");
+        return $.Deferred().reject({ result: 'FAIL', msg: 'required' }).promise();
+      }
+
       var params = Object.assign({
         type: T.ADD
-      }, payload);  // payload = { subject_name: '국어' }
+      }, payload);
 
       return call(params);
     },
 
-    // 수정
+
+    /* --------------------------------------------------
+     * 수정
+     * fields = { subject_name?: '', subject_type?: '' }
+     * -------------------------------------------------- */
     update: function (id, fields) {
-      var params = Object.assign({
+      var p = {
         type: T.UPD,
         id: id
-      }, fields);
+      };
 
-      return call(params);
+      if (fields) {
+        Object.assign(p, fields);
+      }
+
+      return call(p);
     },
 
-    // 삭제(soft delete)
+
+    /* --------------------------------------------------
+     * 삭제 (soft delete)
+     * -------------------------------------------------- */
     remove: function (id) {
       return call({
         type: T.DEL,

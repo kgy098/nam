@@ -1,5 +1,3 @@
-
-
 /* Pretendard 기본 적용 */
 body {
   margin: 0;
@@ -9,6 +7,7 @@ body {
   color: #E7E3DCB0;
   font-size: 14px;
   padding-bottom: 90px;
+  box-sizing: border-box;
 }
 
 /* 상단바 */
@@ -428,15 +427,18 @@ body {
   z-index: 999;
 }
 
+#drawer-overlay.show {
+  display: block;
+}
+
 #drawer {
   position: fixed;
   top: 0;
   right: -80%;
   width: 80%;
   height: 100vh;
-  background: #1f1f1f;
+  background: #1E1F23;
   color: #fff;
-  padding: 20px;
   transition: right 0.3s ease;
   z-index: 1000;
   overflow-y: auto;
@@ -446,55 +448,125 @@ body {
   right: 0;
 }
 
-#drawer-overlay.show {
-  display: block;
+
+/* 메뉴 헤더 */
+/* 전체 헤더 영역 */
+.drawer-header {
+  padding: 0 16px 10px;
+  color: #ffffff;
+  background: #1E1F23;
 }
 
-.drawer-header {
+/* ================================
+   1) 닫기 버튼 줄
+================================= */
+.drawer-close-row {
+  height: 46px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
 }
 
-.drawer-title {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.drawer-login-btn {
-  color: #ccc;
-  font-size: 14px;
-  text-decoration: none;
-}
-
-.drawer-close {
-  background: transparent;
+.drawer-close-btn {
+  background: none;
   border: none;
-  font-size: 22px;
-  color: #ccc;
+  padding: 0 4px;
+  cursor: pointer;
+}
+
+.drawer-close-btn img {
+  width: 26px;
+  height: 26px;
+  opacity: 0.9;
+}
+
+/* ================================
+   2) 환영문구 + 로그아웃 (한줄)
+================================= */
+.drawer-info-row {
+  height: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0 24px 0;
+  border-bottom: 1px solid #292A2F;
+}
+
+.drawer-welcome {
+  font-size: 16px;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* 로그아웃 텍스트 + 아이콘 */
+.drawer-logout {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.drawer-logout span {
+  font-size: 14px;
+  color: #ADABA6;
+}
+
+.drawer-logout img {
+  height: 14px;
+  width: auto;
+  opacity: 1.5;
+}
+
+
+
+
+
+.drawer-menu {
+  padding: 0 16px;
+  /* 좌우 padding만 (요청한 기준) */
+  overflow-y: auto;
 }
 
 .drawer-menu a {
-  display: block;
-  padding: 14px 0;
-  border-bottom: 1px solid #333;
-  font-size: 17px;
+  display: flex;
+  align-items: center;
+  /* 세로 가운데 정렬 */
+  height: 40px;
+  /* 메뉴 높이 */
+  font-size: 14px;
+  color: #ffffff;
   text-decoration: none;
-  color: #e5e5e5;
 }
 
 .drawer-menu a:hover {
-  color: #fff;
+  color: #ffffffE0;
+  /* 살짝 강조 */
 }
 
+
 .drawer-footer {
-  margin-top: 40px;
-  font-size: 13px;
+  position: absolute;
+  bottom: 0;
+  border-top: 1px solid #292A2F;
+  padding: 20px 16px;
+  background: #17181B;
+  font-size: 14px;
+  line-height: 18px;
   opacity: 0.8;
 }
 
+.drawer-footer .corp {
+  margin-bottom: 10px;
+}
 
+.drawer-footer a {
+  color: #fff;
+}
+
+.drawer-footer .links {
+  margin-top: 10px;
+}
 
 
 /* 상단 헤더 */
@@ -512,11 +584,10 @@ body {
   width: 20px;
 }
 
-/* 가운데 타이틀 */
 .sub-header-title {
-  font-family: Pretendard-Medium;
-  font-size: 16px;
-  color: #fff;
+  font-family: Pretendard;
+  font-size: 18px;
+  color: #ffffffe0;
   font-weight: 600;
   position: absolute;
   left: 50%;
@@ -573,7 +644,7 @@ body {
 
 /* 리스트 전체 영역 */
 .common-list-container {
-  padding: 20px 16px 80px;
+  padding: 20px 16px 20px;
 }
 
 /* 리스트 아이템 공통 */
@@ -605,16 +676,17 @@ body {
 }
 
 .common-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
-  color: #ffffffd0;
+  color: #ffffffe0;
   line-height: 1.3em;
   margin-bottom: 6px;
 }
 
 .common-meta {
-  font-size: 13px;
-  color: #A8A7A2;
+  font-size: 14px;
+  font-weight: 400;
+  color: #ADABA6E0;
 }
 
 /* 화살표 */
@@ -651,10 +723,15 @@ body {
 
 /* 상세 텍스트 */
 .common-desc {
-  color: #ddd;
+  color: #D9D8D5E0;
   font-size: 14px;
+  font-weight: 400;
   line-height: 1.6em;
   margin-bottom: 16px;
+}
+
+.common-desc img {
+  width: 100%;
 }
 
 /* 옵션 - 유튜브 영상 */
@@ -666,17 +743,462 @@ body {
 
 /* 더보기 */
 .common-more-wrap {
+  padding: 10px 16px;
   text-align: center;
-  padding: 20px;
 }
 
 .common-more-btn {
   width: 100%;
-  padding: 14px 0;
-  background: #26262d;
-  border: 1px solid #313137;
-  color: #e5c784;
+  height: 48px;
+  background: #1E1F23;
+  /* 스크린샷 배경과 동일 */
+  color: #D9D8D5E0;
+  /* 거의 흰색 */
+  border: 1px solid #3A3A3F;
+  /* 연한 그레이 보더 */
   border-radius: 8px;
+  /* 스크린샷과 동일 rounded */
+  font-size: 16px;
+}
+
+
+
+/* ==============================================
+    공통 SELECT UI (앱 전체 재사용)
+    Prefix: common-
+   ============================================== */
+.common-section {
+  width: 90%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding-top: 10px;
+}
+
+/* 전체 한 줄(여러 select/input 나란히) */
+.common-form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+/* wrapper (select + icon 포함하는 container) */
+.common-select-box {
+  position: relative;
+  flex: 1;
+}
+
+/* 실제 select 태그 */
+.common-select {
+  width: 100%;
+  height: 46px;
+  padding: 0 38px 0 14px;
+
+  background: #1E1F23;
+  border: 1px solid #2A2A2C;
+  border-radius: 8px;
+
   font-size: 15px;
+  color: #ffffffe0;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* 오른쪽 화살표 아이콘 */
+.common-select-arrow {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  opacity: 0.6;
+  pointer-events: none;
+  /* 클릭되면 안됨 */
+}
+
+/* 전체 검색/필터 박스용 (select + date 포함 가능) */
+.common-form-box {
+  /* padding: 10px ; */
+  margin-top: 14px;
+}
+
+/* 라벨 */
+.common-form-label {
+  font-size: 13px;
+  color: #ADABA6E0;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+/* date input 공통 스타일 */
+.common-input-date {
+  flex: 1;
+  height: 46px;
+  padding: 0 5px;
+  background: #1E1F23;
+  border: 1px solid #2A2A2C;
+  border-radius: 8px;
+  color: #ffffffe0;
+  font-size: 15px;
+}
+
+.common-input-date::-webkit-calendar-picker-indicator {
+  filter: invert(80%);
+  opacity: 0.8;
+}
+
+/* 버튼 */
+.common-form-btn {
+  width: 100%;
+  height: 46px;
+  border-radius: 8px;
+  border: 1px solid #3A3A3F;
+  background: #2a2a31;
+  color: #D9D8D5E0;
+  font-size: 15px;
+}
+
+.common-form-row.first-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* 1줄차에서는 라벨 제거 → HTML에서 빼고 CSS는 영향없음 */
+
+/* 검색 버튼 크기 고정 */
+.common-form-row.first-row .common-form-btn {
+  width: 80px;
+  height: 46px;
+  /* select와 동일 높이 */
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* 과목선택 셀렉트는 왼쪽 풀 영역 사용 */
+.common-form-row.first-row .common-select-box {
+  flex: 1;
+}
+
+/* 2줄차: 시험일 라벨 + 날짜 2개 */
+.common-form-row.second-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+/* 시험일 라벨 */
+.common-form-row.second-row .common-form-label {
+  width: auto;
+  font-size: 14px;
+  color: #ADABA6E0;
+  margin-right: 6px;
+}
+
+/* date input 일관화 */
+.common-form-row.second-row .common-input-date {
+  flex: 1;
+  height: 46px;
+  font-size: 14px;
+}
+
+/* ==============================================
+   공통 INPUT (text, tel, number 등)
+   Prefix : common-input
+   ============================================== */
+.common-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+
+  background: #1E1F23;
+  border: 1px solid #2A2A2C;
+  border-radius: 8px;
+
+  font-size: 15px;
+  color: #ffffffe0;
+  box-sizing: border-box;
+}
+
+/* placeholder 색 */
+.common-input::placeholder {
+  color: #9d9d9db0;
+}
+
+.common-btn {
+  width: 100%;
+  height: 46px;
+  border-radius: 8px;
+  border: 1px solid #3A3A3F;
+  background: #2a2a31;
+  color: #D9D8D5E0;
+  font-size: 15px;
+}
+
+.common-btn:active {
+  opacity: 0.9;
+}
+
+.common-row {
+  width: 90%;
+  max-width: 420px;
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.common-row-label {
+  width: 90px;
+  font-size: 14px;
+  color: #ADABA6E0;
+  white-space: nowrap;
+}
+
+.common-row .common-input {
+  flex: 1;
+}
+
+
+.login-wrap {
+  margin-top: 30px;
+}
+
+.login-desc {
+  font-size: 14px;
+  color: #ADABA6B0;
+  width: 90%;
+  max-width: 420px;
+  margin: 0 auto 20px;
+  line-height: 1.5em;
+}
+
+/* 로그인 전용 input 높이만 따로 지정 */
+.login-input {
+  height: 50px;
+}
+
+.login-logo-box {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 120px;
+}
+
+.login-logo-box img {
+  width: 200px;
+  opacity: 0.9;
+}
+
+
+/*******************************************************
+ * 공통 카드 박스 (notice, video, mock 등 재사용)
+ *******************************************************/
+.common-card {
+  background: linear-gradient(55deg, #1E1F23 0%, #232428 50%, #29292C 100%);
+  border: 1px solid #2A2A2C;
+  border-radius: 12px;
+  padding: 20px 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.18);
+}
+
+/*******************************************************
+ * 카드 타이틀 영역
+ *******************************************************/
+.common-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/*******************************************************
+ * 상태 배지 (접수중 / 접수완료 / 마감 / 공지상태 등)
+ *******************************************************/
+.common-badge {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.common-badge-gold {
+  background: rgba(228, 201, 146, 0.15);
+  color: #E4C992E0;
+}
+
+.common-badge-gray {
+  background: rgba(255,255,255,0.08);
+  color: #A0A0A0;
+}
+
+/*******************************************************
+ * 펼침 화살표
+ *******************************************************/
+.common-arrow {
+  width: 18px;
+  opacity: 0.7;
+  transition: transform .2s;
+}
+
+.common-arrow.open {
+  transform: rotate(180deg);
+}
+
+/*******************************************************
+ * 리스트 박스 (하위 옵션 묶음)
+ *******************************************************/
+.common-section-box {
+  margin-top: 16px;
+  background: #1E1F23;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid #2d2d34;
+}
+
+/*******************************************************
+ * 토글 스위치 (앱 전체에서 사용 가능)
+ *******************************************************/
+.common-switch {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  background: #555;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background 0.25s;
+}
+
+.common-switch.active {
+  background: #C49A45;
+}
+
+.common-switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.25s;
+}
+
+.common-switch.active::after {
+  transform: translateX(22px);
+}
+
+
+.mock-item-box {
+  /* common-card 스타일을 그대로 복붙 */
+  position: relative;
+  background: linear-gradient(55deg, #1E1F23 0%, #232428 50%, #29292C 100%);
+  border: 1px solid #2A2A2C;
+  border-radius: 12px;
+  padding: 20px 18px 26px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.18);
+}
+
+/*******************************************************
+ * 모의고사 상세 정보
+ *******************************************************/
+.mock-meta {
+  margin-top: 14px;
+  font-size: 14px;
+  color: #ADABA6;
+  line-height: 1.5em;
+}
+
+/*******************************************************
+ * 과목 리스트 전체 묶음
+ *******************************************************/
+.mock-subject-list {
+  display: none;
+}
+
+/*******************************************************
+ * 과목 1줄
+ *******************************************************/
+.mock-subject-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #2d2d34;
+}
+
+.mock-subject-row:last-child {
+  border-bottom: none;
+}
+
+.mock-subject-name {
+  font-size: 16px;
+  color: #FFFFFF;
+}
+
+.mock-switch {
+  width: 42px;
+  height: 24px;
+  background: #555;
+  border-radius: 24px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mock-switch::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: left 0.2s;
+}
+
+/* 활성 상태 */
+.mock-switch.active {
+  background: #C6A563;
+}
+
+.mock-switch.active::after {
+  left: 20px;
+}
+
+/* 비활성 (접수불가) */
+.mock-switch.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.mock-status-badge.gold {
+  background: linear-gradient(135deg, #E4C992 0%, #A17E36 100%);
+  color: #1E1F23;
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+}
+
+.mock-status-badge.gray {
+  background: #3A3A3F;
+  color: #C8C8C8E0;
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  position: absolute;
+  right: 16px;
+  top: 16px;
 }
 

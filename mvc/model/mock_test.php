@@ -27,7 +27,7 @@ function select_mock_test_list($params = []) {
         SELECT *
         FROM cn_mock_test
         $where
-        ORDER BY id DESC
+        ORDER BY exam_date DESC, id DESC
         LIMIT $start, $rows
     ";
 
@@ -88,9 +88,11 @@ function insert_mock_test($data = []) {
 
     $name        = sql_real_escape_string($data['name'] ?? '');
     $description = sql_real_escape_string($data['description'] ?? '');
-    $apply_start = sql_real_escape_string($data['apply_start'] ?? null);
-    $apply_end   = sql_real_escape_string($data['apply_end'] ?? null);
-    $exam_date   = sql_real_escape_string($data['exam_date'] ?? null);
+
+    $apply_start = $data['apply_start'] ?? null;
+    $apply_end   = $data['apply_end'] ?? null;
+
+    $exam_date   = $data['exam_date'] ?? null;
     $status      = sql_real_escape_string($data['status'] ?? '접수중');
 
     $sql = "
@@ -98,9 +100,9 @@ function insert_mock_test($data = []) {
         SET
             name        = '{$name}',
             description = '{$description}',
-            apply_start = " . ($apply_start ? "'{$apply_start}'" : "NULL") . ",
-            apply_end   = " . ($apply_end ? "'{$apply_end}'" : "NULL") . ",
-            exam_date   = " . ($exam_date ? "'{$exam_date}'" : "NULL") . ",
+            apply_start = " . ($apply_start ? "'" . sql_real_escape_string($apply_start) . "'" : "NULL") . ",
+            apply_end   = " . ($apply_end ? "'" . sql_real_escape_string($apply_end) . "'" : "NULL") . ",
+            exam_date   = " . ($exam_date ? "'" . sql_real_escape_string($exam_date) . "'" : "NULL") . ",
             status      = '{$status}',
             reg_dt      = NOW()
     ";
@@ -119,34 +121,35 @@ function update_mock_test($id, $data = []) {
     $set = [];
 
     if (isset($data['name']))
-        $set[] = " name = '".sql_real_escape_string($data['name'])."' ";
+        $set[] = " name = '" . sql_real_escape_string($data['name']) . "' ";
 
     if (isset($data['description']))
-        $set[] = " description = '".sql_real_escape_string($data['description'])."' ";
+        $set[] = " description = '" . sql_real_escape_string($data['description']) . "' ";
 
     if (isset($data['apply_start']))
-        $set[] = " apply_start = " . ($data['apply_start'] ? "'".sql_real_escape_string($data['apply_start'])."'" : "NULL");
+        $set[] = " apply_start = " . ($data['apply_start'] ? "'" . sql_real_escape_string($data['apply_start']) . "'" : "NULL");
 
     if (isset($data['apply_end']))
-        $set[] = " apply_end = " . ($data['apply_end'] ? "'".sql_real_escape_string($data['apply_end'])."'" : "NULL");
+        $set[] = " apply_end = " . ($data['apply_end'] ? "'" . sql_real_escape_string($data['apply_end']) . "'" : "NULL");
 
     if (isset($data['exam_date']))
-        $set[] = " exam_date = " . ($data['exam_date'] ? "'".sql_real_escape_string($data['exam_date'])."'" : "NULL");
+        $set[] = " exam_date = " . ($data['exam_date'] ? "'" . sql_real_escape_string($data['exam_date']) . "'" : "NULL");
 
     if (isset($data['status']))
-        $set[] = " status = '".sql_real_escape_string($data['status'])."' ";
+        $set[] = " status = '" . sql_real_escape_string($data['status']) . "' ";
 
     if (!$set) return false;
 
     $sql = "
         UPDATE cn_mock_test
-        SET ".implode(',', $set).",
+        SET " . implode(',', $set) . ",
             mod_dt = NOW()
         WHERE id = '{$id}'
     ";
 
     return sql_query($sql);
 }
+
 
 
 /* ============================================================

@@ -18,6 +18,7 @@ function get_board_file($bo_table, $wr_id, $bf_no = 0)
               AND wr_id = {$wr_id}
               AND bf_no = {$bf_no}
             LIMIT 1";
+    error_log(__FILE__.__LINE__."\nSQL: " . $sql);
 
     return sql_fetch($sql);
 }

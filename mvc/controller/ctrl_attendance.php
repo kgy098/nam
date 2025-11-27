@@ -44,22 +44,6 @@ if ($type == AJAX_ATT_LIST) {
   } else {
     echo json_encode(['result' => 'FAIL']);
   }
-} else if ($type == AJAX_ATT_GET) {
-
-  $row = select_attendance_one($id);
-  if (!empty($row)) {
-    echo json_encode(['result' => 'SUCCESS', 'data' => $row]);
-  } else {
-    echo json_encode(['result' => 'FAIL']);
-  }
-} else if ($type == AJAX_ATT_BY_STUDENT) {
-
-  $list = select_attendance_by_student($mb_id, $start, $num);
-  if (!empty($list)) {
-    echo json_encode(['result' => 'SUCCESS', 'data' => $list]);
-  } else {
-    echo json_encode(['result' => 'FAIL']);
-  }
 } else if ($type == AJAX_ATT_BETWEEN) {
 
   // from_dt, to_dt 없으면 잘못된 BETWEEN 쿼리 방지
@@ -77,19 +61,56 @@ if ($type == AJAX_ATT_LIST) {
   }
 } else if ($type == AJAX_ATT_ADD) {
 
-  // insert_attendance($mb_id, $attend_type_id=null, $attend_dt, $status='출석')
+  if (!$mb_id) {
+    echo json_encode(['result' => 'FAIL', 'message' => 'NO_MB_ID']);
+    exit;
+  }
+
+  // 학생 정보 조회
+  $stu = sql_fetch("SELECT mb_id, auth_no, mb_sex FROM g5_member WHERE mb_id = '{$mb_id}'");
+  if (!$stu) {
+    echo json_encode(['result' => 'FAIL', 'message' => 'INVALID_MB']);
+    exit;
+  }
+
+  // 입력 인증번호
+  $input_auth = trim($_REQUEST['auth_no'] ?? '');
+
+  // ① 인증번호 체크
+  if ($stu['auth_no'] !== $input_auth) {
+    echo json_encode(['result' => 'FAIL', 'message' => 'AUTH_FAIL']);
+    exit;
+  }
+
+  // ② 중복 출석 방지 (오늘 + 동일 타입 존재 여부)
+  $type_id = intval($_REQUEST['attend_type_id'] ?? 0);
+
+  $dup = sql_fetch("
+        SELECT id 
+        FROM cn_attendance
+        WHERE mb_id = '{$mb_id}'
+          AND attend_type_id = {$type_id}
+          AND DATE(attend_dt) = CURDATE()
+        LIMIT 1
+    ");
+
+  if ($dup) {
+    echo json_encode(['result' => 'FAIL', 'message' => 'DUPLICATE']);
+    exit;
+  }
+
+  // ③ 서버에서 NOW(), status=출석완료 로 insert
   $ok = insert_attendance(
     $mb_id,
-    $attend_type_id,
-    $attend_dt,
-    $status ? $status : '출석'
+    $type_id
   );
 
   if ($ok) {
     echo json_encode(['result' => 'SUCCESS']);
   } else {
-    echo json_encode(['result' => 'FAIL']);
+    echo json_encode(['result' => 'FAIL', 'message' => 'INSERT_FAIL']);
   }
+  exit;
 } else if ($type == AJAX_ATT_UPD) {
 
   // update_attendance($id, $attend_type_id=null, $attend_dt=null, $status=null)

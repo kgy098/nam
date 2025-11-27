@@ -91,25 +91,24 @@ function select_attendance_between($from_dt, $to_dt, $mb_id = null, $status = nu
 }
 
 /**
- * 단건 insert
- * - type 컬럼 삭제 -> 파라미터에서 제거
+ * 출석 등록 (2단계: NOW() + 출석완료 고정)
  */
-function insert_attendance($mb_id, $attend_type_id = null, $attend_dt, $status = '출석')
+function insert_attendance($mb_id, $attend_type_id)
 {
-  $mb_id     = sql_escape_string($mb_id);
-  $attend_dt = sql_escape_string($attend_dt);
-  $status    = sql_escape_string($status);
+    $mb_id = sql_escape_string($mb_id);
+    $type_id_sql = is_null($attend_type_id) ? "NULL" : intval($attend_type_id);
 
-  $type_id_sql = is_null($attend_type_id) ? "null" : intval($attend_type_id);
+    $sql = "
+        INSERT INTO cn_attendance
+        SET mb_id = '{$mb_id}',
+            attend_type_id = {$type_id_sql},
+            attend_dt = NOW(),
+            status = '출석완료'
+    ";
 
-  $sql = "insert into cn_attendance
-            set mb_id         = '{$mb_id}',
-                attend_type_id = {$type_id_sql},
-                attend_dt      = '{$attend_dt}',
-                status         = '{$status}'";
-
-  return sql_query($sql);
+    return sql_query($sql);
 }
+
 
 /**
  * 단건 update

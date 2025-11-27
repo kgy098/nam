@@ -6,25 +6,34 @@ $mb_name = $is_login ? $member['mb_name'] : '';
 <div id="drawer-overlay"></div>
 
 <div id="drawer">
+
   <div class="drawer-header">
+    <div class="drawer-close-row">
+      <button id="drawerCloseBtn" class="drawer-close-btn">
+        <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/close.png" alt="">
+      </button>
+    </div>
+
     <? if (!$is_login) { ?>
-      <div class="drawer-title">로그인을 해주세요.</div>
-      <a href="/login.php" class="drawer-login-btn">
-        <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/login.png" class="btn-img">
-      </a>
+      <div class="drawer-info-row">
+        <div class="drawer-welcome">로그인을 해주세요.</div>
+
+        <a href="<?= G5_VIEW_URL?>/login/login.php" class="drawer-logout">
+          <span>로그인</span>
+          <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/login.png" alt="">
+        </a>
+      </div>
     <? } else { ?>
-      <div class="drawer-title"><?= $mb_name ?>님 반갑습니다.</div>
-      <a href="/logout.php" class="drawer-login-btn">
-        <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/logout.png" class="btn-img">
-      </a>
+      <div class="drawer-info-row">
+        <div class="drawer-welcome"><?= $mb_name ?>님 반갑습니다.</div>
+
+        <a href="<?= G5_VIEW_URL?>/login/logout.php" class="drawer-logout">
+          <span>로그아웃</span>
+          <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/logout.png" alt="">
+        </a>
+      </div>
     <? } ?>
-
-    <!-- X 닫기 버튼 -->
-    <button id="drawerCloseBtn" class="drawer-close">
-      <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/close.png" class="btn-img">
-    </button>
   </div>
-
 
   <div class="drawer-menu">
     <a href="/notice.php">공지사항</a>
@@ -46,19 +55,21 @@ $mb_name = $is_login ? $member['mb_name'] : '';
 
   <div class="drawer-footer">
     <div class="corp">(주)팡스카이에듀</div>
-    <div class="links">
-      <a href="/privacy.php">개인정보처리방침</a>
-      <span> | </span>
-      <a href="/terms.php">이용약관</a>
-    </div>
     <div class="corp-info">
       주소 : 충남 태안군 안면읍 백사장 2길 25-60<br>
       전화 : 000-000-0000<br>
       이메일 : 000@000.com<br>
       사업자등록번호 : 261-81-20861
     </div>
+    <div class="links">
+      <a href="/privacy.php">개인정보처리방침</a>
+      <span> | </span>
+      <a href="/terms.php">이용약관</a>
+    </div>
   </div>
 </div>
+
+
 
 <script>
   $(function() {
