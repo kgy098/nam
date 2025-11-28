@@ -50,6 +50,45 @@ function select_lounge_reservation_by_date($reserved_date, $lounge_id=null, $sea
     return $list;
 }
 
+function count_reservation_by_mb_date($mb_id, $reserved_date)
+{
+    $mb_id = esc($mb_id);
+    $reserved_date = esc($reserved_date);
+
+    $sql = "
+        SELECT COUNT(*) AS cnt
+        FROM cn_lounge_reservation
+        WHERE mb_id = '{$mb_id}'
+          AND reserved_date = '{$reserved_date}'
+          AND status = '예약'
+    ";
+
+    $row = sql_fetch($sql);
+    return (int)$row['cnt'];
+}
+
+function exists_lounge_reservation($lounge_id, $seat_id, $reserved_date, $start_time)
+{
+    $lounge_id = (int)$lounge_id;
+    $seat_id   = (int)$seat_id;
+    $reserved_date = esc($reserved_date);
+    $start_time    = esc($start_time);
+
+    $sql = "
+        SELECT id
+        FROM cn_lounge_reservation
+        WHERE lounge_id = '{$lounge_id}'
+          AND seat_id   = '{$seat_id}'
+          AND reserved_date = '{$reserved_date}'
+          AND start_time    = '{$start_time}'
+          AND status = '예약'
+        LIMIT 1
+    ";
+
+    return sql_fetch($sql); // 있으면 array, 없으면 null
+}
+
+
 function insert_lounge_reservation($mb_id, $lounge_id, $seat_id, $reserved_date, $start_time, $end_time, $status='예약') {
     $sql = "insert into cn_lounge_reservation
             set mb_id = '{$mb_id}',

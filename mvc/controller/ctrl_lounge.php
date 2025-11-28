@@ -26,10 +26,7 @@ $is_active   = isset($_REQUEST['is_active']) && $_REQUEST['is_active'] !== '' ? 
 if ($type === AJAX_LOUNGE_LIST) {
 
     $list = select_lounge_list($start, $num);
-    echo json_encode(!empty($list)
-        ? ['result' => 'SUCCESS', 'data' => $list]
-        : ['result' => 'FAIL']
-    );
+    echo json_encode(!empty($list) ? ['result' => 'SUCCESS', 'data' => $list]: ['result' => 'FAIL']);
 
 // 2) 단건 조회
 } else if ($type === AJAX_LOUNGE_GET) {

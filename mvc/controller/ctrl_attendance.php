@@ -1,173 +1,151 @@
 <?php
 include_once('./_common.php');
-// cn_attendance.php 는 공통에서 include 되고 있으므로 여기서는 추가 include 하지 않음
 
-header('Content-Type: application/json; charset=utf-8');
+// 로그인 사용자 정보
+$role = $member['role'] ?? '';
+$type = $_REQUEST['type'] ?? '';
 
-$type = isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
+/*****************************************************************
+ * 출결 단건 조회
+ *****************************************************************/
+if ($type === AJAX_ATT_GET) {
 
-$start = isset($_REQUEST['start']) ? intval($_REQUEST['start']) : 0;
-$num   = isset($_REQUEST['num'])   ? intval($_REQUEST['num'])   : (defined('CN_PAGE_NUM') ? CN_PAGE_NUM : 20);
+  $id  = (int)($_REQUEST['id'] ?? 0);
+  $row = select_attendance_one($id);
 
-$id    = isset($_REQUEST['id'])    ? intval($_REQUEST['id'])    : 0;
-$mb_id = isset($_REQUEST['mb_id']) ? $_REQUEST['mb_id']         : null;
-
-$attend_type_id = (isset($_REQUEST['attend_type_id']) && $_REQUEST['attend_type_id'] !== '')
-  ? intval($_REQUEST['attend_type_id'])
-  : null;
-
-$attend_dt = isset($_REQUEST['attend_dt']) ? $_REQUEST['attend_dt'] : null;
-// $atype (입실/퇴실 등) 은 type 컬럼 삭제로 더이상 사용하지 않음
-$status   = isset($_REQUEST['status']) ? $_REQUEST['status'] : null;
-
-// 기간 검색용
-$from_dt = isset($_REQUEST['from_dt']) ? $_REQUEST['from_dt'] : null;
-$to_dt   = isset($_REQUEST['to_dt'])   ? $_REQUEST['to_dt']   : null;
-
-// 출결현황(OUTER JOIN)용 파라미터
-$attend_date = isset($_REQUEST['attend_date']) ? $_REQUEST['attend_date'] : null; // YYYY-MM-DD
-$class    = (isset($_REQUEST['class']) && $_REQUEST['class'] !== '')
-  ? intval($_REQUEST['class'])
-  : null;
-
-if ($type == AJAX_ATT_LIST) {
-
-  $list  = select_attendance_list($start, $num);
-  $total = select_attendance_listcnt();
-
-  if (!empty($list)) {
-    echo json_encode([
-      'result' => 'SUCCESS',
-      'data'   => $list,
-      'total'  => $total
-    ]);
-  } else {
-    echo json_encode(['result' => 'FAIL']);
-  }
-} else if ($type == AJAX_ATT_BETWEEN) {
-
-  // from_dt, to_dt 없으면 잘못된 BETWEEN 쿼리 방지
-  if (empty($from_dt) || empty($to_dt)) {
-    echo json_encode(['result' => 'FAIL', 'message' => 'INVALID_DATE_RANGE']);
-  } else {
-    // CRUD 쪽에서 이미 type 파라미터 제거됨: ($from_dt, $to_dt, $mb_id=null, $status=null, $start=0, $num=CN_PAGE_NUM)
-    $list = select_attendance_between($from_dt, $to_dt, $mb_id, $status, $start, $num);
-
-    if (!empty($list)) {
-      echo json_encode(['result' => 'SUCCESS', 'data' => $list]);
-    } else {
-      echo json_encode(['result' => 'FAIL']);
-    }
-  }
-} else if ($type == AJAX_ATT_ADD) {
-
-  if (!$mb_id) {
-    echo json_encode(['result' => 'FAIL', 'message' => 'NO_MB_ID']);
-    exit;
+  if (!$row) {
+    jres(false, ['msg' => '데이터 없음']);
   }
 
-  // 학생 정보 조회
-  $stu = sql_fetch("SELECT mb_id, auth_no, mb_sex FROM g5_member WHERE mb_id = '{$mb_id}'");
-  if (!$stu) {
-    echo json_encode(['result' => 'FAIL', 'message' => 'INVALID_MB']);
-    exit;
+  jres('ok', ['row' => $row]);
+}
+/*****************************************************************
+ * 출결 리스트 (관리자)
+ *****************************************************************/
+else if ($type === AJAX_ATT_LIST) {
+
+  $start = (int)($_REQUEST['start'] ?? 0);
+  $rows  = (int)($_REQUEST['rows'] ?? CN_PAGE_NUM);
+
+  $list = select_attendance_list($start, $rows);
+  $cnt  = select_attendance_listcnt();
+
+  jres('ok', ['list' => $list, 'total' => $cnt]);
+} else if ($type === AJAX_ATT_OVERVIEW_LIST) {
+
+  $page  = isset($_REQUEST['page']) ? max(1, (int)$_REQUEST['page']) : 1;
+  $rows  = isset($_REQUEST['rows']) ? max(1, (int)$_REQUEST['rows']) : 7; // 날짜 7개 기본
+  $start = ($page - 1) * $rows;
+
+  $mb_id = esc($_REQUEST['mb_id'] ?? '');
+
+  // 출결구분 개수
+  $types = get_all_attendance_types();
+  $typeCount = count($types);
+
+  // 리스트
+  $list = select_attendance_overview_list($start, $rows, $mb_id);
+
+  $total = count($list);
+
+  // elog("LIST11: " . print_r($list, true));
+
+  jres('ok', [
+    'list'  => $list,
+    'total' => $total
+  ]);
+}
+
+else if ($type === AJAX_ATT_ADMIN_LIST) {
+
+  $start_date     = trim($_POST['start_date'] ?? '');
+  $end_date       = trim($_POST['end_date'] ?? '');
+  $class_id       = trim($_POST['class_id'] ?? '');
+  $attend_type_id = trim($_POST['attend_type_id'] ?? '');
+
+  // elog("ADMIN DATA: " . print_r($REQUEST, true));
+
+  $list = select_attendance_admin_list($start_date, $end_date, $class_id, $attend_type_id);
+
+  jres(true, [
+    'list' => $list,
+    'count' => count($list)
+  ]);
+}
+
+
+/*****************************************************************
+ * 출결 등록 (학생/관리자 공용)
+ *****************************************************************/
+else if ($type === AJAX_ATT_ADD) {
+
+  $mb_id          = Esc($_REQUEST['mb_id'] ?? '');
+  $attend_type_id = (int)($_REQUEST['attend_type_id'] ?? 0);
+  $date           = trim($_REQUEST['date'] ?? '');
+
+  // date 는 필수
+  if ($mb_id === '' || $attend_type_id <= 0 || $date === '') {
+    jres(false, ['msg' => '필수값이 누락되었습니다.']);
   }
 
-  // 입력 인증번호
-  $input_auth = trim($_REQUEST['auth_no'] ?? '');
+  // 안전한 날짜 형식으로 잘라줌
+  $date = substr($date, 0, 16);
 
-  // ① 인증번호 체크
-  if ($stu['auth_no'] !== $input_auth) {
-    echo json_encode(['result' => 'FAIL', 'message' => 'AUTH_FAIL']);
-    exit;
+  // 해당 날짜 + type 데이터 있는지 조회 (CRUD)
+  $row = select_attendance_one_by_key($mb_id, $date, $attend_type_id);
+
+  if ($row) {
+    // 이미 있으면 update (출석완료)
+    $ok = update_attendance($row['id'], null, $date . ' 00:00:00', '출석완료');
+    jres($ok, ['msg' => $ok ? '출석완료로 수정됨' : '수정 실패']);
   }
 
-  // ② 중복 출석 방지 (오늘 + 동일 타입 존재 여부)
-  $type_id = intval($_REQUEST['attend_type_id'] ?? 0);
+  // 없으면 insert
+  $ok = insert_attendance($mb_id, $attend_type_id, $date);
+  jres($ok, ['msg' => $ok ? '출석 등록 완료' : '등록 실패']);
+}
 
-  $dup = sql_fetch("
-        SELECT id 
-        FROM cn_attendance
-        WHERE mb_id = '{$mb_id}'
-          AND attend_type_id = {$type_id}
-          AND DATE(attend_dt) = CURDATE()
-        LIMIT 1
-    ");
+/*****************************************************************
+ * 출결 수정 (관리자 전용)
+ *****************************************************************/
+else if ($type === AJAX_ATT_UPD) {
 
-  if ($dup) {
-    echo json_encode(['result' => 'FAIL', 'message' => 'DUPLICATE']);
-    exit;
+  if ($role === '학생') {
+    jres('', ['msg' => '권한 없음']);
   }
 
-  // ③ 서버에서 NOW(), status=출석완료 로 insert
-  $ok = insert_attendance(
-    $mb_id,
-    $type_id
-  );
+  $id             = (int)($_REQUEST['id'] ?? 0);
+  $attend_type_id = $_REQUEST['attend_type_id'] ?? null;
+  $attend_dt      = $_REQUEST['attend_dt'] ?? null;
+  $status         = $_REQUEST['status'] ?? null;
 
-  if ($ok) {
-    echo json_encode(['result' => 'SUCCESS']);
-  } else {
-    echo json_encode(['result' => 'FAIL', 'message' => 'INSERT_FAIL']);
+  // ENUM 검증
+  if (!is_null($status) && !in_array($status, ['출석완료', '미출석'], true)) {
+    jres('', ['msg' => 'status 오류']);
   }
-  exit;
-} else if ($type == AJAX_ATT_UPD) {
 
-  // update_attendance($id, $attend_type_id=null, $attend_dt=null, $status=null)
-  $ok = update_attendance(
-    $id,
-    $attend_type_id,
-    $attend_dt,
-    $status
-  );
+  $ok = update_attendance($id, $attend_type_id, $attend_dt, $status);
+  jres($ok ? 'ok' : '', ['msg' => $ok ? '수정 완료' : '수정 실패']);
+}
 
-  if ($ok) {
-    echo json_encode(['result' => 'SUCCESS']);
-  } else {
-    echo json_encode(['result' => 'FAIL']);
+/*****************************************************************
+ * 출결 삭제 (관리자)
+ *****************************************************************/
+else if ($type === AJAX_ATT_DEL) {
+
+  if ($role === '학생') {
+    jres('', ['msg' => '권한 없음']);
   }
-} else if ($type == AJAX_ATT_DEL) {
 
+  $id = (int)($_REQUEST['id'] ?? 0);
   $ok = delete_attendance($id);
-  if ($ok) {
-    echo json_encode(['result' => 'SUCCESS']);
-  } else {
-    echo json_encode(['result' => 'FAIL']);
-  }
 
-  // ========================================================================
-  // 출결현황: 학생 × 출결구분 전체 조합 + 기간 OUTER JOIN
-  // ========================================================================
-} else if ($type == AJAX_ATT_STATUS_LIST) {
+  jres($ok ? 'ok' : '', ['msg' => $ok ? '삭제 완료' : '삭제 실패']);
+}
 
-  if (!$start_date || !$end_date) {
-    echo json_encode(['result' => 'FAIL', 'message' => 'INVALID_DATE_RANGE']);
-    exit;
-  }
-
-  $list  = select_attendance_status($start_date, $end_date, $class, $attend_type_id, $start, $num);
-  $total = select_attendance_status_cnt($start_date, $end_date, $class, $attend_type_id);
-
-  echo json_encode([
-    'result' => 'SUCCESS',
-    'data'   => $list,
-    'total'  => $total
-  ]);
-  exit;
-} else if ($type == AJAX_ATT_STATUS_CNT) {
-
-  if (!$start_date || !$end_date) {
-    echo json_encode(['result' => 'FAIL', 'message' => 'INVALID_DATE_RANGE']);
-    exit;
-  }
-
-  $total = select_attendance_status_cnt($start_date, $end_date, $class, $attend_type_id);
-
-  echo json_encode([
-    'result' => 'SUCCESS',
-    'total'  => $total
-  ]);
-  exit;
-} else {
-  echo json_encode(['result' => 'FAIL']);
+/*****************************************************************
+ * 잘못된 요청
+ *****************************************************************/
+else {
+  jres('', ['msg' => '잘못된 요청']);
 }

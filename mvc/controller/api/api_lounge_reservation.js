@@ -1,7 +1,7 @@
 (function (global, $) {
   'use strict';
 
-  var ENDPOINT = 'ctrl_lounge_reservation.php';
+  var ENDPOINT = g5_ctrl_url + '/ctrl_lounge_reservation.php';
   var T = {
     LIST:       'LRES_LIST',
     GET:        'LRES_GET',

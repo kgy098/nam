@@ -942,15 +942,13 @@ include_once(G5_MODEL_PATH . '/board_file.php');
 
 /* ===== AJAX 요청 타입 상수 선언 ===== */
 // 출결
-define('AJAX_ATT_LIST',         'ATT_LIST');         // 출결 리스트
 define('AJAX_ATT_GET',          'ATT_GET');          // 출결 단건
-define('AJAX_ATT_BY_STUDENT',   'ATT_BY_STUDENT');   // 학생별 출결
-define('AJAX_ATT_BETWEEN',      'ATT_BETWEEN');      // 기간별 출결
+define('AJAX_ATT_LIST',         'ATT_LIST');         // 출결 리스트
 define('AJAX_ATT_ADD',          'ATT_ADD');          // 출결 등록
 define('AJAX_ATT_UPD',          'ATT_UPD');          // 출결 수정
 define('AJAX_ATT_DEL',          'ATT_DEL');          // 출결 삭제
-define('AJAX_ATT_STATUS_LIST',  'ATT_STATUS_LIST');  // 출결현황 리스트(OUTER JOIN)
-define('AJAX_ATT_STATUS_CNT',   'ATT_STATUS_CNT');   // 출결현황 카운트
+define('AJAX_ATT_OVERVIEW_LIST', 'ATT_OVERVIEW_LIST');   // 출결 오버뷰 리스트
+define('AJAX_ATT_ADMIN_LIST',   'ATT_ADMIN_LIST');
 
 // 반, 클래스
 define('AJAX_CLASS_LIST',   'CLASS_LIST');  // 반 리스트
@@ -1015,6 +1013,7 @@ define('AJAX_LRES_BY_DATE',    'LRES_BY_DATE');     // 일자별(라운지/좌�
 define('AJAX_LRES_ADD',        'LRES_ADD');         // 예약 등록
 define('AJAX_LRES_UPD',        'LRES_UPD');         // 예약 수정
 define('AJAX_LRES_DEL',        'LRES_DEL');         // 예약 삭제
+
 
 // 교사 시간 블록
 define('AJAX_TTB_LIST', 'TTB_LIST');   // 블록 리스트

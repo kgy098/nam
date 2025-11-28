@@ -65,6 +65,7 @@ function select_lounge_seat_by_lounge($lounge_id, $only_active=false, $start=0, 
         LIMIT {$start}, {$num}
     ";
     $result = sql_query($sql);
+    elog("SQL: $sql");
     if ($result === false) return false;
 
     $list = [];

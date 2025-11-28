@@ -69,15 +69,8 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
   </table>
 </div>
 
-<div class="pg_wrap">
-  <div id="pagination"></div>
-</div>
-
 <script>
   $(function() {
-
-    var curPage = 1;
-    var pageSize = 50;
 
     // 오늘 날짜
     function todayYmd() {
@@ -87,26 +80,11 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
       return d.getFullYear() + '-' + m + '-' + dd;
     }
 
-    // 페이지 UI
-    function setPagination(total, currentPage) {
-      var totalPage = Math.ceil(total / pageSize);
-      if (totalPage < 1) totalPage = 1;
-
-      var html = '';
-      for (var i = 1; i <= totalPage; i++) {
-        html += '<a href="#" class="pg_page ' + (i === currentPage ? 'on' : '') +
-          '" data-page="' + i + '">' + i + '</a>';
-      }
-      $('#pagination').html(html);
-
-      $(".pg_page").on("click", function(e) {
-        e.preventDefault();
-        loadList($(this).data("page"));
-      });
-    }
 
     // 리스트 로딩
-    function loadList(page) {
+    // 리스트 로딩 (신규 adminList 기반)
+    function loadList() {
+
       var start_date = $('#start_date').val();
       var end_date = $('#end_date').val();
 
@@ -115,102 +93,135 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
         return;
       }
 
-      curPage = page;
+      AttendanceAPI.adminList({
+          start_date: start_date,
+          end_date: end_date,
+          class_id: $('#class').val(),
+          attend_type_id: $('#attend_type_id').val()
+        })
+        .then(function(res) {
 
-      AttendanceAPI.statusList(start_date, end_date, {
-        class: $('#class').val(),
-        attend_type_id: $('#attend_type_id').val(),
-        page: page,
-        num: pageSize
-      }).then(function(res) {
-        var list = res.data || [];
-        var total = res.total || 0;
+          var list = res.data.list || [];
+          var total = res.data.count || 0;
 
-        $('#att_total').text(total);
+          $('#att_total').text(total);
 
-        var $tbody = $('#att_list_body');
-        $tbody.empty();
+          var $tbody = $('#att_list_body');
+          $tbody.empty();
 
-        if (list.length === 0) {
-          $tbody.append('<tr><td colspan="6" class="empty_table">자료가 없습니다.</td></tr>');
-          return;
-        }
+          if (list.length === 0) {
+            $tbody.append('<tr><td colspan="6" class="empty_table">자료가 없습니다.</td></tr>');
+            return;
+          }
 
-        list.forEach(function(row) {
+          list.forEach(function(row) {
 
-          // 출석 여부 및 시간 처리
-          let isAttend = row.attend_dt ? true : false;
+            let isAttend = row.status === '출석완료';
+            let displayDate = row.status === '출석완료' ? row.attend_dt?.substring(0, 16)  : row.date;
 
-          let attendDate = isAttend ?
-            row.attend_dt.substring(0, 16) :
-            '-';
+            let statusHtml = isAttend ?
+              '출석완료' :
+              '<span class="missing">미출석</span>';
 
-          let status = isAttend ?
-            row.status :
-            '<span class="missing">미출석</span>';
+            // ★ 상태에 따라 버튼 변경
+            let checkBtn = '';
 
-          // 출석 버튼 (미출석일 때만 표시)
-          let checkBtn = !isAttend ?
-            `<button class="btn_01 btn_attend btn_small" data-mb="${row.mb_id}" data-type="${row.attend_type_id}">출석</button>` :
-            '';
+            if (isAttend) {
+              // 출석완료 → 미출석 버튼
+              checkBtn = `
+                <button class="btn_01 btn_small btn_unattend"
+                        data-id="${row.att_id}"
+                        data-date="${row.date}">
+                  미출석으로 변경
+                </button>`;
+            } else {
+              // 미출석 → 출석 버튼
+              checkBtn = `
+                <button class="btn_01 btn_small btn_attend"
+                        data-mb="${row.mb_id}"
+                        data-type="${row.attend_type_id}"
+                        data-date="${row.date}">
+                  출석하기
+                </button>`;
+            }
 
-          var tr = `
+            var tr = `
                 <tr>
-                  <td>${row.class || '-'}</td>
+                  <td>${row.class_name || '-'}</td>
                   <td>${row.mb_name}</td>
                   <td>${row.attend_type_name || '-'}</td>
-                  <td>${status}</td>
+                  <td>${statusHtml}</td>
                   <td>${checkBtn}</td>
-                  <td>${attendDate}</td>
+                  <td>${displayDate}</td>
                 </tr>
-              `;
+                `;
 
-          $tbody.append(tr);
+            $tbody.append(tr);
+          });
+
+
+        })
+        .fail(function() {
+          $('#att_list_body').html(`<tr><td colspan="6" class="empty_table">조회 실패</td></tr>`);
+          $('#att_total').text(0);
         });
-
-
-        setPagination(total, page);
-
-      }).fail(function(err) {
-        $('#att_list_body').html(
-          '<tr><td colspan="6" class="empty_table">조회 실패</td></tr>'
-        );
-        $('#att_total').text(0);
-        setPagination(0, 1);
-      });
     }
+
 
     // 기본 날짜: 오늘
     $('#start_date').val(todayYmd());
     $('#end_date').val(todayYmd());
-    loadList(1);
+    loadList();
 
     // 검색 버튼
     $('#btn_search').on('click', function() {
-      loadList(1);
+      loadList();
     });
 
     // 출석 버튼 처리
     $(document).on('click', '.btn_attend', function() {
 
       let mb_id = $(this).data('mb');
-      let attend_type_id = $(this).data('type');
+      let type_id = $(this).data('type');
+      let date = $(this).data('date');
 
       if (!confirm('이 학생을 출석 처리하시겠습니까?')) return;
 
       let now = new Date();
-      let attend_dt = now.toISOString().slice(0, 19).replace('T', ' ');
+      let hh = ('0' + now.getHours()).slice(-2);
+      let mm = ('0' + now.getMinutes()).slice(-2);
+      let ss = ('0' + now.getSeconds()).slice(-2);
 
-      AttendanceAPI.add(mb_id, attend_dt, {
-        attend_type_id: attend_type_id,
-        status: '출석'
-      }).then(function(res) {
-        alert('출석 처리되었습니다.');
-        loadList(curPage); // 현재 페이지 새로고침
-      }).fail(function(err) {
-        alert('출석 처리 실패');
-      });
+      let attend_dt = `${date} ${hh}:${mm}:${ss}`;
 
+      AttendanceAPI.add(mb_id, {
+          attend_type_id: type_id,
+          date: attend_dt,
+          status: '출석완료'
+        })
+        .then(() => {
+          alert('출석 처리되었습니다.');
+          loadList();
+        })
+        .fail(() => alert('출석 처리 실패'));
+    });
+
+    $(document).on('click', '.btn_unattend', function() {
+
+      let id = $(this).data('id'); // 출석 id
+      let date = $(this).data('date');
+
+      if (!confirm('해당 출석을 미출석으로 변경하시겠습니까?')) return;
+
+      AttendanceAPI.update(id, {
+          status: '미출석',
+          attend_dt: date + ' 00:00:00'
+        })
+        .then(() => {
+          alert('미출석으로 변경되었습니다.');
+          loadList();
+        })
+        .fail(() => alert('변경 실패'));
     });
 
     loadClassList();

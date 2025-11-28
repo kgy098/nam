@@ -753,3 +753,16 @@ $(function() {
         return true;
     });
 });
+
+
+function formatKoreanDate(ymd) {
+  var parts = ymd.split("-");
+  return parts[0] + "년 " + parts[1] + "월 " + parts[2] + "일";
+}
+
+function formatKoreanTime(h) {
+  if (h === 0) return "AM 12시";
+  if (h < 12) return `AM ${h}시`;
+  if (h === 12) return "PM 12시";
+  return `PM ${h - 12}시`;
+}

@@ -26,7 +26,7 @@ include_once('./head.php');
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
   </a>
 
-  <a class="list-box">
+  <a href="<?= G5_VIEW_URL ?>/attendance/attendance_list.php" class="list-box">
     <span>출결 관리</span>
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
   </a>

@@ -12,15 +12,11 @@
   var T = {
     LIST: 'ATT_LIST',
     GET: 'ATT_GET',
-    BY_STUDENT: 'ATT_BY_STUDENT',
-    BETWEEN: 'ATT_BETWEEN',
     ADD: 'ATT_ADD',
     UPD: 'ATT_UPD',
     DEL: 'ATT_DEL',
-
-    STATUS_LIST: 'ATT_STATUS_LIST',   // ★ 출결현황 (학생×출결구분 OUTER JOIN)
-    STATUS_CNT: 'ATT_STATUS_CNT',     // ★ 출결현황 카운트
-
+    OVERVIEW_LIST: 'ATT_OVERVIEW_LIST',
+    ADMIN_LIST: 'ATT_ADMIN_LIST',
   };
 
   // 공통 Ajax 호출
@@ -61,43 +57,41 @@
       return call({ type: T.GET, id: id });
     },
 
-    byStudent: function (mb_id, page, num) {
-      var pg = pageParams(page, num);
+    overviewList: function (page, rows, mb_id) {
+      var p = pageParams(page, rows);
+
       return call({
-        type: T.BY_STUDENT,
-        mb_id: mb_id,
-        start: pg.start,
-        num: pg.num
+        type: T.OVERVIEW_LIST,
+        page: page,
+        rows: rows,
+        mb_id: mb_id
       });
     },
 
-    between: function (from_dt, to_dt, opts) {
-      opts = opts || {};
-      var pg = pageParams(opts.page, opts.num);
-
-      var payload = {
-        type: T.BETWEEN,
-        from_dt: from_dt,
-        to_dt: to_dt,
-        start: pg.start,
-        num: pg.num
-      };
-
-      if (opts.mb_id) payload.mb_id = opts.mb_id;
-      if (opts.status) payload.status = opts.status;
-
-      return call(payload);
+    adminList: function (filters) {
+      return call({
+        type: T.ADMIN_LIST,
+        start_date: filters.start_date || '',
+        end_date: filters.end_date || '',
+        class_id: filters.class_id || '',
+        attend_type_id: filters.attend_type_id || ''
+      });
     },
 
-    add: function (mb_id, attend_dt, opts) {
+    add: function (mb_id, opts) {
       opts = opts || {};
       var payload = {
         type: T.ADD,
         mb_id: mb_id,
-        attend_dt: attend_dt,
-        status: opts.status || '출석'
+        status: opts.status || '출석완료'
       };
-      if (opts.attend_type_id != null) payload.attend_type_id = opts.attend_type_id;
+
+      if (opts.attend_type_id != null)
+        payload.attend_type_id = opts.attend_type_id;
+
+      if (opts.date)
+        payload.date = opts.date;   // ★ 날짜 전달 추가
+
       return call(payload);
     },
 
@@ -114,50 +108,6 @@
 
     remove: function (id) {
       return call({ type: T.DEL, id: id });
-    },
-
-    // === ★ 새 출결현황 API (학생 × 출결구분 OUTER JOIN + 기간검색) ===
-    statusList: function (start_date, end_date, opts) {
-      opts = opts || {};
-      var pg = pageParams(opts.page, opts.num);
-
-      var payload = {
-        type: T.STATUS_LIST,
-        start_date: start_date,
-        end_date: end_date,
-        start: pg.start,
-        num: pg.num
-      };
-      // console.log("param: " + JSON.stringify(payload)); return;
-
-      if (opts.class != null && opts.class !== '') {
-        payload.class = opts.class;
-      }
-
-      if (opts.attend_type_id != null && opts.attend_type_id !== '') {
-        payload.attend_type_id = opts.attend_type_id;
-      }
-
-      return call(payload);
-    },
-
-    statusCount: function (start_date, end_date, opts) {
-      opts = opts || {};
-
-      var payload = {
-        type: T.STATUS_CNT,
-        start_date: start_date,
-        end_date: end_date
-      };
-
-      if (opts.class != null && opts.class !== '') {
-        payload.class = opts.class;
-      }
-      if (opts.attend_type_id != null && opts.attend_type_id !== '') {
-        payload.attend_type_id = opts.attend_type_id;
-      }
-
-      return call(payload);
     },
 
     // 디버그용

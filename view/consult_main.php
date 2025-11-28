@@ -11,25 +11,25 @@ include_once('./head.php');
 
 <section class="submain-list">
 
-  <div class="list-box">
+  <a href="<?= G5_VIEW_URL ?>/lounge_reservation/lounge_reservation_list.php" class="list-box">
     <span>스터디라운지 예약</span>
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
-  </div>
+  </a>
 
-  <div class="list-box">
+  <a class="list-box">
     <span>학과상담</span>
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
-  </div>
+  </a>
 
-  <div class="list-box">
+  <a class="list-box">
     <span>멘토상담</span>
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
-  </div>
+  </a>
 
-  <div class="list-box">
+  <a class="list-box">
     <span>비대면 질의응답</span>
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
-  </div>
+  </a>
 
 </section>
 

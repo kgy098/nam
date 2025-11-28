@@ -11,9 +11,11 @@ function select_lounge_list($start=0, $num=CN_PAGE_NUM) {
     $sql = "select *
             from cn_lounge
             WHERE is_active = 1
-            order by id desc
+            order by id asc
             limit {$start}, {$num}";
+
     $result = sql_query($sql);
+    // elog("SQL: $sql");
 
     $list = [];
     while ($row = sql_fetch_array($result)) $list[] = $row;
