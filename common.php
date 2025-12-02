@@ -1028,6 +1028,13 @@ define('AJAX_CONSULT_GET',    'CONSULT_GET');     // 상담 단건 조회
 define('AJAX_CONSULT_CREATE', 'CONSULT_CREATE');  // 상담 생성
 define('AJAX_CONSULT_UPDATE', 'CONSULT_UPDATE');  // 상담 수정
 define('AJAX_CONSULT_DELETE', 'CONSULT_DELETE');  // 상담 삭제
+define('AJAX_CONSULT_TEACHER_LIST',    'CONSULT_TEACHER_LIST');  // 선생님 목록 
+define('AJAX_CONSULT_DATE_LIST',       'CONSULT_DATE_LIST'); // 날짜 리스트
+define('AJAX_CONSULT_AVAILABLE_TIMES', 'CONSULT_AVAILABLE_TIMES'); // 상담 가능 시간표 조회
+define('AJAX_CONSULT_RESERVE',         'CONSULT_RESERVE'); // 예약 생성
+define('AJAX_CONSULT_CANCEL',          'CONSULT_CANCEL');  // 예약 취소
+define('AJAX_CONSULT_MY_LIST',         'CONSULT_MY_LIST'); // 내 상담 목록
+
 
 // 학원비(회원별)
 define('AJAX_MEMBER_FEE_LIST',   'MEMBER_FEE_LIST');    // 학원비 리스트

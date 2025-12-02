@@ -18,10 +18,6 @@ $location    = isset($_REQUEST['location']) ? trim($_REQUEST['location']) : '';
 $total_seats = isset($_REQUEST['total_seats']) && $_REQUEST['total_seats'] !== '' ? (int)$_REQUEST['total_seats'] : 0;
 $is_active   = isset($_REQUEST['is_active']) && $_REQUEST['is_active'] !== '' ? (int)$_REQUEST['is_active'] : 1;
 
-// -----------------------------------------------------
-// type 분기
-// -----------------------------------------------------
-
 // 1) 라운지 리스트
 if ($type === AJAX_LOUNGE_LIST) {
 

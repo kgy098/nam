@@ -16,12 +16,12 @@ include_once('./head.php');
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
   </a>
 
-  <a class="list-box">
+  <a href="<?= G5_VIEW_URL ?>/consult/consult_list.php" class="list-box">
     <span>학과상담</span>
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
   </a>
 
-  <a class="list-box">
+  <a href="<?= G5_VIEW_URL ?>/mento/mento_list.php" class="list-box">
     <span>멘토상담</span>
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
   </a>

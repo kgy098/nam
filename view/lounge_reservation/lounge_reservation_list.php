@@ -274,18 +274,45 @@ if ($mb_id === '') {
 <script src="<?= G5_API_URL ?>/api_lounge_reservation.js"></script>
 
 <script>
-  let mb_id = "<?= $mb_id ?>";
-  let selectedLounge = null;
-  let selectedDate = null;
-  let selectedTime = null;
-  let selectedSeatId = null;
+  var mb_id = "<?= $mb_id ?>";
+  var selectedLounge = null;
+  var selectedDate = null;
+  var selectedTime = null;
+  var selectedSeatId = null;
 
   /* ============================================
      초기 로딩
   ============================================ */
   $(document).ready(function() {
-    loadLounges();
+    selectedLounge = $(this).val();
+
     loadToday();
+    loadDateOptions();
+    updateTimeList();
+
+
+    loadLounges();
+
+    $('#selLounge').on('change', function() {
+      selectedLounge = $(this).val();
+      loadSeatGrid(); // → 좌석 배치 다시 생성
+      loadMyReservations(1, true); // 내 예약 다시 로딩
+    });
+
+    $('#selDate').on('change', function() {
+      selectedDate = $(this).val();
+      markSeatStates(); 
+      loadSeatGrid(); 
+      loadMyReservations(1, true);
+    });
+
+    $('#selTime').on('change', function() {
+      selectedTime = $(this).val();
+      markSeatStates(); // → 해당 시간 예약 현황 반영
+      loadSeatGrid();
+      loadMyReservations(1, true);
+    });
+
   });
 
   /* ============================================
@@ -311,66 +338,12 @@ if ($mb_id === '') {
 
       $('#selLounge').val(selectedLounge);
 
-      loadDateOptions();
+      loadSeatGrid();
+      loadMyReservations(1);
+
     });
   }
 
-  /* ============================================
-     2) 날짜 today
-  ============================================ */
-  function loadToday() {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    selectedDate = `${yyyy}-${mm}-${dd}`;
-  }
-
-  /* 날짜 select 채우기(오늘~7일) */
-  function loadDateOptions() {
-    let html = '';
-    const today = new Date();
-    for (let i = 0; i < 7; i++) {
-      const d = new Date();
-      d.setDate(today.getDate() + i);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      const val = `${y}-${m}-${day}`;
-      html += `<option value="${val}">${m}/${day}</option>`;
-    }
-    $('#selDate').html(html);
-    $('#selDate').val(selectedDate);
-
-    updateTimeList();
-    loadSeatGrid();
-    loadMyReservations(1);
-  }
-
-  function updateTimeList() {
-    let now = new Date();
-    let nowH = now.getHours();
-
-    let html = '<option value="">시간선택</option>';
-
-    for (let h = 0; h < 24; h++) {
-      if (h <= nowH) continue; // 현재 시간 이전은 제외
-
-      let label = formatKoreanTime(h);
-      let hh = String(h).padStart(2, '0');
-
-      html += `<option value="${hh}:00:00">${label}</option>`;
-    }
-
-    $('#selTime').html(html);
-
-    // 기본 선택 - 가장 가까운 시간
-    const first = $('#selTime option').eq(1);
-    if (first.length > 0) {
-      $('#selTime').val(first.val());
-      selectedTime = first.val();
-    }
-  }
 
   /* ============================================
      좌석 그리드 로딩 (cell_no 기반)
@@ -524,6 +497,7 @@ if ($mb_id === '') {
     $('#bookDim').hide();
   }
 
+  // 좌석예약
   function reserveSeat() {
     if (!selectedSeatId) return;
 
@@ -544,7 +518,8 @@ if ($mb_id === '') {
       loadSeatGrid();
       loadMyReservations(1, true);
     }).fail(err => {
-      alert(err.msg || "예약 실패");
+      console.log(err);
+      alert(err.data || "예약 실패");
     });
   }
 
@@ -565,15 +540,15 @@ if ($mb_id === '') {
 
       list.forEach(item => {
         $('#myResList').append(`
-                <div class="common-item">
-                    <div class="common-item-row">
-                        <div class="common-info">
-                            <div class="common-title">${item.reserved_date} ${item.start_time.substring(0,5)}</div>
-                            <div class="common-meta">${item.lounge_name} / ${item.seat_no}번 좌석</div>
-                        </div>
-                    </div>
-                </div>
-            `);
+          <div class="common-item">
+            <div class="common-item-row">
+              <div class="common-info">
+                <div class="common-title">${item.reserved_date} ${item.start_time.substring(0,5)}</div>
+                <div class="common-meta">${item.l_name} / ${item.seat_no}번 좌석</div>
+              </div>
+            </div>
+          </div>
+        `);
       });
 
       if ((p * 10) < total) {
@@ -583,6 +558,60 @@ if ($mb_id === '') {
       }
     });
   }
+
+  /* 날짜 select 채우기(오늘~7일) */
+  function loadDateOptions() {
+    let html = '';
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const d = new Date();
+      d.setDate(today.getDate() + i);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const val = `${y}-${m}-${day}`;
+      html += `<option value="${val}">${m}/${day}</option>`;
+    }
+    $('#selDate').html(html);
+    $('#selDate').val(selectedDate);
+  }
+
+  function updateTimeList() {
+    let now = new Date();
+    let nowH = now.getHours();
+
+    let html = '<option value="">시간선택</option>';
+
+    for (let h = 0; h < 24; h++) {
+      if (h <= nowH) continue; // 현재 시간 이전은 제외
+
+      let label = formatKoreanTime(h);
+      let hh = String(h).padStart(2, '0');
+
+      html += `<option value="${hh}:00:00">${label}</option>`;
+    }
+
+    $('#selTime').html(html);
+
+    // 기본 선택 - 가장 가까운 시간
+    const first = $('#selTime option').eq(1);
+    if (first.length > 0) {
+      $('#selTime').val(first.val());
+      selectedTime = first.val();
+    }
+  }
+
+  /* ============================================
+     2) 날짜 today
+  ============================================ */
+  function loadToday() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    selectedDate = `${yyyy}-${mm}-${dd}`;
+  }
+
 
   function loadMore() {
     pageNum++;

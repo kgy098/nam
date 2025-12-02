@@ -43,6 +43,40 @@ function select_consult_by_teacher($teacher_mb_id, $status=null, $start=0, $num=
     return $list;
 }
 
+function select_consult_by_teacher_and_date($teacher_mb_id, $target_date) {
+    $sql = "select *
+            from cn_consult
+            where teacher_mb_id = '{$teacher_mb_id}'
+              and date(scheduled_dt) = '{$target_date}'
+            order by scheduled_dt asc, id asc";
+    $result = sql_query($sql);
+    $list = [];
+    while ($row = sql_fetch_array($result)) $list[] = $row;
+    return $list;
+}
+
+function select_consult_by_teacher_and_datetime($teacher_mb_id, $scheduled_dt) {
+    $sql = "select *
+            from cn_consult
+            where teacher_mb_id = '{$teacher_mb_id}'
+              and scheduled_dt = '{$scheduled_dt}'
+            limit 1";
+    return sql_fetch($sql);
+}
+
+function insert_consult_slot($student_mb_id, $teacher_mb_id, $type, $scheduled_dt, $memo=null) {
+    $memo_sql = is_null($memo) ? "null" : "'{$memo}'";
+    $sql = "insert into cn_consult
+            set student_mb_id = '{$student_mb_id}',
+                teacher_mb_id = '{$teacher_mb_id}',
+                type = '{$type}',
+                requested_dt = now(),
+                scheduled_dt = '{$scheduled_dt}',
+                status = '예약완료',
+                memo = {$memo_sql}";
+    return sql_query($sql);
+}
+
 function insert_consult($student_mb_id, $teacher_mb_id, $type, $requested_dt, $scheduled_dt=null, $status='예약요청', $memo=null) {
     $scheduled = is_null($scheduled_dt) ? "null" : "'{$scheduled_dt}'";
     $memo_sql = is_null($memo) ? "null" : "'{$memo}'";

@@ -39,7 +39,7 @@ if ($type === AJAX_LRES_LIST) {
 
   // 1) 하루 3개 초과 제한 체크
   $cnt = count_reservation_by_mb_date($mb_id, $reserved_date);
-  if ($cnt > 3) {
+  if ($cnt >= 3) {
     jres(false, '하루에 3개 초과 예약할 수 없습니다.');
   }
 

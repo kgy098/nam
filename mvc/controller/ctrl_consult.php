@@ -1,112 +1,181 @@
 <?php
 include_once('./_common.php');
-header('Content-Type: application/json; charset=utf-8');
 
-$type = isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
-$table = 'cn_consult';
-$pk = 'id';
+$type = $_REQUEST['type'] ?? '';
 
-function jres($ok, $data = null) {
-    echo json_encode(['result' => $ok ? 'SUCCESS' : 'FAIL', 'data' => $data], JSON_UNESCAPED_UNICODE);
-    exit;
+$student_mb_id = esc($_REQUEST['student_mb_id'] ?? '');
+$teacher_mb_id = esc($_REQUEST['teacher_mb_id'] ?? '');
+$target_date   = esc($_REQUEST['target_date'] ?? '');
+$scheduled_dt  = esc($_REQUEST['scheduled_dt'] ?? '');
+$id            = intval($_REQUEST['id'] ?? 0);
+
+
+/* ============================================================
+ * 날짜 리스트 생성 (14일)
+ * ============================================================ */
+function _build_date_list($days = 14) {
+    $list = [];
+    for ($i = 0; $i < $days; $i++) {
+        $d = date('Y-m-d', strtotime("+{$i} day"));
+        $list[] = $d;
+    }
+    return $list;
 }
-function esc($s) { if (function_exists('sql_escape_string')) return sql_escape_string($s); return addslashes($s); }
 
-switch ($type) {
-    case 'CONSULT_LIST':
-        $page = isset($_REQUEST['page']) ? max(1, (int)$_REQUEST['page']) : 1;
-        $rows = isset($_REQUEST['rows']) ? max(1, min(200, (int)$_REQUEST['rows'])) : 20;
-        $offset = ($page - 1) * $rows;
-        $keyword = isset($_REQUEST['keyword']) ? trim($_REQUEST['keyword']) : '';
-        $status = isset($_REQUEST['status']) ? trim($_REQUEST['status']) : '';
-        $student_id = isset($_REQUEST['student_mb_id']) ? trim($_REQUEST['student_mb_id']) : '';
-        $teacher_id = isset($_REQUEST['teacher_mb_id']) ? trim($_REQUEST['teacher_mb_id']) : '';
 
-        $where = '1';
-        if ($keyword !== '') {
-            $k = esc($keyword);
-            $where .= " AND (title LIKE '%{$k}%' OR content LIKE '%{$k}%')";
+/* ============================================================
+ * 시간표 생성 (slot builder)
+ * ============================================================ */
+function _build_time_slots($teacher_mb_id, $target_date, $student_mb_id) {
+
+    $slots = [];
+    $start = strtotime("{$target_date} 07:00:00");
+    $end   = strtotime("{$target_date} 23:00:00");
+
+    while ($start < $end) {
+        $t = date('H:i', $start);
+        $slots[] = [
+            'time'         => $t,
+            'status'       => '상담가능',
+            'mine'         => false,
+            'exists'       => false,
+            'scheduled_dt' => date('Y-m-d H:i:s', $start)
+        ];
+        $start = strtotime("+30 minutes", $start);
+    }
+
+    // BLOCK/BREAK 반영
+    $blocks = select_teacher_time_block_by_teacher_date($teacher_mb_id, $target_date);
+    foreach ($blocks as $b) {
+        foreach ($slots as &$s) {
+            $cur = strtotime("{$target_date} {$s['time']}:00");
+
+            if ($cur >= strtotime("{$target_date} {$b['start_time']}") &&
+                $cur <  strtotime("{$target_date} {$b['end_time']}")) {
+
+                if ($b['type'] === 'BREAK' || $b['type'] === 'BLOCK') {
+                    $s['status'] = '상담불가';
+                }
+            }
         }
-        if ($status !== '') $where .= " AND status='" . esc($status) . "'";
-        if ($student_id !== '') $where .= " AND student_mb_id='" . esc($student_id) . "'";
-        if ($teacher_id !== '') $where .= " AND teacher_mb_id='" . esc($teacher_id) . "'";
+        unset($s);
+    }
 
-        $cnt_row = sql_fetch("SELECT COUNT(*) AS cnt FROM {$table} WHERE {$where}");
-        $total = (int)$cnt_row['cnt'];
+    // 예약 반영
+    $reserved = select_consult_by_teacher_and_date($teacher_mb_id, $target_date);
+    foreach ($reserved as $r) {
+        foreach ($slots as &$s) {
+            if ($s['scheduled_dt'] === $r['scheduled_dt']) {
 
-        $list = [];
-        $q = sql_query("SELECT {$pk}, student_mb_id, teacher_mb_id, title, content, status, scheduled_at, created_at, updated_at
-                        FROM {$table}
-                        WHERE {$where}
-                        ORDER BY {$pk} DESC
-                        LIMIT {$offset}, {$rows}");
-        for ($i = 0; $row = sql_fetch_array($q); $i++) $list[] = $row;
+                $s['exists'] = true;
 
-        jres(true, ['total' => $total, 'list' => $list, 'page' => $page, 'rows' => $rows]);
-        break;
-
-    case 'CONSULT_GET':
-        $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
-        if ($id <= 0) jres(false, 'invalid id');
-        $row = sql_fetch("SELECT {$pk}, student_mb_id, teacher_mb_id, title, content, status, scheduled_at, created_at, updated_at
-                          FROM {$table} WHERE {$pk}={$id}");
-        if (!$row) jres(false, 'not found');
-        jres(true, $row);
-        break;
-
-    case 'CONSULT_CREATE':
-        $student_mb_id = isset($_REQUEST['student_mb_id']) ? esc(trim($_REQUEST['student_mb_id'])) : '';
-        $teacher_mb_id = isset($_REQUEST['teacher_mb_id']) ? esc(trim($_REQUEST['teacher_mb_id'])) : '';
-        $title = isset($_REQUEST['title']) ? esc(trim($_REQUEST['title'])) : '';
-        $content = isset($_REQUEST['content']) ? esc(trim($_REQUEST['content'])) : '';
-        $status = isset($_REQUEST['status']) ? esc(trim($_REQUEST['status'])) : 'REQUESTED';
-        $scheduled_at = isset($_REQUEST['scheduled_at']) && $_REQUEST['scheduled_at'] !== '' ? "'" . esc($_REQUEST['scheduled_at']) . "'" : 'NULL';
-
-        if ($student_mb_id === '' || $title === '') jres(false, 'required');
-
-        $sql = "INSERT INTO {$table}
-                (student_mb_id, teacher_mb_id, title, content, status, scheduled_at, created_at, updated_at)
-                VALUES ('{$student_mb_id}', '{$teacher_mb_id}', '{$title}', '{$content}', '{$status}', {$scheduled_at}, NOW(), NOW())";
-        $ok = sql_query($sql, false);
-        if (!$ok) jres(false, 'insert fail');
-
-        $new = sql_fetch("SELECT {$pk}, student_mb_id, teacher_mb_id, title, content, status, scheduled_at, created_at, updated_at
-                          FROM {$table} ORDER BY {$pk} DESC LIMIT 1");
-        jres(true, $new);
-        break;
-
-    case 'CONSULT_UPDATE':
-        $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
-        if ($id <= 0) jres(false, 'invalid id');
-
-        $sets = [];
-        if (isset($_REQUEST['student_mb_id'])) $sets[] = "student_mb_id='" . esc(trim($_REQUEST['student_mb_id'])) . "'";
-        if (isset($_REQUEST['teacher_mb_id'])) $sets[] = "teacher_mb_id='" . esc(trim($_REQUEST['teacher_mb_id'])) . "'";
-        if (isset($_REQUEST['title'])) $sets[] = "title='" . esc(trim($_REQUEST['title'])) . "'";
-        if (isset($_REQUEST['content'])) $sets[] = "content='" . esc(trim($_REQUEST['content'])) . "'";
-        if (isset($_REQUEST['status'])) $sets[] = "status='" . esc(trim($_REQUEST['status'])) . "'";
-        if (array_key_exists('scheduled_at', $_REQUEST)) {
-            $sets[] = "scheduled_at=" . ($_REQUEST['scheduled_at'] === '' ? "NULL" : ("'" . esc($_REQUEST['scheduled_at']) . "'"));
+                if ($r['student_mb_id'] === $student_mb_id) {
+                    $s['status'] = '내상담';
+                    $s['mine']   = true;
+                } else {
+                    $s['status'] = '상담불가';
+                }
+            }
         }
-        $sets[] = "updated_at=NOW()";
+        unset($s);
+    }
 
-        $set_sql = implode(',', $sets);
-        $ok = sql_query("UPDATE {$table} SET {$set_sql} WHERE {$pk}={$id}", false);
-        if (!$ok) jres(false, 'update fail');
-
-        $row = sql_fetch("SELECT {$pk}, student_mb_id, teacher_mb_id, title, content, status, scheduled_at, created_at, updated_at
-                          FROM {$table} WHERE {$pk}={$id}");
-        jres(true, $row);
-        break;
-
-    case 'CONSULT_DELETE':
-        $id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
-        if ($id <= 0) jres(false, 'invalid id');
-        $ok = sql_query("DELETE FROM {$table} WHERE {$pk}={$id}", false);
-        if (!$ok) jres(false, 'delete fail');
-        jres(true, 'deleted');
-        break;
-
-    default:
-        jres(false, 'invalid type');
+    return $slots;
 }
+
+
+/* ============================================================
+ * Controller
+ * ============================================================ */
+
+if ($type === AJAX_CONSULT_TEACHER_LIST) {
+
+    $rows = sql_query("select mb_id, mb_name from g5_member where role='TEACHER' order by mb_name asc");
+    $list = [];
+    while ($r = sql_fetch_array($rows)) $list[] = $r;
+    jres(true, $list);
+
+
+} else if ($type === AJAX_CONSULT_DATE_LIST) {
+
+    $dates = _build_date_list(14);
+    jres(true, $dates);
+
+
+} else if ($type === AJAX_CONSULT_AVAILABLE_TIMES) {
+
+    if ($teacher_mb_id === '' || $target_date === '') jres(false, 'required');
+
+    $slots = _build_time_slots($teacher_mb_id, $target_date, $student_mb_id);
+    jres(true, $slots);
+
+
+} else if ($type === AJAX_CONSULT_RESERVE) {
+
+    if ($student_mb_id === '' || $teacher_mb_id === '' || $scheduled_dt === '') {
+        jres(false, 'required');
+    }
+
+    // 중복 체크
+    $exist = select_consult_by_teacher_and_datetime($teacher_mb_id, $scheduled_dt);
+    if ($exist && $exist['student_mb_id'] !== $student_mb_id) {
+        jres(false, '이미 예약된 시간입니다.');
+    }
+
+    $ok = insert_consult_slot($student_mb_id, $teacher_mb_id, '학과상담', $scheduled_dt);
+    if (!$ok) jres(false, 'insert fail');
+
+    jres(true, 'ok');
+
+
+} else if ($type === AJAX_CONSULT_CANCEL) {
+
+    if ($id <= 0) jres(false, 'invalid id');
+
+    $row = select_consult_one($id);
+    if (!$row) jres(false, 'not found');
+
+    if ($row['student_mb_id'] !== $student_mb_id) {
+        jres(false, 'permission denied');
+    }
+
+    delete_consult($id);
+    jres(true, 'deleted');
+
+
+} else if ($type === AJAX_CONSULT_MY_LIST) {
+
+    if ($student_mb_id === '') jres(false, 'required');
+
+    $list = select_consult_by_student($student_mb_id);
+    jres(true, $list);
+
+
+}
+
+/* ============================================================
+ * 기존 CONSULT 기능 (관리자/기존 페이지 용)
+ * ============================================================ */
+else if ($type === AJAX_CONSULT_GET) {
+
+    $row = select_consult_one($id);
+    if (!$row) jres(false, 'not found');
+    jres(true, $row);
+
+} else if ($type === AJAX_CONSULT_LIST) {
+
+    $list = select_consult_list(0, 200);
+    jres(true, $list);
+
+} else if ($type === AJAX_CONSULT_DELETE) {
+
+    if ($id <= 0) jres(false, 'invalid');
+    delete_consult($id);
+    jres(true, 'deleted');
+
+} 
+
+else {
+    jres(false, 'invalid type');
+}
+?>
