@@ -38,15 +38,23 @@ $mb_name = $is_login ? $member['mb_name'] : '';
   <div class="drawer-menu">
     <a href="/notice.php">공지사항</a>
     <a href="/schedule.php">학사일정</a>
-    <a href="/lounge_reserve.php">스터디 라운지 예약</a>
-    <a href="/consult_subject.php">학과 상담</a>
-    <a href="/consult_mentor.php">멘토 상담</a>
-    <a href="/qna.php">비대면 질의 응답</a>
-    <a href="/video.php">수업 영상</a>
-    <a href="/report.php">학습 보고서</a>
-    <a href="/mock_apply.php">모의고사 신청</a>
-    <a href="/attendance.php">출결 관리</a>
+    <? if ( $member['role']=='STUDENT' ) { ?>
+    <a href="<?= G5_VIEW_URL ?>/lounge_reservation/lounge_reservation_list.php">스터디 라운지 예약</a>
+    <? } ?>
+    <a href="<?= G5_VIEW_URL ?>/consult/consult_list.php">학과 상담</a>
+    <a href="<?= G5_VIEW_URL ?>/mento/mento_list.php">멘토 상담</a>
+    <a href="<?= G5_VIEW_URL ?>/qna/qna_list.php">비대면 질의 응답</a>
+    <a href="<?= G5_VIEW_URL ?>/video/video_list.php">수업 영상</a>
+    <a href="<?= G5_VIEW_URL ?>/study_report/study_report_list.php">학습 보고서</a>
+    <a href="<?= G5_VIEW_URL ?>/mock_apply/mock_apply_list.php">모의고사 신청</a>
+    <a href="<?= G5_VIEW_URL ?>/attendance/attendance_list.php">출결 관리</a>
+
+    <? if ( $member['role']=='STUDENT' ) { ?>
+    <a href="">질문잠금 관리</a>
+    <? } ?>
+    <? if ( $member['role']=='STUDENT' ) { ?>
     <a href="/pay.php">학원비 납부 & 내역</a>
+    <? } ?>
 
     <?php if ($is_login) { ?>
       <a href="/myinfo.php">내 정보 변경</a>

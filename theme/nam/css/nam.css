@@ -791,7 +791,9 @@ body {
 .common-select {
   width: 100%;
   height: 46px;
-  padding: 0 38px 0 14px;
+  max-width: 100%;
+  /* padding: 0 38px 0 14px; */
+  box-sizing: border-box; 
 
   background: #1E1F23;
   border: 1px solid #2A2A2C;
@@ -799,10 +801,14 @@ body {
 
   font-size: 15px;
   color: #ffffffe0;
-
+/* 
   appearance: none;
   -webkit-appearance: none;
-  -moz-appearance: none;
+  -moz-appearance: none; */
+}
+
+select {
+  max-width: 100vw !important;
 }
 
 /* 오른쪽 화살표 아이콘 */
@@ -1003,7 +1009,7 @@ body {
   border-radius: 12px;
   padding: 20px 18px;
   margin-bottom: 20px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.18);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.18);
 }
 
 /*******************************************************
@@ -1031,7 +1037,7 @@ body {
 }
 
 .common-badge-gray {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.08);
   color: #A0A0A0;
 }
 
@@ -1101,7 +1107,7 @@ body {
   border-radius: 12px;
   padding: 20px 18px 26px;
   margin-bottom: 20px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.18);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.18);
 }
 
 /*******************************************************
@@ -1202,3 +1208,225 @@ body {
   top: 16px;
 }
 
+
+/* ================================
+  학과상담/멘토상담 전용 추가 스타일
+  ================================= */
+
+.consult-top-section {
+  width: 90%;
+  max-width: 420px;
+  margin: 10px auto 0;
+}
+
+.consult-top-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.consult-top-row .common-select-box {
+  flex: 1;
+}
+
+.consult-info {
+  width: 90%;
+  max-width: 420px;
+  margin: 6px auto 0;
+  font-size: 13px;
+  color: #ADABA6E0;
+  line-height: 1.5em;
+}
+
+.consult-state-wrap {
+  width: 90%;
+  max-width: 420px;
+  margin: 14px auto 6px;
+  display: flex;
+  gap: 16px;
+}
+
+.consult-state-row {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: #D9D8D5E0;
+}
+
+.consult-state-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.consult-dot-available {
+  background: #3A3A3F;
+}
+
+.consult-dot-mine {
+  background: #A17E36;
+}
+
+.consult-dot-disabled {
+  background: #333;
+}
+
+.consult-time-grid {
+  width: 90%;
+  max-width: 420px;
+  margin: 10px auto 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.consult-time-slot {
+  height: 40px;
+  border-radius: 6px;
+  background: #2b2c31;
+  border: 1px solid #2b2c31;
+  font-size: 13px;
+  color: #D9D8D5E0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.consult-time-slot.available {
+  background: #3A3A3F;
+}
+
+.consult-time-slot.mine {
+  background: #A17E36;
+  color: #000;
+  font-weight: 600;
+}
+
+.consult-time-slot.disabled {
+  opacity: 0.25;
+}
+
+.consult-time-slot.selected {
+  border: 1px solid #E4CA92;
+}
+
+.consult-my-section-title {
+  width: 90%;
+  max-width: 420px;
+  margin: 20px auto 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffffe0;
+}
+
+.consult-cancel-btn {
+  border: 1px solid #3A3A3F;
+  background: #2a2a31;
+  color: #D9D8D5E0;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.consult-cancel-btn:active {
+  opacity: 0.9;
+}
+
+.consult-sheet-dim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 900;
+}
+
+.consult-sheet-box {
+  display: none;
+  position: fixed;
+  left: 0;
+  bottom: -70%;
+  width: 100%;
+  max-height: 70%;
+  background: #1B1B20;
+  border-radius: 14px 14px 0 0;
+  padding: 16px 20px 26px;
+  z-index: 999;
+  transition: bottom 0.25s ease;
+}
+
+.consult-sheet-header {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #E5C784;
+  margin-bottom: 12px;
+}
+
+.consult-sheet-body {
+  padding: 14px 0;
+  text-align: center;
+  font-size: 15px;
+  color: #fff;
+}
+
+.consult-sheet-btn-wrap {
+  margin-top: 18px;
+  display: flex;
+  gap: 12px;
+}
+
+.consult-sheet-btn {
+  flex: 1;
+  height: 46px;
+  border-radius: 8px;
+  background: #2A2A31;
+  border: 1px solid #3A3A3F;
+  font-size: 15px;
+  color: #D9D8D5E0;
+}
+
+.consult-sheet-btn.confirm {
+  background: #A17E36;
+  border: none;
+  color: #000;
+  font-weight: 600;
+}
+
+
+
+
+
+
+
+/* ============================
+   QNA 전용 최소 스타일
+   (공통 + 출결관리 기반)
+============================ */
+
+.qna-answer-box {
+  background: #2A2A31;
+  border: 1px solid #3A3A3F;
+  padding: 14px 12px;
+  border-radius: 8px;
+  margin-top: 14px;
+  font-size: 14px;
+  color: #D9D8D5E0;
+  line-height: 1.5em;
+}
+
+.qna-answer-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: #D9D8D5E0;
+}
+
+.qna-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffffd0;
+}

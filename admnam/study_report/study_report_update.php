@@ -37,7 +37,7 @@ if ($w === 'd') {
   delete_board_file_all($bo_table, $id);
   
   // 보고서 삭제
-  $result = delete_study_report($id);
+  $result = delete_study_report_adm($id);
   json_response($result, $result ? '' : '삭제 실패');
 }
 
@@ -45,10 +45,10 @@ if ($w === 'd') {
 if (empty($mb_id) || empty($title)) {
   json_response(false, '필수 항목을 입력해주세요.');
 }
-
+$reg_id = $member['mb_id'];
 // 등록
 if ($w === '' ) {
-  $result = insert_study_report($mb_id, $subject_id, $title, $content, $report_date);
+  $result = insert_study_report($mb_id, $subject_id, $title, $content, $report_date, $reg_id);
   
   if (!$result) {
     json_response(false, '등록 실패');

@@ -70,7 +70,7 @@
       var payload = { type: T.CREATE };
 
       if (fields.mb_id) payload.mb_id = fields.mb_id;
-      if (fields.subject) payload.subject = fields.subject;
+      if (fields.subject_id) payload.subject_id = fields.subject_id;
       if (fields.title) payload.title = fields.title;
       if (fields.content) payload.content = fields.content;
       if (fields.report_date) payload.report_date = fields.report_date;
@@ -81,8 +81,8 @@
     update: function (id, fields) {
       var payload = { type: T.UPDATE, id: id };
 
-      if (typeof fields.subject !== 'undefined') {
-        payload.subject = fields.subject;
+      if (typeof fields.subject_id !== 'undefined') {
+        payload.subject_id = fields.subject_id;
       }
       if (typeof fields.title !== 'undefined') {
         payload.title = fields.title;

@@ -35,6 +35,7 @@ include_once('./head.php');
   <div id="calendarDays" class="calendar-days"></div>
 </section>
 
+<? if ( $member['role']=='STUDENT' ) { ?>
 <section class="quick-menu">
   <div class="menu-btn-box left-box">
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/attendance 2.png">
@@ -56,6 +57,24 @@ include_once('./head.php');
     <span>멘토 상담</span>
   </div>
 </section>
+<? } else if ( $member['role']=='TEACHER' ) { ?>
+<section class="quick-menu">
+  <div class="menu-btn-box left-box">
+    <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/attendance 2.png">
+    <span>출결</span>
+  </div>
+
+  <div class="menu-btn-box left-box">
+    <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/counsel3.png">
+    <span>학과상담 신청</span>
+  </div>
+
+  <div class="menu-btn-box right-box">
+    <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/mentor4.png">
+    <span>멘토 상담</span>
+  </div>
+</section>  
+<? } ?>
 
 
 <div id="scheduleDim" class="schedule-dim"></div>

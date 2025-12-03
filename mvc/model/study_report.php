@@ -16,9 +16,10 @@ function select_study_report_list($start = 0, $num = CN_PAGE_NUM, $mb_id = '', $
   $sql = "
         SELECT 
             r.*,
+            r.reg_id,  
             m.mb_name,
             m.class,
-            ms.type ,
+            ms.type,
             ms.subject_name
         FROM cn_study_report r
         LEFT JOIN g5_member m ON r.mb_id = m.mb_id
@@ -38,13 +39,14 @@ function select_study_report_list($start = 0, $num = CN_PAGE_NUM, $mb_id = '', $
                                FROM g5_board_file 
                                WHERE bo_table='cn_study_report' 
                                AND wr_id={$row['id']}");
-    $row['file_count'] = $file_cnt['cnt'];
 
+    $row['file_count'] = $file_cnt['cnt'];
     $list[] = $row;
   }
 
   return $list;
 }
+
 
 
 function select_study_report_listcnt($mb_id = '', $class = '', $date_from = '', $date_to = '', $keyword = '')
@@ -82,6 +84,7 @@ function select_study_report_list_app($mb_id, $start = 0, $rows = 20, $subject_i
     $sql = "
         SELECT 
             r.*,
+            r.reg_id, 
             ms.type,
             ms.subject_name
         FROM cn_study_report r
@@ -194,7 +197,7 @@ function select_study_report_between($from_date, $to_date, $mb_id = null, $start
   return $list;
 }
 
-function insert_study_report($mb_id, $subject_id, $title, $content, $report_date)
+function insert_study_report($mb_id, $subject_id, $title, $content, $report_date, $reg_id)
 {
   $sql = "INSERT INTO cn_study_report
             SET mb_id = '{$mb_id}',
@@ -202,6 +205,7 @@ function insert_study_report($mb_id, $subject_id, $title, $content, $report_date
                 title = '{$title}',
                 content = '{$content}',
                 report_date = '{$report_date}',
+                reg_id = '{$reg_id}',
                 reg_dt = NOW(),
                 mod_dt = NOW()";
   return sql_query($sql);
@@ -225,23 +229,42 @@ function update_study_report($id, $mb_id, $subject_id, $title, $content, $report
   return sql_query($sql);
 }
 
-function delete_study_report($id)
+function delete_study_report($id, $login_id)
+{
+  $id = intval($id);
+  $login_id = sql_real_escape_string($login_id);
+
+  // 본인 작성 여부 체크
+  $row = sql_fetch("SELECT reg_id FROM cn_study_report WHERE id = {$id}");
+  if (!$row || $row['reg_id'] != $login_id) {
+    return false;  // 권한 없음
+  }
+
+  // 첨부파일 삭제
+  $files = get_board_file_list('cn_study_report', $id);
+  foreach ($files as $file) {
+    $path = G5_DATA_PATH . '/file/cn_study_report/' . $file['bf_file'];
+    if (file_exists($path)) @unlink($path);
+  }
+
+  delete_board_file_all('cn_study_report', $id);
+
+  return sql_query("DELETE FROM cn_study_report WHERE id = {$id}");
+}
+
+
+function delete_study_report_adm($id)
 {
   $id = intval($id);
 
-  // 첨부파일 삭제 (실제 파일 + DB)
+  // 첨부파일 삭제
   $files = get_board_file_list('cn_study_report', $id);
   foreach ($files as $file) {
-    // 실제 파일 삭제
-    $file_path = G5_DATA_PATH . '/study_report/' . $file['bf_file'];
-    if (file_exists($file_path)) {
-      @unlink($file_path);
-    }
+    $path = G5_DATA_PATH . '/file/cn_study_report/' . $file['bf_file'];
+    if (file_exists($path)) @unlink($path);
   }
 
-  // DB에서 파일 정보 삭제
   delete_board_file_all('cn_study_report', $id);
 
-  // 학습보고서 삭제
   return sql_query("DELETE FROM cn_study_report WHERE id = {$id}");
 }
