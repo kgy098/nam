@@ -4,17 +4,17 @@
   var ENDPOINT = g5_ctrl_url + '/ctrl_consult.php';
 
   var T = {
-    TEACHER_LIST:       'CONSULT_TEACHER_LIST',
-    DATE_LIST:          'CONSULT_DATE_LIST',
-    AVAILABLE_TIMES:    'CONSULT_AVAILABLE_TIMES',
-    RESERVE:            'CONSULT_RESERVE',
-    CANCEL:             'CONSULT_CANCEL',
-    MY_LIST:            'CONSULT_MY_LIST',
+    TEACHER_LIST: 'CONSULT_TEACHER_LIST',
+    DATE_LIST: 'CONSULT_DATE_LIST',
+    AVAILABLE_TIMES: 'CONSULT_AVAILABLE_TIMES',
+    RESERVE: 'CONSULT_RESERVE',
+    CANCEL: 'CONSULT_CANCEL',
+    MY_LIST: 'CONSULT_MY_LIST',
 
     // 기존 consult admin 기능
-    LIST:               'CONSULT_LIST',
-    GET:                'CONSULT_GET',
-    DELETE:             'CONSULT_DELETE'
+    LIST: 'CONSULT_LIST',
+    GET: 'CONSULT_GET',
+    DELETE: 'CONSULT_DELETE'
   };
 
   // 공통 ajax 호출
@@ -62,7 +62,8 @@
         type: T.AVAILABLE_TIMES,
         student_mb_id: params.student_mb_id,
         teacher_mb_id: params.teacher_mb_id,
-        target_date: params.target_date
+        target_date: params.target_date,
+        consult_type: params.consult_type
       });
     },
 
@@ -71,11 +72,13 @@
      * params: { student_mb_id, teacher_mb_id, scheduled_dt }
      * ----------------------------------------- */
     reserve: function (params) {
+      console.log(JSON.stringify(params));
       return call({
         type: T.RESERVE,
         student_mb_id: params.student_mb_id,
         teacher_mb_id: params.teacher_mb_id,
-        scheduled_dt: params.scheduled_dt
+        scheduled_dt: params.scheduled_dt,
+        consult_type: params.consult_type
       });
     },
 
@@ -83,11 +86,12 @@
      * 예약 취소
      * params: { id, student_mb_id }
      * ----------------------------------------- */
-    cancel: function (id, student_mb_id) {
+    cancel: function (id, student_mb_id, consult_type) {
       return call({
         type: T.CANCEL,
         id: id,
-        student_mb_id: student_mb_id
+        student_mb_id: student_mb_id,
+        consult_type: consult_type
       });
     },
 
@@ -95,10 +99,11 @@
      * 내 상담 리스트
      * params: { student_mb_id }
      * ----------------------------------------- */
-    myList: function (student_mb_id) {
+    myList: function (student_mb_id, consult_type) {
       return call({
         type: T.MY_LIST,
-        student_mb_id: student_mb_id
+        student_mb_id: student_mb_id,
+        consult_type: consult_type  
       });
     },
 

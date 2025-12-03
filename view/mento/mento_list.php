@@ -263,20 +263,20 @@ if ($mb_id === '') {
   var selectedDate = '';
   var pendingScheduledDt = '';
   var teacherMap = {};
-  var CONSULT_TYPE = "멘토상담";   // ★ 변경된 부분
+  var CONSULT_TYPE = "멘토상담"; // ★ 변경된 부분
 
-  $(document).ready(function () {
+  $(document).ready(function() {
     if (!mb_id) return;
     initConsultScreen();
   });
 
   function initConsultScreen() {
-    ConsultAPI.teacherList().then(function (res) {
+    ConsultAPI.teacherList().then(function(res) {
       var list = res.data || [];
       teacherMap = {};
       var html = '<option value="">선생님 선택</option>';
 
-      list.forEach(function (t) {
+      list.forEach(function(t) {
         teacherMap[t.mb_id] = t.mb_name;
         html += '<option value="' + t.mb_id + '">' + t.mb_name + '</option>';
       });
@@ -290,11 +290,11 @@ if ($mb_id === '') {
 
       return ConsultAPI.dateList();
 
-    }).then(function (res) {
+    }).then(function(res) {
       var dates = res.data || [];
       var html = '<option value="">날짜 선택</option>';
 
-      dates.forEach(function (d) {
+      dates.forEach(function(d) {
         var parts = d.split('-');
         var label = parts[1] + '/' + parts[2];
         html += '<option value="' + d + '">' + label + '</option>';
@@ -310,17 +310,17 @@ if ($mb_id === '') {
       loadTimeSlots();
       loadMyConsults();
 
-    }).fail(function () {
+    }).fail(function() {
       alert('멘토상담 정보를 불러오는 중 오류가 발생했습니다.');
     });
 
-    $('#selTeacher').on('change', function () {
+    $('#selTeacher').on('change', function() {
       selectedTeacher = $(this).val() || '';
       loadTimeSlots();
       loadMyConsults();
     });
 
-    $('#selDate').on('change', function () {
+    $('#selDate').on('change', function() {
       selectedDate = $(this).val() || '';
       loadTimeSlots();
     });
@@ -335,8 +335,9 @@ if ($mb_id === '') {
     ConsultAPI.times({
       student_mb_id: mb_id,
       teacher_mb_id: selectedTeacher,
-      target_date: selectedDate
-    }).then(function (res) {
+      target_date: selectedDate,
+      consult_type: '멘토상담'
+    }).then(function(res) {
       renderTimeGrid(res.data || []);
     });
   }
@@ -344,7 +345,7 @@ if ($mb_id === '') {
   function renderTimeGrid(list) {
     var html = '';
 
-    list.forEach(function (slot) {
+    list.forEach(function(slot) {
       var cls = 'consult-time-slot';
 
       if (slot.status === '상담가능') cls += ' available';
@@ -360,12 +361,12 @@ if ($mb_id === '') {
 
     $('#timeGrid').html(html);
 
-    $('#timeGrid .consult-time-slot').each(function () {
+    $('#timeGrid .consult-time-slot').each(function() {
       var $slot = $(this);
       var status = $slot.data('status');
       var dt = $slot.data('dt');
 
-      $slot.off('click').on('click', function () {
+      $slot.off('click').on('click', function() {
         if (status === '상담가능') {
           pendingScheduledDt = dt;
           openConsultBookSheet();
@@ -379,7 +380,7 @@ if ($mb_id === '') {
   function openConsultBookSheet() {
     if (!pendingScheduledDt || !selectedTeacher) return;
 
-    var msg = 
+    var msg =
       '선택한 시간으로 멘토상담을 예약하시겠습니까?<br>' +
       '<span style="font-size:13px;color:#ADABA6E0;">' +
       selectedDate + ' ' + pendingScheduledDt.substring(11, 16) +
@@ -394,7 +395,7 @@ if ($mb_id === '') {
 
   function closeConsultBookSheet() {
     $('#consultBookSheet').css('bottom', '-70%');
-    setTimeout(function () {
+    setTimeout(function() {
       $('#consultBookSheet').hide();
     }, 250);
     $('#consultBookDim').hide();
@@ -407,8 +408,8 @@ if ($mb_id === '') {
       student_mb_id: mb_id,
       teacher_mb_id: selectedTeacher,
       scheduled_dt: pendingScheduledDt,
-      type: CONSULT_TYPE    // ★ type = 멘토상담
-    }).then(function () {
+      consult_type: '멘토상담'
+    }).then(function() {
       alert('상담이 예약되었습니다.');
       closeConsultBookSheet();
       loadTimeSlots();
@@ -417,7 +418,7 @@ if ($mb_id === '') {
   }
 
   function loadMyConsults() {
-    ConsultAPI.myList(mb_id).then(function (res) {
+    ConsultAPI.myList(mb_id, '멘토상담').then(function(res) {
       var list = res.data || [];
       renderMyConsultList(list);
     });
@@ -433,10 +434,10 @@ if ($mb_id === '') {
     }
 
     list
-      .filter(function (row) {
-        return row.type === CONSULT_TYPE;   // ★ 멘토상담만
+      .filter(function(row) {
+        return row.type === CONSULT_TYPE; // ★ 멘토상담만
       })
-      .forEach(function (row) {
+      .forEach(function(row) {
 
         var id = row.id;
         var dt = row.scheduled_dt || '';
@@ -463,15 +464,15 @@ if ($mb_id === '') {
 
     $('#myConsultList').html(html);
 
-    $('#myConsultList .consult-cancel-btn').each(function () {
+    $('#myConsultList .consult-cancel-btn').each(function() {
       var $btn = $(this);
       var $item = $btn.closest('.common-item');
       var id = $item.data('id');
 
-      $btn.off('click').on('click', function () {
+      $btn.off('click').on('click', function() {
         if (!confirm('해당 상담을 취소하시겠습니까?')) return;
 
-        ConsultAPI.cancel(id, mb_id).then(function () {
+        ConsultAPI.cancel(id, mb_id).then(function() {
           alert('상담이 취소되었습니다.');
           loadTimeSlots();
           loadMyConsults();

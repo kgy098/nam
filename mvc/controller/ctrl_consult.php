@@ -13,74 +13,78 @@ $id            = intval($_REQUEST['id'] ?? 0);
 /* ============================================================
  * 날짜 리스트 생성 (14일)
  * ============================================================ */
-function _build_date_list($days = 14) {
-    $list = [];
-    for ($i = 0; $i < $days; $i++) {
-        $d = date('Y-m-d', strtotime("+{$i} day"));
-        $list[] = $d;
-    }
-    return $list;
+function _build_date_list($days = 14)
+{
+  $list = [];
+  for ($i = 0; $i < $days; $i++) {
+    $d = date('Y-m-d', strtotime("+{$i} day"));
+    $list[] = $d;
+  }
+  return $list;
 }
 
 
 /* ============================================================
  * 시간표 생성 (slot builder)
  * ============================================================ */
-function _build_time_slots($teacher_mb_id, $target_date, $student_mb_id) {
+function _build_time_slots($teacher_mb_id, $target_date, $student_mb_id)
+{
 
-    $slots = [];
-    $start = strtotime("{$target_date} 07:00:00");
-    $end   = strtotime("{$target_date} 23:00:00");
+  $slots = [];
+  $start = strtotime("{$target_date} 07:00:00");
+  $end   = strtotime("{$target_date} 23:00:00");
 
-    while ($start < $end) {
-        $t = date('H:i', $start);
-        $slots[] = [
-            'time'         => $t,
-            'status'       => '상담가능',
-            'mine'         => false,
-            'exists'       => false,
-            'scheduled_dt' => date('Y-m-d H:i:s', $start)
-        ];
-        $start = strtotime("+30 minutes", $start);
-    }
+  while ($start < $end) {
+    $t = date('H:i', $start);
+    $slots[] = [
+      'time'         => $t,
+      'status'       => '상담가능',
+      'mine'         => false,
+      'exists'       => false,
+      'scheduled_dt' => date('Y-m-d H:i:s', $start)
+    ];
+    $start = strtotime("+30 minutes", $start);
+  }
 
-    // BLOCK/BREAK 반영
-    $blocks = select_teacher_time_block_by_teacher_date($teacher_mb_id, $target_date);
-    foreach ($blocks as $b) {
-        foreach ($slots as &$s) {
-            $cur = strtotime("{$target_date} {$s['time']}:00");
+  // BLOCK/BREAK 반영
+  $blocks = select_teacher_time_block_by_teacher_date($teacher_mb_id, $target_date);
+  foreach ($blocks as $b) {
+    foreach ($slots as &$s) {
+      $cur = strtotime("{$target_date} {$s['time']}:00");
 
-            if ($cur >= strtotime("{$target_date} {$b['start_time']}") &&
-                $cur <  strtotime("{$target_date} {$b['end_time']}")) {
+      if (
+        $cur >= strtotime("{$target_date} {$b['start_time']}") &&
+        $cur <  strtotime("{$target_date} {$b['end_time']}")
+      ) {
 
-                if ($b['type'] === 'BREAK' || $b['type'] === 'BLOCK') {
-                    $s['status'] = '상담불가';
-                }
-            }
+        if ($b['type'] === 'BREAK' || $b['type'] === 'BLOCK') {
+          $s['status'] = '상담불가';
         }
-        unset($s);
+      }
     }
+    unset($s);
+  }
 
-    // 예약 반영
-    $reserved = select_consult_by_teacher_and_date($teacher_mb_id, $target_date);
-    foreach ($reserved as $r) {
-        foreach ($slots as &$s) {
-            if ($s['scheduled_dt'] === $r['scheduled_dt']) {
+  // 예약 반영
+  $reserved = select_consult_by_teacher_and_date($teacher_mb_id, $_REQUEST['consult_type'], $target_date);
+  foreach ($reserved as $r) {
+    foreach ($slots as &$s) {
+      if ($s['scheduled_dt'] === $r['scheduled_dt']) {
 
-                $s['exists'] = true;
+        $s['exists'] = true;
 
-                if ($r['student_mb_id'] === $student_mb_id) {
-                    $s['status'] = '내상담';
-                    $s['mine']   = true;
-                } else {
-                    $s['status'] = '상담불가';
-                }
-            }
+        if ($r['student_mb_id'] === $student_mb_id) {
+          $s['status'] = '내상담';
+          $s['mine']   = true;
+        } else {
+          $s['status'] = '상담불가';
         }
-        unset($s);
+      }
     }
+    unset($s);
+  }
 
-    return $slots;
+  return $slots;
 }
 
 
@@ -90,92 +94,80 @@ function _build_time_slots($teacher_mb_id, $target_date, $student_mb_id) {
 
 if ($type === AJAX_CONSULT_TEACHER_LIST) {
 
-    $rows = sql_query("select mb_id, mb_name from g5_member where role='TEACHER' order by mb_name asc");
-    $list = [];
-    while ($r = sql_fetch_array($rows)) $list[] = $r;
-    jres(true, $list);
-
-
+  $rows = sql_query("select mb_id, mb_name from g5_member where role='TEACHER' order by mb_name asc");
+  $list = [];
+  while ($r = sql_fetch_array($rows)) $list[] = $r;
+  jres(true, $list);
 } else if ($type === AJAX_CONSULT_DATE_LIST) {
 
-    $dates = _build_date_list(14);
-    jres(true, $dates);
-
-
+  $dates = _build_date_list(14);
+  jres(true, $dates);
 } else if ($type === AJAX_CONSULT_AVAILABLE_TIMES) {
 
-    if ($teacher_mb_id === '' || $target_date === '') jres(false, 'required');
+  if ($teacher_mb_id === '' || $target_date === '') jres(false, 'required');
 
-    $slots = _build_time_slots($teacher_mb_id, $target_date, $student_mb_id);
-    jres(true, $slots);
+  $consult_type = esc($_REQUEST['consult_type'] ?? '');
 
-
+  $slots = _build_time_slots($teacher_mb_id, $target_date, $student_mb_id, $consult_type);
+  jres(true, $slots);
 } else if ($type === AJAX_CONSULT_RESERVE) {
 
-    if ($student_mb_id === '' || $teacher_mb_id === '' || $scheduled_dt === '') {
-        jres(false, 'required');
-    }
+  if ($student_mb_id === '' || $teacher_mb_id === '' || $scheduled_dt === '') {
+    jres(false, 'required');
+  }
 
-    // 중복 체크
-    $exist = select_consult_by_teacher_and_datetime($teacher_mb_id, $scheduled_dt);
-    if ($exist && $exist['student_mb_id'] !== $student_mb_id) {
-        jres(false, '이미 예약된 시간입니다.');
-    }
+  $consult_type = esc($_REQUEST['consult_type'] ?? '');
+  elog(print_r($_REQUEST, true));
 
-    $ok = insert_consult_slot($student_mb_id, $teacher_mb_id, '학과상담', $scheduled_dt);
-    if (!$ok) jres(false, 'insert fail');
+  // 중복 체크
+  $exist = select_consult_by_teacher_and_datetime($teacher_mb_id, $consult_type, $scheduled_dt);
+  if ($exist && $exist['student_mb_id'] !== $student_mb_id) {
+    jres(false, '이미 예약된 시간입니다.');
+  }
 
-    jres(true, 'ok');
+  $ok = insert_consult_slot($student_mb_id, $teacher_mb_id, $consult_type, $scheduled_dt);
+  if (!$ok) jres(false, 'insert fail');
 
-
+  jres(true, 'ok');
 } else if ($type === AJAX_CONSULT_CANCEL) {
 
-    if ($id <= 0) jres(false, 'invalid id');
+  if ($id <= 0) jres(false, 'invalid id');
 
-    $row = select_consult_one($id);
-    if (!$row) jres(false, 'not found');
+  $row = select_consult_one($id);
+  if (!$row) jres(false, 'not found');
 
-    if ($row['student_mb_id'] !== $student_mb_id) {
-        jres(false, 'permission denied');
-    }
+  if ($row['student_mb_id'] !== $student_mb_id) {
+    jres(false, 'permission denied');
+  }
 
-    delete_consult($id);
-    jres(true, 'deleted');
-
-
+  delete_consult($id);
+  jres(true, 'deleted');
 } else if ($type === AJAX_CONSULT_MY_LIST) {
 
-    if ($student_mb_id === '') jres(false, 'required');
+  if ($student_mb_id === '') jres(false, 'required');
 
-    $list = select_consult_by_student($student_mb_id);
-    jres(true, $list);
+  $consult_type = esc($_REQUEST['consult_type'] ?? '');
 
-
+  $list = select_consult_by_student($student_mb_id, $consult_type);
+  jres(true, $list);
 }
 
 /* ============================================================
  * 기존 CONSULT 기능 (관리자/기존 페이지 용)
- * ============================================================ */
-else if ($type === AJAX_CONSULT_GET) {
+ * ============================================================ */ else if ($type === AJAX_CONSULT_GET) {
 
-    $row = select_consult_one($id);
-    if (!$row) jres(false, 'not found');
-    jres(true, $row);
-
+  $row = select_consult_one($id);
+  if (!$row) jres(false, 'not found');
+  jres(true, $row);
 } else if ($type === AJAX_CONSULT_LIST) {
 
-    $list = select_consult_list(0, 200);
-    jres(true, $list);
-
+  $list = select_consult_list(0, 200);
+  jres(true, $list);
 } else if ($type === AJAX_CONSULT_DELETE) {
 
-    if ($id <= 0) jres(false, 'invalid');
-    delete_consult($id);
-    jres(true, 'deleted');
-
-} 
-
-else {
-    jres(false, 'invalid type');
+  if ($id <= 0) jres(false, 'invalid');
+  delete_consult($id);
+  jres(true, 'deleted');
+} else {
+  jres(false, 'invalid type');
 }
-?>

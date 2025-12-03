@@ -280,7 +280,7 @@ if ($mb_id === '') {
   var pendingScheduledDt = '';
   var teacherMap = {}; // mb_id -> mb_name
 
-  $(document).ready(function () {
+  $(document).ready(function() {
     if (!mb_id) return;
 
     initConsultScreen();
@@ -288,12 +288,12 @@ if ($mb_id === '') {
 
   function initConsultScreen() {
     // 1) 선생님 목록 로딩
-    ConsultAPI.teacherList().then(function (res) {
+    ConsultAPI.teacherList().then(function(res) {
       var list = res.data || [];
       teacherMap = {};
       var html = '<option value="">선생님 선택</option>';
 
-      list.forEach(function (t) {
+      list.forEach(function(t) {
         teacherMap[t.mb_id] = t.mb_name;
         html += '<option value="' + t.mb_id + '">' + t.mb_name + '</option>';
       });
@@ -308,11 +308,11 @@ if ($mb_id === '') {
       // 2) 날짜 리스트 로딩
       return ConsultAPI.dateList();
 
-    }).then(function (res) {
+    }).then(function(res) {
       var dates = res.data || [];
       var html = '<option value="">날짜 선택</option>';
 
-      dates.forEach(function (d) {
+      dates.forEach(function(d) {
         // d: YYYY-MM-DD → MM/DD 표시
         var parts = d.split('-');
         var label = parts[1] + '/' + parts[2];
@@ -330,20 +330,20 @@ if ($mb_id === '') {
       loadTimeSlots();
       loadMyConsults();
 
-    }).fail(function (err) {
+    }).fail(function(err) {
       console.log(err);
       alert('학과상담 정보를 불러오는 중 오류가 발생했습니다.');
     });
 
     // 이벤트: 선생님 변경
-    $('#selTeacher').on('change', function () {
+    $('#selTeacher').on('change', function() {
       selectedTeacher = $(this).val() || '';
       loadTimeSlots();
       loadMyConsults();
     });
 
     // 이벤트: 날짜 변경
-    $('#selDate').on('change', function () {
+    $('#selDate').on('change', function() {
       selectedDate = $(this).val() || '';
       loadTimeSlots();
     });
@@ -361,11 +361,12 @@ if ($mb_id === '') {
     ConsultAPI.times({
       student_mb_id: mb_id,
       teacher_mb_id: selectedTeacher,
-      target_date: selectedDate
-    }).then(function (res) {
+      target_date: selectedDate,
+      consult_type: '학과상담'
+    }).then(function(res) {
       var list = res.data || [];
       renderTimeGrid(list);
-    }).fail(function (err) {
+    }).fail(function(err) {
       console.log(err);
       $('#timeGrid').html('');
       alert('시간표를 불러오는 중 오류가 발생했습니다.');
@@ -375,7 +376,7 @@ if ($mb_id === '') {
   function renderTimeGrid(list) {
     var html = '';
 
-    list.forEach(function (slot) {
+    list.forEach(function(slot) {
       var cls = 'consult-time-slot';
       if (slot.status === '상담가능') {
         cls += ' available';
@@ -395,12 +396,12 @@ if ($mb_id === '') {
     $('#timeGrid').html(html);
 
     // 클릭 이벤트
-    $('#timeGrid .consult-time-slot').each(function () {
+    $('#timeGrid .consult-time-slot').each(function() {
       var $slot = $(this);
       var status = $slot.data('status');
       var dt = $slot.data('dt');
 
-      $slot.off('click').on('click', function () {
+      $slot.off('click').on('click', function() {
         if (status === '상담가능') {
           pendingScheduledDt = dt;
           openConsultBookSheet();
@@ -434,7 +435,7 @@ if ($mb_id === '') {
 
   function closeConsultBookSheet() {
     $('#consultBookSheet').css('bottom', '-70%');
-    setTimeout(function () {
+    setTimeout(function() {
       $('#consultBookSheet').hide();
     }, 250);
     $('#consultBookDim').hide();
@@ -446,13 +447,14 @@ if ($mb_id === '') {
     ConsultAPI.reserve({
       student_mb_id: mb_id,
       teacher_mb_id: selectedTeacher,
-      scheduled_dt: pendingScheduledDt
-    }).then(function () {
+      scheduled_dt: pendingScheduledDt,
+      consult_type: '학과상담'
+    }).then(function() {
       alert('상담이 예약되었습니다.');
       closeConsultBookSheet();
       loadTimeSlots();
       loadMyConsults();
-    }).fail(function (err) {
+    }).fail(function(err) {
       console.log(err);
       alert((err && err.data) || '예약 중 오류가 발생했습니다.');
     });
@@ -462,10 +464,10 @@ if ($mb_id === '') {
      내 상담 리스트
   ============================================ */
   function loadMyConsults() {
-    ConsultAPI.myList(mb_id).then(function (res) {
+    ConsultAPI.myList(mb_id, '학과상담').then(function(res) {
       var list = res.data || [];
       renderMyConsultList(list);
-    }).fail(function (err) {
+    }).fail(function(err) {
       console.log(err);
       $('#myConsultList').html('');
     });
@@ -482,7 +484,7 @@ if ($mb_id === '') {
       return;
     }
 
-    list.forEach(function (row) {
+    list.forEach(function(row) {
       var id = row.id;
       var dt = row.scheduled_dt || '';
       var datePart = '';
@@ -516,19 +518,19 @@ if ($mb_id === '') {
     $('#myConsultList').html(html);
 
     // 취소 버튼 이벤트
-    $('#myConsultList .consult-cancel-btn').each(function () {
+    $('#myConsultList .consult-cancel-btn').each(function() {
       var $btn = $(this);
       var $item = $btn.closest('.common-item');
       var id = $item.data('id');
 
-      $btn.off('click').on('click', function () {
+      $btn.off('click').on('click', function() {
         if (!confirm('해당 상담을 취소하시겠습니까?')) return;
 
-        ConsultAPI.cancel(id, mb_id).then(function () {
+        ConsultAPI.cancel(id, mb_id).then(function() {
           alert('상담이 취소되었습니다.');
           loadTimeSlots();
           loadMyConsults();
-        }).fail(function (err) {
+        }).fail(function(err) {
           console.log(err);
           alert((err && err.data) || '취소 중 오류가 발생했습니다.');
         });

@@ -19,9 +19,9 @@ function select_consult_one($id) {
     return sql_fetch("select * from cn_consult where id = {$id}");
 }
 
-function select_consult_by_student($student_mb_id, $start=0, $num=CN_PAGE_NUM) {
+function select_consult_by_student($student_mb_id, $type, $start=0, $num=CN_PAGE_NUM) {
     $sql = "select * from cn_consult
-            where student_mb_id = '{$student_mb_id}'
+            where student_mb_id = '{$student_mb_id}' and type = '{$type}'
             order by requested_dt desc, id desc
             limit $start, $num";
     $result = sql_query($sql);
@@ -30,9 +30,10 @@ function select_consult_by_student($student_mb_id, $start=0, $num=CN_PAGE_NUM) {
     return $list;
 }
 
-function select_consult_by_teacher($teacher_mb_id, $status=null, $start=0, $num=CN_PAGE_NUM) {
-    $where = "teacher_mb_id = '{$teacher_mb_id}'";
+function select_consult_by_teacher($teacher_mb_id, $type, $status=null, $start=0, $num=CN_PAGE_NUM) {
+    $where = "teacher_mb_id = '{$teacher_mb_id}' and type = '{$type}'";
     if (!is_null($status)) $where .= " and status = '{$status}'";
+
     $sql = "select * from cn_consult
             where {$where}
             order by requested_dt desc, id desc
@@ -43,10 +44,11 @@ function select_consult_by_teacher($teacher_mb_id, $status=null, $start=0, $num=
     return $list;
 }
 
-function select_consult_by_teacher_and_date($teacher_mb_id, $target_date) {
+function select_consult_by_teacher_and_date($teacher_mb_id, $type, $target_date) {
     $sql = "select *
             from cn_consult
             where teacher_mb_id = '{$teacher_mb_id}'
+              and type = '{$type}'
               and date(scheduled_dt) = '{$target_date}'
             order by scheduled_dt asc, id asc";
     $result = sql_query($sql);
@@ -55,10 +57,11 @@ function select_consult_by_teacher_and_date($teacher_mb_id, $target_date) {
     return $list;
 }
 
-function select_consult_by_teacher_and_datetime($teacher_mb_id, $scheduled_dt) {
+function select_consult_by_teacher_and_datetime($teacher_mb_id, $type, $scheduled_dt) {
     $sql = "select *
             from cn_consult
             where teacher_mb_id = '{$teacher_mb_id}'
+              and type = '{$type}'
               and scheduled_dt = '{$scheduled_dt}'
             limit 1";
     return sql_fetch($sql);
@@ -74,6 +77,7 @@ function insert_consult_slot($student_mb_id, $teacher_mb_id, $type, $scheduled_d
                 scheduled_dt = '{$scheduled_dt}',
                 status = '예약완료',
                 memo = {$memo_sql}";
+    elog("$sql");
     return sql_query($sql);
 }
 
