@@ -27,27 +27,29 @@ function _build_date_list($days = 14)
 /* ============================================================
  * 시간표 생성 (slot builder)
  * ============================================================ */
-function _build_time_slots($teacher_mb_id, $target_date, $student_mb_id)
+function _build_time_slots($teacher_mb_id, $target_date, $student_mb_id, $mode = 'student')
 {
-
   $slots = [];
   $start = strtotime("{$target_date} 07:00:00");
   $end   = strtotime("{$target_date} 23:00:00");
 
-  while ($start < $end) {
+  while ($start <= $end) {
     $t = date('H:i', $start);
     $slots[] = [
       'time'         => $t,
       'status'       => '상담가능',
-      'mine'         => false,
       'exists'       => false,
-      'scheduled_dt' => date('Y-m-d H:i:s', $start)
+      'scheduled_dt' => date('Y-m-d H:i:s', $start),
+      'mb_name'      => '',
     ];
     $start = strtotime("+30 minutes", $start);
   }
 
-  // BLOCK/BREAK 반영
+  /* ================================
+   * 휴게시간(BREAK) 처리
+   * ================================ */
   $blocks = select_teacher_time_block_by_teacher_date($teacher_mb_id, $target_date);
+
   foreach ($blocks as $b) {
     foreach ($slots as &$s) {
       $cur = strtotime("{$target_date} {$s['time']}:00");
@@ -56,28 +58,49 @@ function _build_time_slots($teacher_mb_id, $target_date, $student_mb_id)
         $cur >= strtotime("{$target_date} {$b['start_time']}") &&
         $cur <  strtotime("{$target_date} {$b['end_time']}")
       ) {
-
-        if ($b['type'] === 'BREAK' || $b['type'] === 'BLOCK') {
-          $s['status'] = '상담불가';
+        if ($mode === 'teacher') {
+          // 선생님 화면
+          if ($b['type'] === 'BREAK') {
+            $s['status'] = '휴게시간';
+          }
+        } else {
+          // 학생 화면 기존 로직
+          if ($b['type'] === 'BREAK' ) {
+            $s['status'] = '상담불가';
+          }
         }
       }
     }
     unset($s);
   }
 
-  // 예약 반영
-  $reserved = select_consult_by_teacher_and_date($teacher_mb_id, $_REQUEST['consult_type'], $target_date);
+  /* ================================
+   * 예약 반영
+   * ================================ */
+  $reserved = select_consult_by_teacher_and_date(
+    $teacher_mb_id,
+    $_REQUEST['consult_type'],
+    $target_date
+  );
+
   foreach ($reserved as $r) {
     foreach ($slots as &$s) {
       if ($s['scheduled_dt'] === $r['scheduled_dt']) {
 
         $s['exists'] = true;
+        $s['mb_name'] = $r['mb_name'];  // 학생 이름
 
-        if ($r['student_mb_id'] === $student_mb_id) {
-          $s['status'] = '내상담';
-          $s['mine']   = true;
+        if ($mode === 'teacher') {
+          // ★ 선생님 화면: 예약되었으면 무조건 예약완료
+          $s['status'] = '예약완료';
         } else {
-          $s['status'] = '상담불가';
+          // ★ 학생 화면: 기존 mine 처리
+          if ($r['student_mb_id'] === $student_mb_id) {
+            $s['status'] = '내상담';
+            $s['mine'] = true;
+          } else {
+            $s['status'] = '상담불가';
+          }
         }
       }
     }
@@ -88,12 +111,12 @@ function _build_time_slots($teacher_mb_id, $target_date, $student_mb_id)
 }
 
 
+
 /* ============================================================
  * Controller
  * ============================================================ */
 
 if ($type === AJAX_CONSULT_TEACHER_LIST) {
-
   $rows = sql_query("select mb_id, mb_name from g5_member where role='TEACHER' order by mb_name asc");
   $list = [];
   while ($r = sql_fetch_array($rows)) $list[] = $r;
@@ -151,6 +174,31 @@ if ($type === AJAX_CONSULT_TEACHER_LIST) {
   $list = select_consult_by_student($student_mb_id, $consult_type);
   jres(true, $list);
 }
+
+/* ============================================================
+ * 앱 선생님 화면용
+ * ============================================================ */
+else if ($type === 'CONSULT_TEACHER_MY_LIST') {
+
+  $teacher_mb_id = Esc($_POST['teacher_mb_id'] ?? '');
+  $consult_type  = Esc($_POST['consult_type'] ?? '');
+  $target_date   = Esc($_POST['target_date'] ?? '');
+
+  if ($teacher_mb_id === '' || $consult_type === '' || $target_date === '') {
+    jres(false, '필수값이 누락되었습니다.');
+  }
+
+  // ★ 슬롯 전체 생성 + 예약 반영 + 휴게/불가 반영 + teacher mode 적용
+  $slots = _build_time_slots(
+    $teacher_mb_id,
+    $target_date,
+    '',           // 선생님 화면은 student_mb_id 비교 필요 없음
+    'teacher'     // ← 핵심
+  );
+
+  jres(true, ['list' => $slots]);
+}
+
 
 /* ============================================================
  * 기존 CONSULT 기능 (관리자/기존 페이지 용)

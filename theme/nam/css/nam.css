@@ -10,6 +10,13 @@ body {
   box-sizing: border-box;
 }
 
+input, button {
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', 'Pretendard', sans-serif;
+    font-size: 1em;
+}
+
 /* 상단바 */
 .top-bar {
   height: 60px;
@@ -790,7 +797,7 @@ body {
 /* 실제 select 태그 */
 .common-select {
   width: 100%;
-  height: 46px;
+  height: 36px;
   max-width: 100%;
   /* padding: 0 38px 0 14px; */
   box-sizing: border-box; 
@@ -799,7 +806,7 @@ body {
   border: 1px solid #2A2A2C;
   border-radius: 8px;
 
-  font-size: 15px;
+  font-size: 12px;
   color: #ffffffe0;
 /* 
   appearance: none;
@@ -856,13 +863,14 @@ select {
 
 /* 버튼 */
 .common-form-btn {
-  width: 100%;
-  height: 46px;
+  width: auto;
+  height: 36px;
+  padding:0 10px;
   border-radius: 8px;
   border: 1px solid #3A3A3F;
   background: #2a2a31;
   color: #D9D8D5E0;
-  font-size: 15px;
+  font-size: 12px;
 }
 
 .common-form-row.first-row {
@@ -877,7 +885,6 @@ select {
 /* 검색 버튼 크기 고정 */
 .common-form-row.first-row .common-form-btn {
   width: 80px;
-  height: 46px;
   /* select와 동일 높이 */
   margin: 0;
   flex-shrink: 0;
@@ -907,8 +914,8 @@ select {
 /* date input 일관화 */
 .common-form-row.second-row .common-input-date {
   flex: 1;
-  height: 46px;
-  font-size: 14px;
+  height: 36px;
+  font-size: 12px;
 }
 
 /* ==============================================
@@ -1189,7 +1196,7 @@ select {
   color: #1E1F23;
   padding: 4px 10px;
   font-size: 12px;
-  border-radius: 6px;
+  border-radius: 4px;
   font-weight: 600;
   position: absolute;
   right: 16px;
@@ -1201,7 +1208,7 @@ select {
   color: #C8C8C8E0;
   padding: 4px 10px;
   font-size: 12px;
-  border-radius: 6px;
+  border-radius: 4px;
   font-weight: 500;
   position: absolute;
   right: 16px;

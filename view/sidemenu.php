@@ -46,10 +46,18 @@ $mb_name = $is_login ? $member['mb_name'] : '';
     <a href="<?= G5_VIEW_URL ?>/qna/qna_list.php">비대면 질의 응답</a>
     <a href="<?= G5_VIEW_URL ?>/video/video_list.php">수업 영상</a>
     <a href="<?= G5_VIEW_URL ?>/study_report/study_report_list.php">학습 보고서</a>
-    <a href="<?= G5_VIEW_URL ?>/mock_apply/mock_apply_list.php">모의고사 신청</a>
-    <a href="<?= G5_VIEW_URL ?>/attendance/attendance_list.php">출결 관리</a>
-
     <? if ( $member['role']=='STUDENT' ) { ?>
+    <a href="<?= G5_VIEW_URL ?>/mock_apply/mock_apply_list.php">모의고사 신청</a>
+    <? } else { ?>
+    <a href="<?= G5_VIEW_URL ?>/mock_apply/mock_apply_teacher_list.php">모의고사 신청현황</a>
+    <? } ?>
+    <? if ( $member['role']=='STUDENT' ) { ?>
+    <a href="<?= G5_VIEW_URL ?>/attendance/attendance_list.php">출결 관리</a>
+    <? } else { ?>
+    <a href="<?= G5_VIEW_URL ?>/attendance/attendance_teacher_list.php">출결 현황</a>
+    <? } ?>
+
+    <? if ( $member['role']=='TEACHER' ) { ?>
     <a href="">질문잠금 관리</a>
     <? } ?>
     <? if ( $member['role']=='STUDENT' ) { ?>

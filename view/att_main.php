@@ -21,15 +21,30 @@ include_once('./head.php');
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
   </a>
 
+  <? if ( $member['role']=='STUDENT' ) { ?>
   <a href="<?= G5_VIEW_URL ?>/mock_apply/mock_apply_list.php" class="list-box">
     <span>모의고사 신청</span>
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
   </a>
+  <? } else { ?>
+  <a href="<?= G5_VIEW_URL ?>/mock_apply/mock_apply_teacher_list.php" class="list-box">
+    <span>모의고사 신청현황</span>
+    <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
+  </a>
+  <? } ?>
 
+  <? if ( $member['role']=='STUDENT' ) { ?>
   <a href="<?= G5_VIEW_URL ?>/attendance/attendance_list.php" class="list-box">
     <span>출결 관리</span>
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
   </a>
+  <? } else { ?>
+  <a href="<?= G5_VIEW_URL ?>/attendance/attendance_teacher_list.php" class="list-box">
+    <span>출결 관리</span>
+    <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
+  </a>
+  <? } ?>
+
 
 </section>
 

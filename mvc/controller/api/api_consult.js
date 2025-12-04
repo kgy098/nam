@@ -103,7 +103,7 @@
       return call({
         type: T.MY_LIST,
         student_mb_id: student_mb_id,
-        consult_type: consult_type  
+        consult_type: consult_type
       });
     },
 
@@ -125,6 +125,15 @@
 
     remove: function (id) {
       return call({ type: T.DELETE, id: id });
+    },
+
+    teacherMyList: function (teacher_mb_id, consult_type, target_date) {
+      return call({
+        type: 'CONSULT_TEACHER_MY_LIST',
+        teacher_mb_id: teacher_mb_id,
+        consult_type: consult_type,
+        target_date: target_date
+      });
     },
 
     _endpoint: ENDPOINT,

@@ -20,7 +20,7 @@ $mb_id       = isset($_REQUEST['mb_id']) ? $_REQUEST['mb_id'] : null;           
 $target_date = isset($_REQUEST['target_date']) ? $_REQUEST['target_date'] : null;        // YYYY-MM-DD
 $start_time  = isset($_REQUEST['start_time'])  ? $_REQUEST['start_time']  : null;        // HH:MM:SS
 $end_time    = isset($_REQUEST['end_time'])    ? $_REQUEST['end_time']    : null;        // HH:MM:SS
-$type_code   = isset($_REQUEST['ttb_type'])    ? $_REQUEST['ttb_type']    : null;        // 'AVAILABLE'|'BREAK'|'BLOCK'
+$type_code   = isset($_REQUEST['ttb_type'])    ? $_REQUEST['ttb_type']    : null;        // 'AVAILABLE'|'BREAK'
 $memo        = array_key_exists('memo', $_REQUEST) ? $_REQUEST['memo'] : '';             // nullable
 
 if ($type === AJAX_TTB_LIST) {

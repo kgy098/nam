@@ -7,7 +7,6 @@
 ============================================================ */
 function select_mock_apply_list($params = [])
 {
-
   $start      = intval($params['start'] ?? 0);
   $rows       = intval($params['rows'] ?? 20);
 
@@ -18,49 +17,54 @@ function select_mock_apply_list($params = [])
   $sdate      = $params['sdate'] ?? '';
   $edate      = $params['edate'] ?? '';
 
+  // 학생 기준 where
   $where = " WHERE 1=1 ";
-
-  // 시험
-  if ($mock_id !== '' && $mock_id !== null)
-    $where .= " AND a.mock_id = '{$mock_id}' ";
-
-  // 과목
-  if ($subject_id !== '' && $subject_id !== null)
-    $where .= " AND a.subject_id = '{$subject_id}' ";
 
   // 반
   if ($class_id !== '' && $class_id !== null)
     $where .= " AND m.class = '{$class_id}' ";
 
-  // 응시여부
+  // 응시 상태(신청/취소) 필터
+  // -> 이 값이 있을 때만 apply 상태로 필터 (없으면 전체 학생 + 미신청 포함)
   if ($status !== '' && $status !== null)
     $where .= " AND a.status = '{$status}' ";
 
-  // 기간 검색
+  // apply 쪽 조건은 LEFT JOIN 쪽으로 이동
+  $join_apply = " LEFT JOIN cn_mock_apply AS a
+                      ON a.mb_id = m.mb_id ";
+
+  // 시험
+  if ($mock_id !== '' && $mock_id !== null)
+    $join_apply .= " AND a.mock_id = '{$mock_id}' ";
+
+  // 과목
+  if ($subject_id !== '' && $subject_id !== null)
+    $join_apply .= " AND a.subject_id = '{$subject_id}' ";
+
+  // 기간 (접수 시작/종료 기준)
   if ($sdate !== '')
-    $where .= " AND a.applied_at >= '{$sdate} 00:00:00' ";
+    $join_apply .= " AND a.apply_start >= '{$sdate} 00:00:00' ";
 
   if ($edate !== '')
-    $where .= " AND a.applied_at <= '{$edate} 23:59:59' ";
+    $join_apply .= " AND a.apply_end <= '{$edate} 23:59:59' ";
 
   $sql = "
         SELECT 
             a.*,
             m.mb_name,
-            c.name as class_name,
+            c.name AS class_name,
             mt.name AS mock_name,
             mt.exam_date,
             ms.subject_name
-        FROM cn_mock_apply AS a
-        JOIN g5_member AS m ON a.mb_id = m.mb_id
+        FROM g5_member AS m
+        {$join_apply}
         LEFT JOIN cn_class AS c ON m.class = c.id
         LEFT JOIN cn_mock_test AS mt ON a.mock_id = mt.id
         LEFT JOIN cn_mock_subject AS ms ON a.subject_id = ms.id
-        $where
+        {$where} AND m.role='STUDENT' AND ms.type='모의고사과목'
         ORDER BY a.id DESC
-        LIMIT $start, $rows
+        LIMIT {$start}, {$rows}
     ";
-  // error_log(__FILE__.__LINE__."\n SQL: " . $sql);
 
   $result = sql_query($sql);
   $list = [];
@@ -69,12 +73,12 @@ function select_mock_apply_list($params = [])
   return $list;
 }
 
+
 /* ============================================================
    모의고사 응시현황 리스트 개수
 ============================================================ */
 function select_mock_apply_listcnt($params = [])
 {
-
   $mock_id    = $params['mock_id'] ?? '';
   $subject_id = $params['subject_id'] ?? '';
   $class_id   = $params['class_id'] ?? '';
@@ -84,36 +88,190 @@ function select_mock_apply_listcnt($params = [])
 
   $where = " WHERE 1=1 ";
 
-  if ($mock_id !== '' && $mock_id !== null)
-    $where .= " AND a.mock_id = '{$mock_id}' ";
-
-  if ($subject_id !== '' && $subject_id !== null)
-    $where .= " AND a.subject_id = '{$subject_id}' ";
-
   if ($class_id !== '' && $class_id !== null)
     $where .= " AND m.class = '{$class_id}' ";
 
   if ($status !== '' && $status !== null)
     $where .= " AND a.status = '{$status}' ";
 
+  $join_apply = " LEFT JOIN cn_mock_apply AS a
+                      ON a.mb_id = m.mb_id ";
+
+  if ($mock_id !== '' && $mock_id !== null)
+    $join_apply .= " AND a.mock_id = '{$mock_id}' ";
+
+  if ($subject_id !== '' && $subject_id !== null)
+    $join_apply .= " AND a.subject_id = '{$subject_id}' ";
+
   if ($sdate !== '')
-    $where .= " AND a.applied_at >= '{$sdate} 00:00:00' ";
+    $join_apply .= " AND a.apply_start >= '{$sdate} 00:00:00' ";
 
   if ($edate !== '')
-    $where .= " AND a.applied_at <= '{$edate} 23:59:59' ";
+    $join_apply .= " AND a.apply_end <= '{$edate} 23:59:59' ";
 
   $sql = "
         SELECT COUNT(*) AS cnt
-        FROM cn_mock_apply AS a
-        JOIN g5_member AS m ON a.mb_id = m.mb_id
+        FROM g5_member AS m
+        {$join_apply}
         LEFT JOIN cn_class AS c ON m.class = c.id
         LEFT JOIN cn_mock_test AS mt ON a.mock_id = mt.id
         LEFT JOIN cn_mock_subject AS ms ON a.subject_id = ms.id
-        $where
+        {$where} AND m.role='STUDENT' AND ms.type='모의고사과목'
     ";
 
   $row = sql_fetch($sql);
   return (int)($row['cnt'] ?? 0);
+}
+
+function select_mock_apply_teacher_summary(
+  $mock_id,
+  $class_id,
+  $subject_id,
+  $status,
+  $sdate,
+  $edate
+) {
+  $where = "1=1";
+
+  if ($mock_id !== '')
+    $where .= " AND mt.id = '{$mock_id}' ";
+
+  if ($class_id !== '')
+    $where .= " AND m.class = '{$class_id}' ";
+
+  if ($subject_id !== '')
+    $where .= " AND ms.id = '{$subject_id}' ";
+
+  // 시험일 기간
+  if ($sdate !== '')
+    $where .= " AND mt.exam_date >= '{$sdate}' ";
+
+  if ($edate !== '')
+    $where .= " AND mt.exam_date <= '{$edate}' ";
+
+  // ---------------------------------------------------
+  // LEFT JOIN: 신청 안해도 학생이 목록에 나타나야 함
+  // ---------------------------------------------------
+  $sql = "
+        SELECT 
+            SUM(CASE WHEN a.status = '신청' THEN 1 ELSE 0 END) AS total_complete,
+            SUM(CASE WHEN a.status IS NULL OR a.status <> '신청' THEN 1 ELSE 0 END) AS total_incomplete,
+            COUNT(*) AS total
+        FROM g5_member AS m
+        JOIN cn_mock_test mt ON 1=1
+        JOIN cn_mock_subject ms ON 1=1
+        LEFT JOIN cn_mock_apply a 
+               ON a.mb_id = m.mb_id
+              AND a.mock_id = mt.id
+              AND a.subject_id = ms.id
+        WHERE {$where} AND m.role='STUDENT' AND ms.type='모의고사과목'
+    ";
+
+  return sql_fetch($sql);
+}
+
+function select_mock_apply_teacher_listcnt(
+  $mock_id,
+  $class_id,
+  $subject_id,
+  $status,
+  $sdate,
+  $edate
+) {
+  $where = "1=1";
+
+  if ($mock_id !== '')
+    $where .= " AND mt.id = '{$mock_id}' ";
+
+  if ($class_id !== '')
+    $where .= " AND m.class = '{$class_id}' ";
+
+  if ($subject_id !== '')
+    $where .= " AND ms.id = '{$subject_id}' ";
+
+  if ($sdate !== '')
+    $where .= " AND mt.exam_date >= '{$sdate}' ";
+
+  if ($edate !== '')
+    $where .= " AND mt.exam_date <= '{$edate}' ";
+
+  // 응시여부 필터
+  if ($status === 'COMPLETE')       $where .= " AND a.status = '신청' ";
+  else if ($status === 'INCOMPLETE') $where .= " AND (a.status IS NULL OR a.status <> '신청') ";
+
+  $sql = "
+        SELECT COUNT(*) AS cnt
+        FROM g5_member AS m
+        JOIN cn_mock_test mt ON 1=1
+        JOIN cn_mock_subject ms ON 1=1
+        LEFT JOIN cn_mock_apply a 
+               ON a.mb_id = m.mb_id
+              AND a.mock_id = mt.id
+              AND a.subject_id = ms.id
+        WHERE {$where} AND m.role='STUDENT' AND ms.type='모의고사과목'
+    ";
+
+  $row = sql_fetch($sql);
+  return (int)$row['cnt'];
+}
+function select_mock_apply_teacher_list(
+  $start,
+  $rows,
+  $mock_id,
+  $class_id,
+  $subject_id,
+  $status,
+  $sdate,
+  $edate
+) {
+  $where = "1=1";
+
+  if ($mock_id !== '')
+    $where .= " AND mt.id = '{$mock_id}' ";
+
+  if ($class_id !== '')
+    $where .= " AND m.class = '{$class_id}' ";
+
+  if ($subject_id !== '')
+    $where .= " AND ms.id = '{$subject_id}' ";
+
+  if ($sdate !== '')
+    $where .= " AND mt.exam_date >= '{$sdate}' ";
+
+  if ($edate !== '')
+    $where .= " AND mt.exam_date <= '{$edate}' ";
+
+  if ($status === 'COMPLETE')       $where .= " AND a.status = '신청' ";
+  else if ($status === 'INCOMPLETE') $where .= " AND (a.status IS NULL OR a.status <> '신청') ";
+
+  $sql = "
+        SELECT 
+            mt.name AS mock_name,
+            ms.subject_name,
+            mt.exam_date,
+            m.class AS class_id,
+            (SELECT name FROM cn_class WHERE id = m.class LIMIT 1) AS class_name,
+            m.mb_name,
+            m.mb_id,
+            a.status
+        FROM g5_member AS m
+        JOIN cn_mock_test mt ON 1=1
+        JOIN cn_mock_subject ms ON 1=1
+        LEFT JOIN cn_mock_apply a 
+               ON a.mb_id = m.mb_id
+              AND a.mock_id = mt.id
+              AND a.subject_id = ms.id
+        WHERE {$where} AND m.role='STUDENT' AND ms.type='모의고사과목'
+        ORDER BY mt.exam_date DESC, m.mb_name ASC
+        LIMIT {$start}, {$rows}
+    ";
+
+  $rs = sql_query($sql);
+  $list = [];
+  while ($row = sql_fetch_array($rs)) {
+    $list[] = $row;
+  }
+  return $list;
 }
 
 /* ============================================================

@@ -67,6 +67,32 @@ function select_consult_by_teacher_and_datetime($teacher_mb_id, $type, $schedule
     return sql_fetch($sql);
 }
 
+// 앱 선생님 화면용
+function select_consult_list_by_teacher($teacher_mb_id, $consult_type, $target_date) {
+    $teacher_mb_id = sql_escape_string($teacher_mb_id);
+    $consult_type  = sql_escape_string($consult_type);
+    $target_date   = sql_escape_string($target_date); 
+
+    $sql = "
+        SELECT 
+            c.*,
+            m.mb_name
+        FROM cn_consult AS c
+        LEFT JOIN g5_member AS m
+            ON m.mb_id = c.student_mb_id
+        WHERE c.teacher_mb_id = '{$teacher_mb_id}'
+          AND c.type = '{$consult_type}'
+          AND DATE(c.scheduled_dt) = '{$target_date}'
+        ORDER BY c.scheduled_dt ASC
+    ";
+    // elog("SQL: $sql");
+    $result = sql_query($sql);
+    $list = [];
+    while ($row = sql_fetch_array($result)) $list[] = $row;
+    return $list;
+}
+
+
 function insert_consult_slot($student_mb_id, $teacher_mb_id, $type, $scheduled_dt, $memo=null) {
     $memo_sql = is_null($memo) ? "null" : "'{$memo}'";
     $sql = "insert into cn_consult

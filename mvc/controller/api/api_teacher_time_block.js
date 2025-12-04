@@ -58,7 +58,7 @@
       if (fields.target_date) p.target_date = fields.target_date;
       if (fields.start_time)  p.start_time  = fields.start_time;
       if (fields.end_time)    p.end_time    = fields.end_time;
-      if (fields.ttb_type)    p.ttb_type    = fields.ttb_type; // 'AVAILABLE'|'BREAK'|'BLOCK'
+      if (fields.ttb_type)    p.ttb_type    = fields.ttb_type; // 'AVAILABLE'|'BREAK'
       if (fields.memo != null)p.memo        = fields.memo;
       return call(p);
     },

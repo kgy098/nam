@@ -14,7 +14,11 @@
     MY_LIST: 'MOCK_APPLY_MY_LIST',
     MY_STATUS: 'MOCK_APPLY_MY_STATUS',
     TOGGLE: 'MOCK_APPLY_TOGGLE',
-    OVERVIEW_LIST: 'MOCK_APPLY_MY_OVERVIEW_LIST'
+    OVERVIEW_LIST: 'MOCK_APPLY_MY_OVERVIEW_LIST',
+
+    // 선생님
+    TEACHER_SUMMARY: 'MOCK_APPLY_TEACHER_SUMMARY',
+    TEACHER_LIST: 'MOCK_APPLY_TEACHER_LIST'
   };
 
   function call(params) {
@@ -73,6 +77,17 @@
         page: page,
         rows: rows
       });
+    },
+
+     /* -----------------------------
+        선생님 전용
+    ----------------------------- */
+    teacherSummary: function (params) {
+      return call($.extend({ type: T.TEACHER_SUMMARY }, params));
+    },
+
+    teacherList: function (params) {
+      return call($.extend({ type: T.TEACHER_LIST }, params));
     }
   };
 
