@@ -4368,3 +4368,4 @@ function elog($msg, $level = 'INFO')
 
   error_log($log);
 }
+

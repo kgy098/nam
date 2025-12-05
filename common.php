@@ -1017,6 +1017,7 @@ define('AJAX_LRES_DEL',        'LRES_DEL');         // 예약 삭제
 
 // 교사 시간 블록
 define('AJAX_TTB_LIST', 'TTB_LIST');   // 블록 리스트
+define('AJAX_TTB_SLOTS', 'TTB_SLOTS');   // 타임 슬롯 리스트
 define('AJAX_TTB_GET',  'TTB_GET');    // 단건 조회
 define('AJAX_TTB_ADD',  'TTB_ADD');    // 블록 등록
 define('AJAX_TTB_UPD',  'TTB_UPD');    // 블록 수정

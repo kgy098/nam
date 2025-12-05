@@ -1,13 +1,14 @@
 (function (global, $) {
   'use strict';
 
-  var ENDPOINT = 'ctrl_teacher_time_block.php';
+  var ENDPOINT = g5_ctrl_url + '/ctrl_teacher_time_block.php';
   var T = {
     LIST: 'TTB_LIST',
     GET:  'TTB_GET',
     ADD:  'TTB_ADD',
     UPD:  'TTB_UPD',
-    DEL:  'TTB_DEL'
+    DEL:  'TTB_DEL',
+    SLOTS: 'TTB_SLOTS'
   };
 
   function call(params) {
@@ -32,6 +33,14 @@
     list: function (page, num) {
       var pg = pageParams(page, num);
       return call({ type: T.LIST, start: pg.start, num: pg.num });
+    },
+
+    slots: function (params) {
+      return call({
+        type: T.SLOTS,
+        mb_id: params.mb_id,
+        target_date: params.target_date
+      });
     },
 
     get: function (id) {

@@ -58,7 +58,7 @@ $mb_name = $is_login ? $member['mb_name'] : '';
     <? } ?>
 
     <? if ( $member['role']=='TEACHER' ) { ?>
-    <a href="">질문잠금 관리</a>
+    <a href="<?= G5_VIEW_URL ?>/teacher_time_block/teacher_time_block_list.php">질문잠금 관리</a>
     <? } ?>
     <? if ( $member['role']=='STUDENT' ) { ?>
     <a href="/pay.php">학원비 납부 & 내역</a>

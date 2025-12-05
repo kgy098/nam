@@ -183,9 +183,9 @@ if ($mb_id === '') {
 
     list.forEach(function(slot) {
       var cls = 'consult-time-slot';
-      if (slot.status === '상담가능') {
+      if (slot.status === '상담가능' ) {
         cls += ' available';
-      } else if (slot.status === '내상담') {
+      } else if (slot.status === '내상담' && slot.consult_type==='학과상담') {
         cls += ' mine';
       } else {
         cls += ' disabled';
@@ -193,7 +193,9 @@ if ($mb_id === '') {
 
       html += '<div class="' + cls + '" ' +
         'data-dt="' + (slot.scheduled_dt || '') + '" ' +
-        'data-status="' + (slot.status || '') + '">' +
+        'data-status="' + (slot.status || '') + '" ' +
+        'data-id="' + (slot.consult_id || '') +
+        '">' +
         slot.time +
         '</div>';
     });
@@ -211,7 +213,7 @@ if ($mb_id === '') {
           pendingScheduledDt = dt;
           openConsultBookSheet();
         } else if (status === '내상담') {
-          alert('내 상담은 아래 "내 상담 내역"에서 취소할 수 있습니다.');
+          calcel($slot.data('id'));
         } else {
           // 상담불가
           return;
@@ -331,15 +333,19 @@ if ($mb_id === '') {
       $btn.off('click').on('click', function() {
         if (!confirm('해당 상담을 취소하시겠습니까?')) return;
 
-        ConsultAPI.cancel(id, mb_id).then(function() {
-          alert('상담이 취소되었습니다.');
-          loadTimeSlots();
-          loadMyConsults();
-        }).fail(function(err) {
-          console.log(err);
-          alert((err && err.data) || '취소 중 오류가 발생했습니다.');
-        });
+        calcel(id);
       });
+    });
+  }
+
+  function calcel(id) {
+    ConsultAPI.cancel(id).then(function() {
+      alert('상담이 취소되었습니다.');
+      loadTimeSlots();
+      loadMyConsults();
+    }).fail(function(err) {
+      console.log(err);
+      alert((err && err.data) || '취소 중 오류가 발생했습니다.');
     });
   }
 </script>

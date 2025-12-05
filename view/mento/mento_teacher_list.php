@@ -2,7 +2,7 @@
 include_once('./_common.php');
 
 $menu_group = 'consult';
-$g5['title'] = "학과상담";
+$g5['title'] = "멘토상담";
 include_once('../head.php');
 
 // 로그인 체크
@@ -50,7 +50,7 @@ if ($role !== 'TEACHER') alert("선생님만 접근 가능합니다.", G5_VIEW_U
     const date = $("#selDate").val();
     if (!date) return;
 
-    ConsultAPI.teacherMyList(teacherId, '학과상담', date)
+    ConsultAPI.teacherMyList(teacherId, '멘토상담', date)
       .then(function(res) {
         const list = res.list || res.data?.list || [];
         renderSlots(list);

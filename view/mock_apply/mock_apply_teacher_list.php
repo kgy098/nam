@@ -8,7 +8,7 @@ include_once('../head.php');
 $role = $member['role'] ?? 'STUDENT';
 $is_teacher = ($role === 'TEACHER');
 if (!$is_teacher) {
-  alert('선생님만 접근 가능한 화면입니다.');
+  alert('선생님만 접근 가능한 화면입니다.', G5_VIEW_URL . "/index.php");
 }
 ?>
 

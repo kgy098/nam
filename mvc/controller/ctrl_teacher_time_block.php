@@ -23,7 +23,23 @@ $end_time    = isset($_REQUEST['end_time'])    ? $_REQUEST['end_time']    : null
 $type_code   = isset($_REQUEST['ttb_type'])    ? $_REQUEST['ttb_type']    : null;        // 'AVAILABLE'|'BREAK'
 $memo        = array_key_exists('memo', $_REQUEST) ? $_REQUEST['memo'] : '';             // nullable
 
-if ($type === AJAX_TTB_LIST) {
+if ($type === AJAX_TTB_SLOTS) {
+
+    if (!$mb_id || !$target_date) {
+        echo json_encode(['result' => 'FAIL', 'msg' => 'invalid params']);
+        exit;
+    }
+
+    // 공통 슬롯 생성 (기존 _build_time_slots() 개선/호출)
+    $slots = build_teacher_slots_common($mb_id, $target_date);
+
+    echo json_encode([
+        'result' => 'SUCCESS',
+        'data'   => $slots
+    ]);
+    exit;
+}
+else if ($type === AJAX_TTB_LIST) {
     $list = select_teacher_time_block_list($start, $num);
     echo json_encode(!empty($list) ? ['result'=>'SUCCESS','data'=>$list] : ['result'=>'FAIL']);
 
@@ -31,11 +47,39 @@ if ($type === AJAX_TTB_LIST) {
     $row = select_teacher_time_block_one($id);
     echo json_encode(!empty($row) ? ['result'=>'SUCCESS','data'=>$row] : ['result'=>'FAIL']);
 
-} else if ($type === AJAX_TTB_ADD) {
-    $ok = insert_teacher_time_block($mb_id, $target_date, $start_time, $end_time, $type_code, $memo);
-    echo json_encode($ok ? ['result'=>'SUCCESS'] : ['result'=>'FAIL']);
+} 
 
-} else if ($type === AJAX_TTB_UPD) {
+else if ($type === AJAX_TTB_ADD) {
+    // 같은 시간대 BREAK 가 있는지 CRUD 로 조회
+    $exist = select_teacher_break_one($mb_id, $target_date, $start_time, $end_time);
+
+    if ($exist) {
+        // 이미 있으면 UPDATE
+        $ok = update_teacher_time_block(
+            $exist['id'],
+            $target_date,
+            $start_time,
+            $end_time,
+            'BREAK',
+            $memo
+        );
+    } else {
+        // 없으면 INSERT
+        $ok = insert_teacher_time_block(
+            $mb_id,
+            $target_date,
+            $start_time,
+            $end_time,
+            'BREAK',
+            $memo
+        );
+    }
+
+    echo json_encode($ok ? ['result' => 'SUCCESS'] : ['result' => 'FAIL']);
+
+} 
+
+else if ($type === AJAX_TTB_UPD) {
     $ok = update_teacher_time_block($id, $target_date, $start_time, $end_time, $type_code, $memo);
     echo json_encode($ok ? ['result'=>'SUCCESS'] : ['result'=>'FAIL']);
 

@@ -86,12 +86,10 @@
      * 예약 취소
      * params: { id, student_mb_id }
      * ----------------------------------------- */
-    cancel: function (id, student_mb_id, consult_type) {
+    cancel: function (id) {
       return call({
         type: T.CANCEL,
-        id: id,
-        student_mb_id: student_mb_id,
-        consult_type: consult_type
+        id: id
       });
     },
 

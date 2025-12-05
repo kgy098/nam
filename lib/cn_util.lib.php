@@ -96,3 +96,107 @@ function file_upload($input_name, $upload_dir, $allowed_ext = ['jpg', 'jpeg', 'p
     'bf_path'     => $save_path
   ];
 }
+
+
+/* ============================================================
+ * 시간표 생성 (slot builder)
+ * ============================================================ */
+function _build_time_slots($teacher_mb_id, $target_date, $student_mb_id, $mode = 'student')
+{
+  $slots = [];
+  $start = strtotime("{$target_date} 07:00:00");
+  $end   = strtotime("{$target_date} 23:00:00");
+
+  while ($start < $end) {
+    $t = date('H:i', $start);
+    $slots[] = [
+      'time'         => $t,
+      'status'       => '상담가능',
+      'exists'       => false,
+      'is_break'     => false,   
+      'is_reserved'  => false, 
+      'scheduled_dt' => date('Y-m-d H:i:s', $start),
+      'mb_name'      => '',
+      'class_name'   => '',
+      'break_id'     => '',
+    ];
+    $start = strtotime("+30 minutes", $start);
+  }
+
+  /* ================================
+   * 휴게시간(BREAK) 처리
+   * ================================ */
+  $blocks = select_teacher_time_block_by_teacher_date($teacher_mb_id, $target_date);
+
+  foreach ($blocks as $b) {
+    foreach ($slots as &$s) {
+      $cur = strtotime("{$target_date} {$s['time']}:00");
+
+      if (
+        $cur >= strtotime("{$target_date} {$b['start_time']}") &&
+        $cur <  strtotime("{$target_date} {$b['end_time']}")
+      ) {
+        $s['break_id'] = $b['id'];
+        $s['is_break'] = true;
+            
+        if ($mode === 'teacher') {
+          // 선생님 화면
+          if ($b['type'] === 'BREAK') {
+            $s['status'] = '휴게시간';
+          }
+        } else {
+          // 학생 화면 기존 로직
+          if ($b['type'] === 'BREAK' ) {
+            $s['status'] = '상담불가';
+          }
+        }
+      }
+    }
+    unset($s);
+  }
+
+  /* ================================
+   * 예약 반영
+   * ================================ */
+  $reserved = select_consult_by_teacher_and_date(
+    $teacher_mb_id,
+    $_REQUEST['consult_type'],
+    $target_date
+  );
+
+  foreach ($reserved as $r) {
+    foreach ($slots as &$s) {
+      if ($s['scheduled_dt'] === $r['scheduled_dt']) {
+        $s['is_reserved']  = true;
+
+        $s['exists'] = true;
+        $s['mb_name'] = $r['mb_name'];  // 학생 이름
+        $s['class_name'] = $r['class_name'];
+        $s['consult_type'] = $r['type']; 
+        $s['consult_id'] = $r['id']; 
+
+        if ($mode === 'teacher') {
+          // 선생님 화면: 예약되었으면 무조건 예약완료
+          $s['status'] = '예약완료';
+        } else {
+          // 학생 화면: 기존 mine 처리
+          if ($r['student_mb_id'] === $student_mb_id) {
+            $s['status'] = '내상담';
+            $s['mine'] = true;
+          } else {
+            $s['status'] = '상담불가';
+          }
+        }
+      }
+    }
+
+    // elog
+    unset($s);
+  }
+
+  return $slots;
+}
+
+function build_teacher_slots_common($teacher_mb_id, $target_date) {
+    return _build_time_slots($teacher_mb_id, $target_date, null, 'teacher');
+}

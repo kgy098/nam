@@ -5,6 +5,14 @@ $g5['title'] = "상담&예약";
 $menu_group = 'consult';
 
 include_once('./head.php');
+
+if ( $member['role']=='STUDENT' ) {
+  $consult_url = G5_VIEW_URL . "/consult/consult_list.php";
+  $mento_url = G5_VIEW_URL . "/mento/mento_list.php";
+} else if ( $member['role']=='TEACHER' ) {
+  $consult_url = G5_VIEW_URL . "/consult/consult_teacher_list.php";
+  $mento_url = G5_VIEW_URL . "/mento/mento_teacher_list.php";
+}
 ?>
 
 
@@ -18,19 +26,12 @@ include_once('./head.php');
   </a>
   <? } ?>
 
-  <? if ( $member['role']=='STUDENT' ) { ?>
-  <a href="<?= G5_VIEW_URL ?>/consult/consult_list.php" class="list-box">
+  <a href="<?= $consult_url ?>" class="list-box">
     <span>학과상담</span>
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
   </a>
-  <? } else {?>
-  <a href="<?= G5_VIEW_URL ?>/consult/consult_teacher_list.php" class="list-box">
-    <span>학과상담</span>
-    <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
-  </a>
-  <? } ?>
 
-  <a href="<?= G5_VIEW_URL ?>/mento/mento_list.php" class="list-box">
+  <a href="<?= $mento_url ?>" class="list-box">
     <span>멘토상담</span>
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
   </a>
@@ -39,6 +40,13 @@ include_once('./head.php');
     <span>비대면 질의응답</span>
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
   </a>
+
+  <? if ( $member['role']=='TEACHER' ) { ?>
+  <a href="<?= G5_VIEW_URL ?>/teacher_time_block/teacher_time_block_list.php" class="list-box">
+    <span>질문잠금 관리</span>
+    <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
+  </a>
+  <? } ?>
 
 </section>
 
