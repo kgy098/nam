@@ -34,42 +34,8 @@ if ($type === 'QNA_LIST') {
     $status        = trim($_REQUEST['status'] ?? '');
     $keyword       = trim($_REQUEST['keyword'] ?? '');
 
-    // WHERE 조합
-    $where = "1";
-
-    if ($student_mb_id !== '') {
-        $where .= " AND student_mb_id = '{$student_mb_id}'";
-    }
-
-    if ($teacher_mb_id !== '') {
-        $where .= " AND teacher_mb_id = '{$teacher_mb_id}'";
-    }
-
-    if ($status !== '') {
-        $where .= " AND status = '{$status}'";
-    }
-
-    if ($keyword !== '') {
-        $k = $keyword;
-        $where .= " AND (title LIKE '%{$k}%' OR question LIKE '%{$k}%')";
-    }
-
-    // 전체 개수
-    $total = (int)sql_fetch("SELECT COUNT(*) cnt FROM cn_qna WHERE {$where}")['cnt'];
-
-    // 리스트
-    $list = [];
-    $sql = "
-        SELECT id, student_mb_id, teacher_mb_id,
-               title, question, answer, status, answered_dt,
-               reg_dt, mod_dt
-        FROM cn_qna
-        WHERE {$where}
-        ORDER BY id DESC
-        LIMIT {$offset}, {$rows}
-    ";
-    $q = sql_query($sql);
-    while ($row = sql_fetch_array($q)) $list[] = $row;
+    $list = select_qna_list($student_mb_id, $teacher_mb_id, $status, $keyword, $start = 0, $num = CN_PAGE_NUM);
+    $total = select_qna_listcnt($student_mb_id, $teacher_mb_id, $status, $keyword);
 
     jres(true, [
         'total' => $total,
@@ -191,12 +157,7 @@ else if ($type === 'QNA_ANSWER') {
     // (빈 문자열이면 NULL)
     $answered_val = ($answered_dt === '') ? null : $answered_dt;
 
-    $ok = answer_qna(
-        $id,
-        $teacher_mb_id,
-        $answer,
-        $answered_val
-    );
+    $ok = answer_qna($id, $teacher_mb_id, $answer, $answered_val);
 
     if (!$ok) jres(false, 'answer fail');
 

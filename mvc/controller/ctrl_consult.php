@@ -118,8 +118,27 @@ else if ($type === 'CONSULT_TEACHER_MY_LIST') {
   jres(true, $row);
 } else if ($type === AJAX_CONSULT_LIST) {
 
-  $list = select_consult_list(0, 200);
-  jres(true, $list);
+  $filters = [
+    'date_from' => esc($_REQUEST['date_from'] ?? ''),
+    'date_to'   => esc($_REQUEST['date_to'] ?? ''),
+    'class'     => esc($_REQUEST['class'] ?? ''),
+    'keyword'   => esc($_REQUEST['keyword'] ?? ''),
+    'type'   => esc($_REQUEST['type_filter'] ?? '')
+
+  ];
+
+  $page = max(1, intval($_REQUEST['page'] ?? 1));
+  $rows = 20;
+  $start = ($page - 1) * $rows;
+
+  $list  = select_consult_list($filters, $start, $rows);
+  $total = select_consult_listcnt($filters);
+
+  jres(true, [
+    'list'  => $list,
+    'total' => $total,
+    'page'  => $page
+  ]);
 } else if ($type === AJAX_CONSULT_DELETE) {
 
   if ($id <= 0) jres(false, 'invalid');

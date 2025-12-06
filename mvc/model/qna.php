@@ -1,17 +1,36 @@
 <?php
 
 /* Q&A 목록 */
-function select_qna_list($start = 0, $num = CN_PAGE_NUM)
+function select_qna_list($student_mb_id, $teacher_mb_id, $status, $keyword, $start = 0, $num = CN_PAGE_NUM)
 {
-  $start = (int)$start;
-  $num   = (int)$num;
+  $where = "1";
+
+  if ($student_mb_id !== '') {
+    $where .= " AND student_mb_id = '{$student_mb_id}'";
+  }
+
+  if ($teacher_mb_id !== '') {
+    $where .= " AND teacher_mb_id = '{$teacher_mb_id}'";
+  }
+
+  if ($status !== '') {
+    $where .= " AND status = '{$status}'";
+  }
+
+  if ($keyword !== '') {
+    $k = $keyword;
+    $where .= " AND (title LIKE '%{$k}%' OR question LIKE '%{$k}%')";
+  }
 
   $sql = "
-        select *
-        from cn_qna
-        order by id desc
-        limit {$start}, {$num}
+        SELECT q.*, mt.mb_name as teacher_name
+        FROM cn_qna q
+          LEFT JOIN g5_member mt ON q.teacher_mb_id=mt.mb_id
+        WHERE {$where}
+        ORDER BY id DESC
+        LIMIT {$start}, {$num}
     ";
+  elog($sql);
   $result = sql_query($sql);
 
   $list = [];
@@ -20,9 +39,35 @@ function select_qna_list($start = 0, $num = CN_PAGE_NUM)
 }
 
 /* Q&A 전체 개수 */
-function select_qna_listcnt()
+function select_qna_listcnt($student_mb_id, $teacher_mb_id, $status, $keyword)
 {
-  $row = sql_fetch("select count(id) as cnt from cn_qna");
+  $where = "1";
+
+  if ($student_mb_id !== '') {
+    $where .= " AND student_mb_id = '{$student_mb_id}'";
+  }
+
+  if ($teacher_mb_id !== '') {
+    $where .= " AND teacher_mb_id = '{$teacher_mb_id}'";
+  }
+
+  if ($status !== '') {
+    $where .= " AND status = '{$status}'";
+  }
+
+  if ($keyword !== '') {
+    $k = $keyword;
+    $where .= " AND (title LIKE '%{$k}%' OR question LIKE '%{$k}%')";
+  }
+
+  $sql = "
+        SELECT count(id) as cnt
+        FROM cn_qna q
+          LEFT JOIN g5_member mt ON q.teacher_mb_id=mt.mb_id
+        WHERE {$where}
+    ";
+
+  $row = sql_fetch($sql);
   return $row['cnt'];
 }
 
@@ -30,61 +75,16 @@ function select_qna_listcnt()
 function select_qna_one($id)
 {
   $id = (int)$id;
-  return sql_fetch("select * from cn_qna where id = {$id}");
-}
-
-/* 학생별 조회 */
-function select_qna_by_student($student_mb_id, $status = null, $start = 0, $num = CN_PAGE_NUM)
-{
-  $start = (int)$start;
-  $num   = (int)$num;
-
-  $where = "student_mb_id = '{$student_mb_id}'";
-
-  // status가 null 또는 "" 이 아닐 때만 조건 추가
-  if (!is_null($status) && $status !== '') {
-    $where .= " and status = '{$status}'";
-  }
-
   $sql = "
-        select *
-        from cn_qna
-        where {$where}
-        order by id desc
-        limit {$start}, {$num}
-    ";
-  $result = sql_query($sql);
+      SELECT q.*, mt.mb_name as teacher_name
+      FROM cn_qna q
+        LEFT JOIN g5_member mt ON q.teacher_mb_id=mt.mb_id
+      WHERE id = {$id}
+  ";
 
-  $list = [];
-  while ($row = sql_fetch_array($result)) $list[] = $row;
-  return $list;
+  return sql_fetch($sql);
 }
 
-/* 선생님별 조회 */
-function select_qna_by_teacher($teacher_mb_id, $status = null, $start = 0, $num = CN_PAGE_NUM)
-{
-  $start = (int)$start;
-  $num   = (int)$num;
-
-  $where = "teacher_mb_id = '{$teacher_mb_id}'";
-
-  if (!is_null($status) && $status !== '') {
-    $where .= " and status = '{$status}'";
-  }
-
-  $sql = "
-        select *
-        from cn_qna
-        where {$where}
-        order by id desc
-        limit {$start}, {$num}
-    ";
-  $result = sql_query($sql);
-
-  $list = [];
-  while ($row = sql_fetch_array($result)) $list[] = $row;
-  return $list;
-}
 
 /* 질문 등록 */
 function insert_qna_question($student_mb_id, $title, $question, $teacher_mb_id = null)

@@ -108,12 +108,17 @@
     /* -----------------------------------------
      * (기존) 관리자용 리스트/조회/삭제
      * ----------------------------------------- */
-    list: function (page, num) {
+    list: function (page, num, filters) {
       var pg = pageParams(page, num);
       return call({
         type: T.LIST,
         start: pg.start,
-        num: pg.num
+        num: pg.num,
+        date_from: filters.date_from || '',
+        date_to: filters.date_to || '',
+        class: filters.class || '',
+        keyword: filters.keyword || '',
+        type_filter: filters.type || ''
       });
     },
 

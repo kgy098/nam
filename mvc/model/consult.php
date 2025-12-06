@@ -1,19 +1,101 @@
 <?php
 
-function select_consult_list($start = 0, $num = CN_PAGE_NUM)
+// 관리자에서 사용
+function select_consult_list($filters, $start = 0, $num = CN_PAGE_NUM)
 {
-  $sql = "select * from cn_consult
-            order by requested_dt desc, id desc
-            limit $start, $num";
+  $where = "1=1";
+
+  // 날짜 검색
+  if (!empty($filters['date_from'])) {
+    $where .= " AND date(c.scheduled_dt) >= '{$filters['date_from']}'";
+  }
+  if (!empty($filters['date_to'])) {
+    $where .= " AND date(c.scheduled_dt) <= '{$filters['date_to']}'";
+  }
+
+  // 반 검색
+  if (!empty($filters['class'])) {
+    $where .= " AND s.class = '{$filters['class']}'";
+  }
+  // 타입 검색
+  if (!empty($filters['type'])) {
+    $where .= " AND c.type = '{$filters['type']}'";
+  }
+
+  // 키워드 검색
+  if (!empty($filters['keyword'])) {
+    $kw = esc($filters['keyword']);
+    $where .= "
+            AND (
+                s.mb_name LIKE '%{$kw}%'
+                OR t.mb_name LIKE '%{$kw}%'
+            )
+        ";
+  }
+
+  $sql = "
+        SELECT 
+            c.*,
+            s.mb_name AS student_name,
+            t.mb_name AS teacher_name,
+            cl.name AS class_name
+        FROM cn_consult c
+        LEFT JOIN g5_member s ON c.student_mb_id = s.mb_id
+        LEFT JOIN g5_member t ON c.teacher_mb_id = t.mb_id
+        LEFT JOIN cn_class cl ON s.class = cl.id
+        WHERE {$where}
+        ORDER BY c.requested_dt DESC, c.id DESC
+        LIMIT {$start}, {$num}
+    ";
+  // elog($sql);
   $result = sql_query($sql);
   $list = [];
   while ($row = sql_fetch_array($result)) $list[] = $row;
   return $list;
 }
 
-function select_consult_listcnt()
+function select_consult_listcnt($filters)
 {
-  $row = sql_fetch("select count(id) as cnt from cn_consult");
+  $where = "1=1";
+
+  // 날짜 검색
+  if (!empty($filters['date_from'])) {
+    $where .= " AND date(c.scheduled_dt) >= '{$filters['date_from']}'";
+  }
+  if (!empty($filters['date_to'])) {
+    $where .= " AND date(c.scheduled_dt) <= '{$filters['date_to']}'";
+  }
+
+  // 반 검색
+  if (!empty($filters['class'])) {
+    $where .= " AND s.class = '{$filters['class']}'";
+  }
+  // 타입 검색
+  if (!empty($filters['type'])) {
+    $where .= " AND c.type = '{$filters['type']}'";
+  }
+
+  // 키워드 검색
+  if (!empty($filters['keyword'])) {
+    $kw = esc($filters['keyword']);
+    $where .= "
+            AND (
+                s.mb_name LIKE '%{$kw}%'
+                OR t.mb_name LIKE '%{$kw}%'
+            )
+        ";
+  }
+
+  $sql = "
+        SELECT COUNT(*) AS cnt
+        FROM cn_consult c
+        LEFT JOIN g5_member s ON c.student_mb_id = s.mb_id
+        LEFT JOIN g5_member t ON c.teacher_mb_id = t.mb_id
+        LEFT JOIN cn_class cl ON s.class = cl.id
+        WHERE {$where}
+    ";
+
+  $row = sql_fetch($sql);
   return $row['cnt'];
 }
 
@@ -52,7 +134,7 @@ function select_consult_by_teacher($teacher_mb_id, $type, $status = null, $start
 function select_consult_by_teacher_and_date($teacher_mb_id, $type, $target_date)
 {
   $type_sql = "";
-  if ( !empty($type) ) {
+  if (!empty($type)) {
     $type_sql = " AND type = '{$type}' ";
   }
   $sql = "select c.*, m.mb_name, cl.name as class_name

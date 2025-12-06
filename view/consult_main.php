@@ -9,9 +9,11 @@ include_once('./head.php');
 if ( $member['role']=='STUDENT' ) {
   $consult_url = G5_VIEW_URL . "/consult/consult_list.php";
   $mento_url = G5_VIEW_URL . "/mento/mento_list.php";
+  $qna_url = G5_VIEW_URL . "/qna/qna_list.php";
 } else if ( $member['role']=='TEACHER' ) {
   $consult_url = G5_VIEW_URL . "/consult/consult_teacher_list.php";
   $mento_url = G5_VIEW_URL . "/mento/mento_teacher_list.php";
+  $qna_url = G5_VIEW_URL . "/qna/qna_teacher_list.php";
 }
 ?>
 
@@ -36,7 +38,7 @@ if ( $member['role']=='STUDENT' ) {
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
   </a>
 
-  <a href="<?= G5_VIEW_URL ?>/qna/qna_list.php" class="list-box">
+  <a href="<?= $qna_url ?>" class="list-box">
     <span>비대면 질의응답</span>
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
   </a>
