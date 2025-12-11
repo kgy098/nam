@@ -17,8 +17,28 @@ $end_time      = isset($_REQUEST['end_time'])      ? $_REQUEST['end_time']      
 $status        = isset($_REQUEST['status'])        ? $_REQUEST['status']        : null;
 
 if ($type === AJAX_LRES_LIST) {
-  $list = select_lounge_reservation_list($start, $num);
-  echo json_encode(!empty($list) ? ['result' => 'SUCCESS', 'data' => $list] : ['result' => 'FAIL']);
+  $filters = [
+    'lounge_id'   => $_REQUEST['lounge_id'] ?? '',
+    'target_date' => $_REQUEST['target_date'] ?? '',
+    'field'       => $_REQUEST['field'] ?? '',
+    'keyword'     => $_REQUEST['keyword'] ?? ''
+  ];
+
+  elog(print_r($_REQUEST, true));
+  $list = select_lounge_reservation_list($filters, $start, $num);
+  $total = select_lounge_reservation_listcnt($filters);
+
+  if ($list === false) {
+    echo json_encode(['result' => 'FAIL']);
+    exit;
+  }
+
+  echo json_encode([
+    'result' => 'SUCCESS',
+    'data'   => $list ?: [],
+    'total'  => $total
+  ]);
+  // echo json_encode(!empty($list) ? ['result' => 'SUCCESS', 'data' => $list, 'total' => $total] : ['result' => 'FAIL']);
 } else if ($type === AJAX_LRES_GET) {
   $row = select_lounge_reservation_one($id);
   echo json_encode(!empty($row) ? ['result' => 'SUCCESS', 'data' => $row] : ['result' => 'FAIL']);

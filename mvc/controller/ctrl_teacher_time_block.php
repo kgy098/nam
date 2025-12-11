@@ -1,6 +1,5 @@
 <?php
 include_once('./_common.php');
-include_once('./cn_teacher_time_block.php');
 
 /* ===== 상수 선언 ===== */
 // 교사 시간 블록

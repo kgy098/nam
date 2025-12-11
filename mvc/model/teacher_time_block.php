@@ -45,7 +45,6 @@ function select_teacher_time_block_by_teacher_date($mb_id, $target_date)
             where mb_id = '{$mb_id}' and target_date = '{$target_date}'
             order by start_time asc, id asc
           ";
-  elog($sql);
   $result = sql_query($sql);
   $list = [];
   while ($row = sql_fetch_array($result)) $list[] = $row;

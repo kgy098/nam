@@ -36,8 +36,8 @@ $mb_name = $is_login ? $member['mb_name'] : '';
   </div>
 
   <div class="drawer-menu">
-    <a href="/notice.php">공지사항</a>
-    <a href="/schedule.php">학사일정</a>
+    <a href="<?= G5_VIEW_URL ?>/notice/notice_list.php">공지사항</a>
+    <a href="<?= G5_VIEW_URL ?>/schedule/schedule_list.php">학사일정</a>
     <? if ( $member['role']=='STUDENT' ) { ?>
     <a href="<?= G5_VIEW_URL ?>/lounge_reservation/lounge_reservation_list.php">스터디 라운지 예약</a>
     <? } ?>

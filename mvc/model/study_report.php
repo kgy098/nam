@@ -75,13 +75,13 @@ function select_study_report_listcnt($mb_id = '', $class = '', $date_from = '', 
 
 function select_study_report_list_app($mb_id, $start = 0, $rows = 20, $subject_id = '', $date_from = '', $date_to = '')
 {
-    $where = "r.mb_id = '{$mb_id}'";
+  $where = "r.mb_id = '{$mb_id}'";
 
-    if ($subject_id !== '') $where .= " AND r.subject_id = '{$subject_id}'";
-    if ($date_from !== '')  $where .= " AND r.report_date >= '{$date_from}'";
-    if ($date_to !== '')    $where .= " AND r.report_date <= '{$date_to}'";
+  if ($subject_id !== '') $where .= " AND r.subject_id = '{$subject_id}'";
+  if ($date_from !== '')  $where .= " AND r.report_date >= '{$date_from}'";
+  if ($date_to !== '')    $where .= " AND r.report_date <= '{$date_to}'";
 
-    $sql = "
+  $sql = "
         SELECT 
             r.*,
             r.reg_id, 
@@ -93,49 +93,51 @@ function select_study_report_list_app($mb_id, $start = 0, $rows = 20, $subject_i
         ORDER BY r.report_date DESC, r.id DESC
         LIMIT {$start}, {$rows}
     ";
-    elog("\n SQL: " . $sql);
-    $result = sql_query($sql);
-    $list = [];
+  elog("\n SQL: " . $sql);
+  $result = sql_query($sql);
+  $list = [];
 
-    while ($row = sql_fetch_array($result)) {
+  while ($row = sql_fetch_array($result)) {
 
-        // 첫 번째 첨부파일 가져오기
-        $file = get_board_file('cn_study_report', $row['id'], 0);
+    // 첫 번째 첨부파일 가져오기
+    $file = get_board_file('cn_study_report', $row['id'], 0);
 
-        if ($file && $file['bf_file']) {
-            $row['result_image'] = G5_DATA_URL . "/file/cn_study_report/" . $file['bf_file'];
-        } else {
-            $row['result_image'] = null;
-        }
-
-        $list[] = $row;
+    if ($file && $file['bf_file']) {
+      $row['result_image'] = G5_DATA_URL . "/file/cn_study_report/" . $file['bf_file'];
+      $row['file_name'] = $file['bf_source'];
+    } else {
+      $row['result_image'] = null;
+      $row['file_name'] = null;
     }
 
-    return $list;
+    $list[] = $row;
+  }
+
+  return $list;
 }
 function select_study_report_listcnt_app($mb_id, $subject_id = '', $date_from = '', $date_to = '')
 {
-    $where = "r.mb_id = '{$mb_id}'";
+  $where = "r.mb_id = '{$mb_id}'";
 
-    if ($subject_id !== '') {
-        $where .= " AND r.subject_id = '{$subject_id}'";
-    }
-    if ($date_from !== '') {
-        $where .= " AND r.report_date >= '{$date_from}'";
-    }
-    if ($date_to !== '') {
-        $where .= " AND r.report_date <= '{$date_to}'";
-    }
+  if ($subject_id !== '') {
+    $where .= " AND r.subject_id = '{$subject_id}'";
+  }
+  if ($date_from !== '') {
+    $where .= " AND r.report_date >= '{$date_from}'";
+  }
+  if ($date_to !== '') {
+    $where .= " AND r.report_date <= '{$date_to}'";
+  }
 
-    $sql = "
+  $sql = "
         SELECT COUNT(r.id) AS cnt
         FROM cn_study_report r
         LEFT JOIN cn_mock_subject ms ON r.subject_id = ms.id
         WHERE {$where}
     ";
 
-    $row = sql_fetch($sql);
-    return (int)$row['cnt'];
+  $row = sql_fetch($sql);
+  return (int)$row['cnt'];
 }
 
 

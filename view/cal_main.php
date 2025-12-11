@@ -11,15 +11,15 @@ include_once('./head.php');
 
 <section class="submain-list">
 
-  <div class="list-box">
+  <a href="<?= G5_VIEW_URL ?>/notice/notice_list.php" class="list-box">
     <span>공지사항</span>
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
-  </div>
+  </a>
 
-  <div class="list-box">
+  <a href="<?= G5_VIEW_URL ?>/schedule/schedule_list.php" class="list-box">
     <span>학사일정</span>
     <img src="<?= G5_THEME_IMG_URL ?>/nam/ico/right.png" class="arrow">
-  </div>
+  </a>
 
 </section>
 

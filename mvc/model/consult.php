@@ -47,7 +47,6 @@ function select_consult_list($filters, $start = 0, $num = CN_PAGE_NUM)
         ORDER BY c.requested_dt DESC, c.id DESC
         LIMIT {$start}, {$num}
     ";
-  // elog($sql);
   $result = sql_query($sql);
   $list = [];
   while ($row = sql_fetch_array($result)) $list[] = $row;
@@ -145,7 +144,6 @@ function select_consult_by_teacher_and_date($teacher_mb_id, $type, $target_date)
               $type_sql
               and date(scheduled_dt) = '{$target_date}'
             order by scheduled_dt asc, id asc";
-  elog($sql);
   $result = sql_query($sql);
   $list = [];
   while ($row = sql_fetch_array($result)) $list[] = $row;
@@ -182,7 +180,6 @@ function select_consult_list_by_teacher($teacher_mb_id, $consult_type, $target_d
           AND DATE(c.scheduled_dt) = '{$target_date}'
         ORDER BY c.scheduled_dt ASC
     ";
-  // elog("SQL: $sql");
   $result = sql_query($sql);
   $list = [];
   while ($row = sql_fetch_array($result)) $list[] = $row;
@@ -201,7 +198,6 @@ function insert_consult_slot($student_mb_id, $teacher_mb_id, $type, $scheduled_d
                 scheduled_dt = '{$scheduled_dt}',
                 status = '예약완료',
                 memo = {$memo_sql}";
-  elog("$sql");
   return sql_query($sql);
 }
 
@@ -237,7 +233,6 @@ function update_consult($id, $teacher_mb_id, $type, $scheduled_dt = null, $statu
 function delete_consult($id)
 {
   $sql = "delete from cn_consult where id = {$id}";
-  elog($sql);
 
   return sql_query($sql);
 }

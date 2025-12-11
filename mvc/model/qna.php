@@ -19,13 +19,15 @@ function select_qna_list($student_mb_id, $teacher_mb_id, $status, $keyword, $sta
 
   if ($keyword !== '') {
     $k = $keyword;
-    $where .= " AND (title LIKE '%{$k}%' OR question LIKE '%{$k}%')";
+    $where .= " AND (title LIKE '%{$k}%' OR question LIKE '%{$k}%' OR answer LIKE '%{$k}%' OR ms.mb_name LIKE '%{$k}%')";
   }
 
   $sql = "
-        SELECT q.*, mt.mb_name as teacher_name
+        SELECT q.*, mt.mb_name as teacher_name, ms.mb_name as student_name, c.name as class_name
         FROM cn_qna q
-          LEFT JOIN g5_member mt ON q.teacher_mb_id=mt.mb_id
+          LEFT OUTER JOIN g5_member mt ON q.teacher_mb_id=mt.mb_id
+          LEFT OUTER JOIN g5_member ms ON q.student_mb_id=ms.mb_id
+          LEFT OUTER JOIN cn_class c ON ms.class=c.id
         WHERE {$where}
         ORDER BY id DESC
         LIMIT {$start}, {$num}
@@ -57,13 +59,14 @@ function select_qna_listcnt($student_mb_id, $teacher_mb_id, $status, $keyword)
 
   if ($keyword !== '') {
     $k = $keyword;
-    $where .= " AND (title LIKE '%{$k}%' OR question LIKE '%{$k}%')";
+    $where .= " AND (title LIKE '%{$k}%' OR question LIKE '%{$k}%' OR answer LIKE '%{$k}%' OR ms.mb_name LIKE '%{$k}%')";
   }
 
   $sql = "
         SELECT count(id) as cnt
         FROM cn_qna q
-          LEFT JOIN g5_member mt ON q.teacher_mb_id=mt.mb_id
+          LEFT OUTER JOIN g5_member mt ON q.teacher_mb_id=mt.mb_id
+          LEFT OUTER JOIN g5_member ms ON q.student_mb_id=ms.mb_id
         WHERE {$where}
     ";
 
@@ -120,6 +123,7 @@ function answer_qna($id, $teacher_mb_id, $answer, $answered_dt)
     ";
   return sql_query($sql);
 }
+
 
 /* 질문 수정 */
 function update_qna_question($id, $title, $question, $teacher_mb_id = null, $status = null)

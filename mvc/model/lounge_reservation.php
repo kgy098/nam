@@ -1,24 +1,102 @@
 <?php
 /* cn_lounge_reservation.php */
 
-function select_lounge_reservation_list($start = 0, $num = CN_PAGE_NUM)
+function select_lounge_reservation_list($filters = [], $start = 0, $num = CN_PAGE_NUM)
 {
-  $sql = "select *
-            from cn_lounge_reservation
-            order by reserved_date desc, start_time desc, id desc
-            limit $start, $num";
+  $start = (int)$start;
+  $num   = (int)$num;
+
+  $where = "1=1";
+
+  // -------------------------
+  // 라운지 필터
+  // -------------------------
+  if (!empty($filters['lounge_id'])) {
+    $lounge_id = (int)$filters['lounge_id'];
+    $where .= " AND lr.lounge_id = {$lounge_id}";
+  }
+
+  // -------------------------
+  // 날짜 필터 (예약일)
+  // -------------------------
+  if (!empty($filters['target_date'])) {
+    $date = sql_escape_string($filters['target_date']);
+    $where .= " AND lr.reserved_date = '{$date}'";
+  }
+
+  // -------------------------
+  // 검색어 필터 (학생명, 좌석번호)
+  // -------------------------
+  if (!empty($filters['field']) && !empty($filters['keyword'])) {
+
+    $field = $filters['field'];
+    $keyword = sql_escape_string($filters['keyword']);
+
+    if ($field === 'student_name') {
+      $where .= " AND m.mb_name LIKE '%{$keyword}%'";
+    } else if ($field === 'seat_no') {
+      $where .= " AND ls.seat_no LIKE '%{$keyword}%'";
+    }
+  }
+
+  // -------------------------
+  // 메인 SQL
+  // -------------------------
+  $sql = "
+    SELECT 
+      lr.*,
+      l.name AS lounge_name,
+      ls.seat_no AS seat_no,
+      m.mb_name AS student_name
+    FROM cn_lounge_reservation lr
+      LEFT JOIN cn_lounge l ON lr.lounge_id = l.id
+      LEFT JOIN cn_lounge_seat ls ON lr.seat_id = ls.id
+      LEFT JOIN g5_member m ON lr.mb_id = m.mb_id
+    WHERE {$where}
+    ORDER BY lr.reserved_date DESC, lr.start_time DESC, lr.id DESC
+    LIMIT {$start}, {$num}
+  ";
+
+  elog($sql);
+
   $result = sql_query($sql);
   $list = [];
   while ($row = sql_fetch_array($result)) $list[] = $row;
+
   return $list;
 }
 
-function select_lounge_reservation_listcnt()
+
+function select_lounge_reservation_listcnt($filters = [])
 {
-  $sql = "select count(id) as cnt from cn_lounge_reservation";
-  $row = sql_fetch($sql);
-  return $row['cnt'];
+  $where = "1=1";
+
+  if (!empty($filters['lounge_id'])) {
+    $lounge_id = (int)$filters['lounge_id'];
+    $where .= " AND lounge_id = {$lounge_id}";
+  }
+
+  if (!empty($filters['target_date'])) {
+    $date = sql_escape_string($filters['target_date']);
+    $where .= " AND reserved_date = '{$date}'";
+  }
+
+  if (!empty($filters['field']) && !empty($filters['keyword'])) {
+
+    $field = $filters['field'];
+    $keyword = sql_escape_string($filters['keyword']);
+
+    if ($field === 'student_name') {
+      $where .= " AND mb_id IN (SELECT mb_id FROM g5_member WHERE mb_name LIKE '%{$keyword}%')";
+    } else if ($field === 'seat_no') {
+      $where .= " AND seat_id IN (SELECT id FROM cn_lounge_seat WHERE seat_no LIKE '%{$keyword}%')";
+    }
+  }
+
+  $row = sql_fetch("SELECT COUNT(*) AS cnt FROM cn_lounge_reservation WHERE {$where}");
+  return (int)$row['cnt'];
 }
+
 
 function select_lounge_reservation_one($id)
 {

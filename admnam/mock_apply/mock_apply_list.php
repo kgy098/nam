@@ -1,7 +1,7 @@
 <?php
 include_once('./_common.php');
 
-$sub_menu = '040320';
+$sub_menu = '040300';
 auth_check_menu($auth, $sub_menu, 'r');
 
 $g5['title'] = '모의고사 응시현황';

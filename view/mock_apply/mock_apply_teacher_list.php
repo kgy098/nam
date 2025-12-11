@@ -58,6 +58,7 @@ if (!$is_teacher) {
 
     <div class="common-form-row " style="justify-content:flex-end;">
       <button class="common-form-btn" id="btnExcel" style="width:auto;">엑셀다운로드</button>
+      <a id="downloadLink" href="" style="display:none;">엑셀다운로드</a>
       <button class="common-form-btn" id="btnInit" style="width:auto;">초기화</button>
       <button class="common-form-btn" id="btnSearch" style="width:auto;">검색</button>
     </div>
@@ -136,6 +137,18 @@ if (!$is_teacher) {
     });
 
     $('#btnExcel').on('click', function() {
+
+      downloadFile();
+
+    });
+
+  }
+
+  async function downloadFile() {
+    const ok = await appConfirm('다운로드 받으시겠습니까?');
+
+
+    if (ok) {
       var params = getFilterParams();
 
       // 엑셀 타입 추가
@@ -146,11 +159,16 @@ if (!$is_teacher) {
       var query = Object.keys(params)
         .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k] || ''))
         .join('&');
+      const url = g5_ctrl_url + '/ctrl_mock_apply.php?' + query;
+      document.getElementById('downloadLink').href = url;
+      document.getElementById('downloadLink').click();
+
 
       // 다운로드 실행
-      window.location.href = g5_ctrl_url + '/ctrl_mock_apply.php?' + query;
-    });
-
+      // window.location.href = g5_ctrl_url + '/ctrl_mock_apply.php?' + query;
+      // var excelUrl = g5_ctrl_url + '/ctrl_mock_apply.php?' + query;
+      // window.open(excelUrl, "_blank");
+    }
   }
 
   /* ==========================

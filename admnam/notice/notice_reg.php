@@ -22,9 +22,9 @@ if ($w === 'u') {
   if (!$row) {
     alert('자료가 존재하지 않습니다.');
   }
-  error_log(__FILE__ . __LINE__ . "\n row: " . print_r($row, true));
+  // error_log(__FILE__ . __LINE__ . "\n row: " . print_r($row, true));
 
-  // ★ g5_board_file CRUD 사용 (단일 파일 조회)
+  // g5_board_file CRUD 사용 (단일 파일 조회)
   $file_row = get_board_file($bo_table, $id, 0);
 }
 
@@ -170,7 +170,8 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
           alert(res.message || '저장 실패');
         }
       },
-      error: function() {
+      error: function(err) {
+        console.log(err);
         alert('통신 오류가 발생했습니다.');
       }
     });

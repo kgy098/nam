@@ -199,6 +199,31 @@ function select_member_dup($mb_name, $mb_hp)
   return $row['cnt'] > 0;
 }
 
+function select_member_by_auth_no($auth_no)
+{
+    $auth_no = sql_real_escape_string($auth_no);
+
+    $sql = "
+        SELECT *
+        FROM g5_member
+        WHERE auth_no = '{$auth_no}'
+        LIMIT 1
+    ";
+
+    return sql_fetch($sql);
+}
+
+function select_member_by_hp($hp)
+{
+    $sql = "
+        SELECT *
+        FROM g5_member
+        WHERE mb_hp = '{$hp}'
+        LIMIT 1
+    ";
+
+    return sql_fetch($sql);
+}
 
 /* ==========================================================
    4) mb_id 생성

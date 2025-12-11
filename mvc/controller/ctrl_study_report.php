@@ -24,8 +24,10 @@ switch ($type) {
 
       if ($file && $file['bf_file']) {
         $row['result_image'] = G5_DATA_URL . "/file/cn_study_report/" . $file['bf_file'];
+        $row['file_name'] = $file['bf_source'];
       } else {
         $row['result_image'] = null;
+        $row['file_name'] = null;
       }
     }
     unset($row);

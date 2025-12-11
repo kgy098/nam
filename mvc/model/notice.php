@@ -55,7 +55,7 @@ function update_notice_fields($id, $writer_name, $title, $content) {
                 content     = '".$content."',
                 mod_dt      = NOW()
             where id = {$id}";
-
+    // elog($sql);
     return sql_query($sql);
 }
 

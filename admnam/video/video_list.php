@@ -71,7 +71,7 @@ function loadList(page) {
     drawPagination(total, page, rows);
     $("#totalCount").text(total);
 
-  }).catch(function(){
+  }).fail(function(){
     alert("목록을 불러오지 못했습니다.");
   });
 }

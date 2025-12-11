@@ -73,7 +73,23 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
     </table>
   </div>
 
-  <div style="text-align:center; margin:30px 0;">
+  <div class="btn_fixed_top">
+    <a href="./member_list.php" class="btn btn_02">목록</a>
+    <button type="button" class="btn_submit btn" onclick="saveMember()">저장</button>
+  </div>
+
+  <div class="btn_fixed_top">
+    <a href="./video_list.php" class="btn btn_02">목록</a>
+
+    <?php if ($w === 'u') { ?>
+      <button type="button" id="btnDelete" class="btn btn_02">삭제</button>
+      <button type="button" id="btnSave" class="btn btn_submit">수정</button>
+    <?php } else { ?>
+      <button type="button" id="btnSave" class="btn btn_submit">등록</button>
+    <?php } ?>
+  </div>
+
+  <!-- <div style="text-align:center; margin:30px 0;">
     <a href="./video_list.php" class="btn btn_02" style="min-width:120px;">목록으로</a>
 
     <?php if ($w === 'u') { ?>
@@ -82,7 +98,7 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
     <?php } else { ?>
       <button type="button" id="btnSave" class="btn btn_submit" style="min-width:120px;">등록</button>
     <?php } ?>
-  </div>
+  </div> -->
 
 </form>
 
@@ -93,6 +109,20 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
     $("#btnSave").on("click", function() {
 
       var f = $("#fvideo")[0];
+      var title = $.trim(f.title.value);
+  var youtube_id = $.trim(f.youtube_id.value);
+  var description = f.description.value;
+
+      if (title.length < 2) {
+        alert("제목은 최소 2자 이상이어야 합니다.");
+        f.title.focus();
+        return;
+      }
+      if (youtube_id.length < 1) {
+        alert("유튜브 ID를 입력해주세요.");
+        f.youtube_id.focus();
+        return;
+      }
 
       var data = {
         title: f.title.value,
@@ -105,7 +135,7 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
         VideoAPI.add(data).then(function() {
           alert("등록되었습니다.");
           location.href = "./video_list.php";
-        }).catch(function() {
+        }).fail(function() {
           alert("등록 실패");
         });
 

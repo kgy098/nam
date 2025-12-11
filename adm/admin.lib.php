@@ -687,6 +687,7 @@ if (isset($page)) {
 }
 $qstr = implode("&amp;", $arr_query);
 
+
 if (isset($_REQUEST) && $_REQUEST) {
     if (admin_referer_check(true)) {
         admin_check_xss_params($_REQUEST);

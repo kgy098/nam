@@ -1,6 +1,5 @@
 <?php
 include_once('./_common.php');
-include_once('./cn_schedule.php');
 
 define('AJAX_SCHEDULE_LIST',   'SCHEDULE_LIST');
 define('AJAX_SCHEDULE_GET',    'SCHEDULE_GET');

@@ -49,7 +49,7 @@ $is_teacher = ($role === 'TEACHER');
 
 
   <!-- ==========================
-       📌 선생 업로드 영역
+       선생 업로드 영역
      ========================== -->
   <?php if ($is_teacher) { ?>
     <div style="width:90%;max-width:420px;margin:40px auto 0;">
@@ -316,7 +316,11 @@ $is_teacher = ($role === 'TEACHER');
               r.result_image
                 ? `
                   <div style="text-align:right;margin-bottom:12px;">
-                    <a href="${r.result_image}" download style="color:#4ea1ff;font-size:14px;">다운로드</a>
+                    <button class="common-form-btn"
+                        style="width:auto; padding:6px 10px; font-size:13px;"
+                        onclick="downloadFile('${r.result_image}', '${r.file_name}')">
+                      파일 다운로드
+                    </button>
                   </div>
                   <img src="${r.result_image}" style="width:100%;border-radius:8px;">
                 `
@@ -347,6 +351,19 @@ $is_teacher = ($role === 'TEACHER');
       });
   }
 
+
+  async function downloadFile(url, name) {
+    const ok = await appConfirm('다운로드 받으시겠습니까?');
+
+    if ( ok ) {
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = name || "download";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+  }
 
   /* ==========================
        상세 토글

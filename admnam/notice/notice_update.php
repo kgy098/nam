@@ -1,7 +1,6 @@
 <?php
+define('G5_SKIP_XSS_CHECK', true);
 include_once('./_common.php');
-
-// error_log(__FILE__ . __LINE__ . "\n _REQUEST1: " . print_r($_REQUEST, true));
 
 if (!$is_admin) {
   alert('접근 권한이 없습니다.');
@@ -61,7 +60,6 @@ if ($w === '') {
   echo json_encode(['result' => 'SUCCESS', 'id' => $id]);
   exit;
 }
-
 
 
 // ------------------------------------------------------

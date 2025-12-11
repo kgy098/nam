@@ -348,77 +348,89 @@ if ($mb_id === '') {
   /* ============================================
      좌석 그리드 로딩 (cell_no 기반)
   ============================================ */
-  function loadSeatGrid() {
-    if (!selectedLounge || !selectedDate || !selectedTime) return;
+function loadSeatGrid() {
+  if (!selectedLounge || !selectedDate || !selectedTime) return;
 
-    loungeSeatAPI.byLounge(selectedLounge).then(function(res) {
-      var list = res.data || [];
+  loungeSeatAPI.byLounge(selectedLounge).then(function(res) {
+    const list = res.data || [];
+    if (!list.length) {
+      $('#seatGrid').html('');
+      return;
+    }
 
-      if (!list.length) {
-        $('#seatGrid').html('');
-        return;
-      }
-
-      // cell_no 기준 정렬
-      list.sort(function(a, b) {
-        return a.cell_no - b.cell_no;
-      });
-
-      // cell_no → seat 데이터 맵
-      var cellMap = {};
-      list.forEach(function(row) {
-        cellMap[row.cell_no] = row;
-      });
-
-      var maxCell = list.reduce(function(max, row) {
-        return row.cell_no > max ? row.cell_no : max;
-      }, 0);
-
-      // 30개씩 한 줄
-      var rows = Math.ceil(maxCell / 30);
-      var html = '';
-
-      for (var r = 0; r < rows; r++) {
-
-        var rowHtml = '';
-        var emptyCount = 0; // 연속 빈칸 수 (복도 1칸만 표시하기 위함)
-
-        for (var c = 1; c <= 30; c++) {
-          var cellNo = r * 30 + c;
-          if (cellNo > maxCell) break;
-
-          var seatRow = cellMap[cellNo];
-
-          if (seatRow) {
-            // 앞에 연속된 빈칸이 있었다면 복도 1칸만 추가
-            if (emptyCount > 0) {
-              rowHtml += '<div class="lounge-seat-aisle"></div>';
-              emptyCount = 0;
-            }
-
-            var seat_id = seatRow.id;
-            var seat_no = seatRow.seat_no;
-
-            rowHtml += '<div class="lounge-seat" data-seat="' + seat_id + '">' + seat_no + '</div>';
-
-          } else {
-            // 빈칸 (좌석 없음)
-            emptyCount++;
-          }
-        }
-
-        // 해당 줄에 좌석/복도가 하나라도 있으면 줄 생성
-        if (rowHtml.trim() !== '') {
-          html += '<div class="lounge-seat-row">' + rowHtml + '</div>';
-        }
-      }
-
-      $('#seatGrid').html(html);
-
-      // 상태(예약가능/내예약/예약불가) 반영
-      markSeatStates();
+    // -------------------------------
+    // 1) cell_no → row, col 계산
+    // -------------------------------
+    list.forEach(seat => {
+      const cell = Number(seat.cell_no);
+      seat.row = Math.floor((cell - 1) / 30) + 1; // 1~30
+      seat.col = ((cell - 1) % 30) + 1;           // 1~30
     });
-  }
+
+    // -------------------------------
+    // 2) row/col 최소/최대 계산
+    // -------------------------------
+    let minRow = Infinity, maxRow = -Infinity;
+    let minCol = Infinity, maxCol = -Infinity;
+
+    list.forEach(seat => {
+      if (seat.row < minRow) minRow = seat.row;
+      if (seat.row > maxRow) maxRow = seat.row;
+      if (seat.col < minCol) minCol = seat.col;
+      if (seat.col > maxCol) maxCol = seat.col;
+    });
+
+    const rowCount = maxRow - minRow + 1;
+    const colCount = maxCol - minCol + 1;
+
+    // -------------------------------
+    // 3) 2D grid 준비 (null 로 초기화)
+    // -------------------------------
+    const grid = [];
+    for (let r = 0; r < rowCount; r++) {
+      grid[r] = Array(colCount).fill(null);
+    }
+
+    // -------------------------------
+    // 4) grid 안에 좌석 배치
+    // -------------------------------
+    list.forEach(seat => {
+      const r = seat.row - minRow; 
+      const c = seat.col - minCol;
+      grid[r][c] = seat;
+    });
+
+    // -------------------------------
+    // 5) HTML 생성
+    // -------------------------------
+    let html = "";
+
+    for (let r = 0; r < rowCount; r++) {
+      let rowHtml = "";
+
+      for (let c = 0; c < colCount; c++) {
+        const seat = grid[r][c];
+
+        if (seat) {
+          rowHtml += `
+            <div class="lounge-seat" data-seat="${seat.id}">
+              ${seat.seat_no}
+            </div>
+          `;
+        } else {
+          rowHtml += `<div class="lounge-seat-aisle"></div>`;
+        }
+      }
+
+      html += `<div class="lounge-seat-row">${rowHtml}</div>`;
+    }
+
+    $('#seatGrid').html(html);
+
+    // 기존 상태 반영 호출
+    markSeatStates();
+  });
+}
 
 
   /* ============================================

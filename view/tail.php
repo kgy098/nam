@@ -41,7 +41,7 @@ if (!isset($menu_group)) $menu_group = 'home';
   <div class="app-modal-body" id="appModalMessage">내용 영역</div>
 
   <div class="app-modal-btn-wrap">
-    <button class="app-modal-btn" onclick="closeAppModal()">취소</button>
+    <button class="app-modal-btn" id="appModalCancelBtn">취소</button>
     <button class="app-modal-btn confirm" id="appModalConfirmBtn">확인</button>
   </div>
 </div>
@@ -56,10 +56,38 @@ if (!isset($menu_group)) $menu_group = 'home';
     $('#appModalDim').fadeIn(120);
     $('#appModalBox').fadeIn(120);
 
+    $('#appModalCancelBtn').off('click').on('click', function() {
+      closeAppModal();
+      return false;
+    });
+
     // 기존 confirm 이벤트 제거 후 다시 설정
     $('#appModalConfirmBtn').off('click').on('click', function() {
       closeAppModal();
       if (typeof onConfirm === 'function') onConfirm();
+      return true;
+    });
+  }
+
+  function appConfirm(message) {
+    return new Promise((resolve) => {
+
+      $('#appModalMessage').html(message);
+
+      $('#appModalDim').fadeIn(120);
+      $('#appModalBox').fadeIn(120);
+
+      // 확인 버튼
+      $('#appModalConfirmBtn').off('click').on('click', function() {
+        closeAppModal();
+        resolve(true); // 확인 = true 반환
+      });
+
+      // 취소 버튼
+      $('#appModalCancelBtn').off('click').on('click', function() {
+        closeAppModal();
+        resolve(false); // 취소 = false 반환
+      });
     });
   }
 

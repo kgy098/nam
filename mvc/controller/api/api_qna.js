@@ -4,8 +4,8 @@
   var ENDPOINT = g5_ctrl_url + '/ctrl_qna.php';
 
   var T = {
-    LIST:   'QNA_LIST',
-    GET:    'QNA_GET',
+    LIST: 'QNA_LIST',
+    GET: 'QNA_GET',
     CREATE: 'QNA_CREATE',
     UPDATE: 'QNA_UPDATE',
     DELETE: 'QNA_DELETE',
@@ -94,6 +94,20 @@
       payload.type = T.ANSWER;
       payload.id = id;
       return call(payload);
+    },
+    
+    submit: function (formData) {
+      return $.ajax({
+        url: './qna_update.php',
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        dataType: 'json'
+      }).then(function (res) {
+        if (res && res.result === 'SUCCESS') return res;
+        return $.Deferred().reject(res || { result: 'FAIL' }).promise();
+      });
     },
 
     _endpoint: ENDPOINT,
