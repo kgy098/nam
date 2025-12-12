@@ -78,10 +78,23 @@ input, button {
   color: #E5C784;
 }
 
+.common-section-title {
+  width: 90%;
+  max-width: 420px;
+  margin: 30px auto 10px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #ffffffe0;
+}
+
 /* 리스트 아이템 공통 */
 .common-item {
+  /* background: linear-gradient(55deg, #1E1F23 0%, #232428 50%, #29292C 100%); */
+  background: #29292C;
   border-bottom: 1px solid #2A2A2C;
-  padding: 18px 0;
+  border-radius: 8px;
+  padding: 20px 10px;
+  margin-bottom:10px;
 }
 
 /* 상단 행 (제목 + 썸네일 + 화살표) */
@@ -89,6 +102,7 @@ input, button {
   display: flex;
   align-items: center;
   cursor: pointer;
+  gap: 10px;
 }
 
 /* 옵션 - 썸네일 (수업영상만 사용) */
@@ -103,7 +117,7 @@ input, button {
 /* 텍스트 정보 영역 */
 .common-info {
   flex: 1;
-  margin-left: 14px;
+  /* margin-left: 14px; */
 }
 
 .common-title {
@@ -1196,8 +1210,8 @@ select {
   position: relative;
   background: linear-gradient(55deg, #1E1F23 0%, #232428 50%, #29292C 100%);
   border: 1px solid #2A2A2C;
-  border-radius: 12px;
-  padding: 20px 18px 26px;
+  border-radius: 8px;
+  padding: 20px 10px;
   margin-bottom: 20px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.18);
 }
@@ -1276,21 +1290,8 @@ select {
   pointer-events: none;
 }
 
-.mock-status-badge.gold {
-  background: linear-gradient(135deg, #E4C992 0%, #A17E36 100%);
-  color: #1E1F23;
-  padding: 4px 10px;
-  font-size: 12px;
-  border-radius: 4px;
-  font-weight: 600;
-  position: absolute;
-  right: 16px;
-  top: 16px;
-}
 
-.mock-status-badge.gray {
-  background: #3A3A3F;
-  color: #C8C8C8E0;
+.mock-status-badge {
   padding: 4px 10px;
   font-size: 12px;
   border-radius: 4px;
@@ -1300,6 +1301,20 @@ select {
   top: 16px;
 }
 
+.mock-status-badge.gold {
+  background: linear-gradient(135deg, #E4C992 0%, #A17E36 100%);
+  color: #1E1F23;
+}
+
+.mock-status-badge.gray {
+  background: #3A3A3F;
+  color: #C8C8C8E0;
+}
+
+.mock-status-badge.pink {
+  background: #9A4D4D;
+  color: #C8C8C8E0;
+}
 
 /* ================================
   학과상담/멘토상담 전용 추가 스타일
@@ -1421,6 +1436,7 @@ select {
   padding: 6px 10px;
   font-size: 12px;
   flex-shrink: 0;
+  /* margin-right:10px; */
 }
 
 .consult-cancel-btn:active {

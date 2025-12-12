@@ -11,67 +11,68 @@ if ($mb_id === '') {
 }
 ?>
 
-
-<!-- ================================
+<div class="wrap">
+  <!-- ================================
      상단 선택 영역 (선생님 / 날짜)
 ================================ -->
-<div class="consult-top-section">
-  <div class="common-form-row first-row consult-top-row">
-    <!-- 선생님 선택 -->
-    <div class="common-select-box">
-      <select id="selTeacher" class="common-select">
-        <option value="">선생님 선택</option>
-      </select>
+  <div class="consult-top-section">
+    <div class="common-form-row first-row consult-top-row">
+      <!-- 선생님 선택 -->
+      <div class="common-select-box">
+        <select id="selTeacher" class="common-select">
+          <option value="">선생님 선택</option>
+        </select>
+      </div>
+
+      <!-- 날짜 선택 -->
+      <div class="common-select-box">
+        <select id="selDate" class="common-select">
+          <option value="">날짜 선택</option>
+        </select>
+      </div>
     </div>
+  </div>
 
-    <!-- 날짜 선택 -->
-    <div class="common-select-box">
-      <select id="selDate" class="common-select">
-        <option value="">날짜 선택</option>
-      </select>
+  <!-- 안내문 -->
+  <div class="consult-info">
+    상담을 원하는 선생님과 날짜를 선택한 뒤, 상담 가능 시간을 탭하여 예약하세요.
+  </div>
+
+  <!-- 상태 안내 -->
+  <div class="consult-state-wrap">
+    <div class="consult-state-row">
+      <div class="consult-state-dot consult-dot-available"></div>상담가능
+    </div>
+    <div class="consult-state-row">
+      <div class="consult-state-dot consult-dot-mine"></div>내상담
+    </div>
+    <div class="consult-state-row">
+      <div class="consult-state-dot consult-dot-disabled"></div>상담불가
     </div>
   </div>
-</div>
 
-<!-- 안내문 -->
-<div class="consult-info">
-  상담을 원하는 선생님과 날짜를 선택한 뒤, 상담 가능 시간을 탭하여 예약하세요.
-</div>
+  <!-- 시간표 그리드 -->
+  <div id="timeGrid" class="consult-time-grid"></div>
 
-<!-- 상태 안내 -->
-<div class="consult-state-wrap">
-  <div class="consult-state-row">
-    <div class="consult-state-dot consult-dot-available"></div>상담가능
+  <!-- 내 상담 리스트 타이틀 -->
+  <div class="common-section-title">
+    내 상담 내역
   </div>
-  <div class="consult-state-row">
-    <div class="consult-state-dot consult-dot-mine"></div>내상담
-  </div>
-  <div class="consult-state-row">
-    <div class="consult-state-dot consult-dot-disabled"></div>상담불가
-  </div>
-</div>
 
-<!-- 시간표 그리드 -->
-<div id="timeGrid" class="consult-time-grid"></div>
+  <!-- 내 상담 리스트 -->
+  <div class="common-list-container" id="myConsultList"></div>
 
-<!-- 내 상담 리스트 타이틀 -->
-<div class="consult-my-section-title">
-  내 상담 내역
-</div>
-
-<!-- 내 상담 리스트 -->
-<div class="common-list-container" id="myConsultList"></div>
-
-<!-- 예약 확인 bottom sheet -->
-<div class="consult-sheet-dim" id="consultBookDim" onclick="closeConsultBookSheet();"></div>
-<div class="consult-sheet-box" id="consultBookSheet">
-  <div class="consult-sheet-header">예약 확인</div>
-  <div class="consult-sheet-body" id="consultBookText">
-    선택한 시간으로 상담을 예약하시겠습니까?
-  </div>
-  <div class="consult-sheet-btn-wrap">
-    <button class="consult-sheet-btn" onclick="closeConsultBookSheet();">취소</button>
-    <button class="consult-sheet-btn confirm" onclick="reserveConsult();">예약하기</button>
+  <!-- 예약 확인 bottom sheet -->
+  <div class="consult-sheet-dim" id="consultBookDim" onclick="closeConsultBookSheet();"></div>
+  <div class="consult-sheet-box" id="consultBookSheet">
+    <div class="consult-sheet-header">예약 확인</div>
+    <div class="consult-sheet-body" id="consultBookText">
+      선택한 시간으로 상담을 예약하시겠습니까?
+    </div>
+    <div class="consult-sheet-btn-wrap">
+      <button class="consult-sheet-btn" onclick="closeConsultBookSheet();">취소</button>
+      <button class="consult-sheet-btn confirm" onclick="reserveConsult();">예약하기</button>
+    </div>
   </div>
 </div>
 
@@ -183,9 +184,9 @@ if ($mb_id === '') {
 
     list.forEach(function(slot) {
       var cls = 'consult-time-slot';
-      if (slot.status === '상담가능' ) {
+      if (slot.status === '상담가능') {
         cls += ' available';
-      } else if (slot.status === '내상담' && slot.consult_type==='학과상담') {
+      } else if (slot.status === '내상담' && slot.consult_type === '학과상담') {
         cls += ' mine';
       } else {
         cls += ' disabled';
@@ -306,20 +307,20 @@ if ($mb_id === '') {
       var status = row.status || '';
 
       html +=
-        '<div class="common-item" data-id="' + id + '">' +
-        '  <div class="common-item-row">' +
-        '    <div class="common-info">' +
-        '      <div class="common-title">' +
-        (datePart ? (datePart + ' ' + timePart) : '') +
-        ' · ' + type +
-        '      </div>' +
-        '      <div class="common-meta">' +
-        teacherName + ' · 상태: ' + status +
-        '      </div>' +
-        '    </div>' +
-        '    <button type="button" class="consult-cancel-btn">취소</button>' +
-        '  </div>' +
-        '</div>';
+        `
+        <div class="common-item" data-id="${id}">
+          <div class="common-item-row">
+            <div class="common-info">
+              <div class="common-title">
+                ${datePart ? `${datePart} ${timePart}` : ''} · ${type}
+              </div>
+              <div class="common-meta">${teacherName} · 상태: ${status}
+              </div>
+            </div>
+            <button type="button" class="consult-cancel-btn">취소</button>
+          </div>
+        </div>
+        `;
     });
 
     $('#myConsultList').html(html);

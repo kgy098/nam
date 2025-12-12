@@ -193,77 +193,81 @@ if ($mb_id === '') {
   }
 </style>
 
-
-<!-- ======================================
+<div class="wrap">
+  <!-- ======================================
      첫 번째 줄 (라운지 / 날짜 / 시간 선택)
 ====================================== -->
-<div class="resv-top-row">
+  <div class="resv-top-row">
 
-  <!-- 라운지 -->
-  <div class="common-select-box">
-    <select id="selLounge" class="common-select"></select>
+    <!-- 라운지 -->
+    <div class="common-select-box">
+      <select id="selLounge" class="common-select"></select>
+    </div>
+
+    <!-- 날짜 -->
+    <div class="common-select-box">
+      <select id="selDate" class="common-select"></select>
+    </div>
+
+    <!-- 시간 -->
+    <div class="common-select-box">
+      <select id="selTime" class="common-select">
+      </select>
+    </div>
   </div>
 
-  <!-- 날짜 -->
-  <div class="common-select-box">
-    <select id="selDate" class="common-select"></select>
-  </div>
-
-  <!-- 시간 -->
-  <div class="common-select-box">
-    <select id="selTime" class="common-select">
-    </select>
-  </div>
-</div>
-
-<!-- ======================================
+  <!-- ======================================
      안내문
 ====================================== -->
-<div class="resv-info">
-  예약하고 싶은 자리를 탭하여 예약하세요.
-</div>
+  <div class="resv-info">
+    예약하고 싶은 자리를 탭하여 예약하세요.
+  </div>
 
-<!-- ======================================
+  <!-- ======================================
      좌석 상태 안내
 ====================================== -->
-<div class="seat-state-wrap">
-  <div class="state-row">
-    <div class="state-dot dot-available"></div>예약가능
+  <div class="seat-state-wrap">
+    <div class="state-row">
+      <div class="state-dot dot-available"></div>예약가능
+    </div>
+    <div class="state-row">
+      <div class="state-dot dot-mine"></div>내예약
+    </div>
+    <div class="state-row">
+      <div class="state-dot dot-disabled"></div>예약불가
+    </div>
   </div>
-  <div class="state-row">
-    <div class="state-dot dot-mine"></div>내예약
-  </div>
-  <div class="state-row">
-    <div class="state-dot dot-disabled"></div>예약불가
-  </div>
-</div>
 
-<!-- ======================================
+  <!-- ======================================
      좌석 배치 (cell_no 기반)
 ====================================== -->
-<div id="seatGrid" class="lounge-seat-grid"></div>
+  <div id="seatGrid" class="lounge-seat-grid"></div>
 
-<!-- ======================================
+  <div class="common-section-title">내 예약현황</div>
+
+  <!-- ======================================
      내 예약 리스트
 ====================================== -->
-<div class="common-list-container" id="myResList"></div>
-<div class="common-more-wrap" id="moreWrap" style="display:none;">
-  <button class="common-more-btn" onclick="loadMore()">더보기</button>
-</div>
+  <div class="common-list-container" id="myResList"></div>
+  <div class="common-more-wrap" id="moreWrap" style="display:none;">
+    <button class="common-more-btn" onclick="loadMore()">더보기</button>
+  </div>
 
-<!-- ======================================
+  <!-- ======================================
      예약 확인 bottom sheet
 ====================================== -->
-<div class="sheet-dim" id="bookDim" onclick="closeBookSheet();"></div>
-<div class="sheet-box" id="bookSheet">
-  <div class="sheet-header">예약 확인</div>
-  <div style="padding:14px 0; text-align:center; font-size:15px; color:#fff;">
-    이 좌석을 예약하시겠습니까?
+  <div class="sheet-dim" id="bookDim" onclick="closeBookSheet();"></div>
+  <div class="sheet-box" id="bookSheet">
+    <div class="sheet-header">예약 확인</div>
+    <div style="padding:14px 0; text-align:center; font-size:15px; color:#fff;">
+      이 좌석을 예약하시겠습니까?
+    </div>
+    <div class="sheet-btn-wrap">
+      <button class="sheet-btn" onclick="closeBookSheet();">취소</button>
+      <button class="sheet-btn confirm" onclick="reserveSeat();">예약하기</button>
+    </div>
   </div>
-  <div class="sheet-btn-wrap">
-    <button class="sheet-btn" onclick="closeBookSheet();">취소</button>
-    <button class="sheet-btn confirm" onclick="reserveSeat();">예약하기</button>
-  </div>
+
 </div>
 
 <!-- ======================================
@@ -301,8 +305,8 @@ if ($mb_id === '') {
 
     $('#selDate').on('change', function() {
       selectedDate = $(this).val();
-      markSeatStates(); 
-      loadSeatGrid(); 
+      markSeatStates();
+      loadSeatGrid();
       loadMyReservations(1, true);
     });
 
@@ -348,89 +352,91 @@ if ($mb_id === '') {
   /* ============================================
      좌석 그리드 로딩 (cell_no 기반)
   ============================================ */
-function loadSeatGrid() {
-  if (!selectedLounge || !selectedDate || !selectedTime) return;
+  function loadSeatGrid() {
+    if (!selectedLounge || !selectedDate || !selectedTime) return;
 
-  loungeSeatAPI.byLounge(selectedLounge).then(function(res) {
-    const list = res.data || [];
-    if (!list.length) {
-      $('#seatGrid').html('');
-      return;
-    }
+    loungeSeatAPI.byLounge(selectedLounge).then(function(res) {
+      const list = res.data || [];
+      if (!list.length) {
+        $('#seatGrid').html('');
+        return;
+      }
 
-    // -------------------------------
-    // 1) cell_no → row, col 계산
-    // -------------------------------
-    list.forEach(seat => {
-      const cell = Number(seat.cell_no);
-      seat.row = Math.floor((cell - 1) / 30) + 1; // 1~30
-      seat.col = ((cell - 1) % 30) + 1;           // 1~30
-    });
+      // -------------------------------
+      // 1) cell_no → row, col 계산
+      // -------------------------------
+      list.forEach(seat => {
+        const cell = Number(seat.cell_no);
+        seat.row = Math.floor((cell - 1) / 30) + 1; // 1~30
+        seat.col = ((cell - 1) % 30) + 1; // 1~30
+      });
 
-    // -------------------------------
-    // 2) row/col 최소/최대 계산
-    // -------------------------------
-    let minRow = Infinity, maxRow = -Infinity;
-    let minCol = Infinity, maxCol = -Infinity;
+      // -------------------------------
+      // 2) row/col 최소/최대 계산
+      // -------------------------------
+      let minRow = Infinity,
+        maxRow = -Infinity;
+      let minCol = Infinity,
+        maxCol = -Infinity;
 
-    list.forEach(seat => {
-      if (seat.row < minRow) minRow = seat.row;
-      if (seat.row > maxRow) maxRow = seat.row;
-      if (seat.col < minCol) minCol = seat.col;
-      if (seat.col > maxCol) maxCol = seat.col;
-    });
+      list.forEach(seat => {
+        if (seat.row < minRow) minRow = seat.row;
+        if (seat.row > maxRow) maxRow = seat.row;
+        if (seat.col < minCol) minCol = seat.col;
+        if (seat.col > maxCol) maxCol = seat.col;
+      });
 
-    const rowCount = maxRow - minRow + 1;
-    const colCount = maxCol - minCol + 1;
+      const rowCount = maxRow - minRow + 1;
+      const colCount = maxCol - minCol + 1;
 
-    // -------------------------------
-    // 3) 2D grid 준비 (null 로 초기화)
-    // -------------------------------
-    const grid = [];
-    for (let r = 0; r < rowCount; r++) {
-      grid[r] = Array(colCount).fill(null);
-    }
+      // -------------------------------
+      // 3) 2D grid 준비 (null 로 초기화)
+      // -------------------------------
+      const grid = [];
+      for (let r = 0; r < rowCount; r++) {
+        grid[r] = Array(colCount).fill(null);
+      }
 
-    // -------------------------------
-    // 4) grid 안에 좌석 배치
-    // -------------------------------
-    list.forEach(seat => {
-      const r = seat.row - minRow; 
-      const c = seat.col - minCol;
-      grid[r][c] = seat;
-    });
+      // -------------------------------
+      // 4) grid 안에 좌석 배치
+      // -------------------------------
+      list.forEach(seat => {
+        const r = seat.row - minRow;
+        const c = seat.col - minCol;
+        grid[r][c] = seat;
+      });
 
-    // -------------------------------
-    // 5) HTML 생성
-    // -------------------------------
-    let html = "";
+      // -------------------------------
+      // 5) HTML 생성
+      // -------------------------------
+      let html = "";
 
-    for (let r = 0; r < rowCount; r++) {
-      let rowHtml = "";
+      for (let r = 0; r < rowCount; r++) {
+        let rowHtml = "";
 
-      for (let c = 0; c < colCount; c++) {
-        const seat = grid[r][c];
+        for (let c = 0; c < colCount; c++) {
+          const seat = grid[r][c];
 
-        if (seat) {
-          rowHtml += `
+          if (seat) {
+            rowHtml += `
             <div class="lounge-seat" data-seat="${seat.id}">
               ${seat.seat_no}
             </div>
           `;
-        } else {
-          rowHtml += `<div class="lounge-seat-aisle"></div>`;
+          } else {
+            rowHtml += `<div class="lounge-seat-aisle"></div>`;
+          }
         }
+
+        html += `<div class="lounge-seat-row">${rowHtml}</div>`;
       }
 
-      html += `<div class="lounge-seat-row">${rowHtml}</div>`;
-    }
+      $('#seatGrid').html(html);
 
-    $('#seatGrid').html(html);
-
-    // 기존 상태 반영 호출
-    markSeatStates();
-  });
-}
+      // 기존 상태 반영 호출
+      markSeatStates();
+    });
+  }
 
 
   /* ============================================
@@ -555,8 +561,9 @@ function loadSeatGrid() {
           <div class="common-item">
             <div class="common-item-row">
               <div class="common-info">
-                <div class="common-title">${item.reserved_date} ${item.start_time.substring(0,5)}</div>
-                <div class="common-meta">${item.l_name} / ${item.seat_no}번 좌석</div>
+                <div class="common-title">${item.reserved_date} ${item.start_time.substring(0,5)} 
+                  <span class="common-meta">${item.l_name} / ${item.seat_no}번 좌석</span>
+                </div>
               </div>
             </div>
           </div>

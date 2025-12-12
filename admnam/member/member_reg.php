@@ -144,6 +144,10 @@ if ($w === '' || $w === 'w') {
   $(function() {
     loadProductList();
     loadClassList();
+
+    $(document).on("input", "input[name='mb_hp']", function() {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
   });
 
   /* 상품 */

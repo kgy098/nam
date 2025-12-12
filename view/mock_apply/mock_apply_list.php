@@ -5,10 +5,14 @@ $g5['title'] = "모의고사 신청";
 include_once('../head.php');
 ?>
 
-<div class="common-list-container" id="mockApplyContainer"></div>
+<div class="wrap">
 
-<div class="common-more-wrap" id="moreWrap" style="display:none;">
-  <button class="common-more-btn" onclick="loadMore()">더보기</button>
+  <div class="common-list-container" id="mockApplyContainer"></div>
+
+  <div class="common-more-wrap" id="moreWrap" style="display:none;">
+    <button class="common-more-btn" onclick="loadMore()">더보기</button>
+  </div>
+
 </div>
 
 <script src="<?= G5_API_URL ?>/api_mock_apply.js"></script>

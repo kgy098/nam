@@ -8,23 +8,26 @@ include_once('../head.php');
 $mb_id = $_SESSION['ss_mb_id'] ?? '';
 ?>
 
-<!-- 출결구분 필터 -->
-<div class="common-section">
-  <div class="common-form-row first-row">
-    <div class="common-select-box">
-      <select id="attendTypeFilter" class="common-select">
-        <option value="">출결구분 선택</option>
-      </select>
+<div class="wrap">
+
+  <!-- 출결구분 필터 -->
+  <div class="common-section">
+    <div class="common-form-row first-row">
+      <div class="common-select-box">
+        <select id="attendTypeFilter" class="common-select">
+          <option value="">출결구분 선택</option>
+        </select>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- 리스트 -->
-<div class="common-list-container" id="attList"></div>
+  <!-- 리스트 -->
+  <div class="common-list-container" id="attList"></div>
 
-<!-- 더보기 -->
-<div class="common-more-wrap" id="moreWrap" style="display:none;">
-  <button class="common-more-btn" onclick="loadMore()">더보기</button>
+  <!-- 더보기 -->
+  <div class="common-more-wrap" id="moreWrap" style="display:none;">
+    <button class="common-more-btn" onclick="loadMore()">더보기</button>
+  </div>
 </div>
 
 <script src="<?= G5_API_URL ?>/api_attendance.js"></script>
@@ -113,7 +116,7 @@ $mb_id = $_SESSION['ss_mb_id'] ?? '';
       var date = item.date; // YYYY-MM-DD
       var typeName = item.attend_type_name; // 출결구분명
       var status = item.status; // 출석완료 / 미출석
-      var statusClass = (status === '출석완료') ? 'gold' : 'gray';
+      var statusClass = (status === '출석완료') ? 'gold' : 'pink';
 
       var idKey = date + "_" + item.attend_type_id;
 
@@ -219,7 +222,7 @@ $mb_id = $_SESSION['ss_mb_id'] ?? '';
     // 서버 insert_attendance는 attend_dt = NOW() 자동처리
     AttendanceAPI.add(mb_id, {
         attend_type_id: typeId,
-        date: date, 
+        date: date,
         status: '출석완료'
       })
       .then(() => {

@@ -32,7 +32,7 @@ function select_qna_list($student_mb_id, $teacher_mb_id, $status, $keyword, $sta
         ORDER BY id DESC
         LIMIT {$start}, {$num}
     ";
-  elog($sql);
+  // elog($sql);
   $result = sql_query($sql);
 
   $list = [];
@@ -79,12 +79,14 @@ function select_qna_one($id)
 {
   $id = (int)$id;
   $sql = "
-      SELECT q.*, mt.mb_name as teacher_name
+      SELECT q.*, mt.mb_name as teacher_name, ms.mb_name as student_name, c.name as class_name
       FROM cn_qna q
-        LEFT JOIN g5_member mt ON q.teacher_mb_id=mt.mb_id
-      WHERE id = {$id}
+        LEFT OUTER JOIN g5_member mt ON q.teacher_mb_id=mt.mb_id
+        LEFT OUTER JOIN g5_member ms ON q.student_mb_id=ms.mb_id
+        LEFT OUTER JOIN cn_class c ON ms.class=c.id
+      WHERE q.id = {$id}
   ";
-
+  
   return sql_fetch($sql);
 }
 

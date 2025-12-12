@@ -9,7 +9,10 @@
     CREATE: 'QNA_CREATE',
     UPDATE: 'QNA_UPDATE',
     DELETE: 'QNA_DELETE',
-    ANSWER: 'QNA_ANSWER'
+    ANSWER: 'QNA_ANSWER',
+
+    UPLOAD: 'QNA_ANSWER_FILE_UPLOAD',
+    DELETE_FILE: 'QNA_ANSWER_FILE_DELETE'
   };
 
   // 공통 ajax 호출
@@ -95,7 +98,7 @@
       payload.id = id;
       return call(payload);
     },
-    
+
     submit: function (formData) {
       return $.ajax({
         url: './qna_update.php',
@@ -107,6 +110,28 @@
       }).then(function (res) {
         if (res && res.result === 'SUCCESS') return res;
         return $.Deferred().reject(res || { result: 'FAIL' }).promise();
+      });
+    },
+
+    uploadFile: function (formData) {
+      return $.ajax({
+        url: ENDPOINT,
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        dataType: 'json'
+      }).then(function (res) {
+        if (res && res.result === 'SUCCESS') return res;
+        return $.Deferred().reject(res || { result: 'FAIL' }).promise();
+      });
+    },
+
+    deleteFile: function (id, bf_no) {
+      return call({
+        type: T.DELETE_FILE,
+        id: id,
+        bf_no: bf_no
       });
     },
 

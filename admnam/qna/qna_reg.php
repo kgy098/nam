@@ -12,13 +12,20 @@ $row = [];
 if ($w === 'u') {
   $row = select_qna_one($id);
   if (!$row) alert('자료가 존재하지 않습니다.');
+
+  $file_list = [];
+  $sql = "SELECT * FROM g5_board_file WHERE bo_table='qna' AND wr_id={$id} ORDER BY bf_no ASC";
+  elog($sql);
+  $q = sql_query($sql);
+  while ($f = sql_fetch_array($q)) {
+    $file_list[] = $f;
+  }
+  elog(print_r($file_list, true));
 }
 
 // 제목
 $g5['title'] = "비대면 질의응답 답변관리";
 include_once(G5_NAM_ADM_PATH . '/admin.head.php');
-
-$file_row = get_board_file('qna', $id, 0);
 ?>
 
 <form id="qna_form" autocomplete="off">
@@ -35,16 +42,6 @@ $file_row = get_board_file('qna', $id, 0);
       </colgroup>
       <tbody>
 
-        <!-- 제목 -->
-        <tr>
-          <th scope="row">제목</th>
-          <td>
-            <input type="text" class="frm_input"
-              value="<?= get_text($row['title']) ?>"
-              style="width:100%;" readonly>
-          </td>
-        </tr>
-
         <!-- 학생명 / 반 -->
         <tr>
           <th scope="row">학생 / 반</th>
@@ -57,9 +54,9 @@ $file_row = get_board_file('qna', $id, 0);
 
         <!-- 질문 내용 -->
         <tr>
-          <th scope="row">질문 내용</th>
+          <th scope="row">질문</th>
           <td>
-            <div style="padding:10px; border:1px solid #ddd; min-height:120px; white-space:pre-line;">
+            <div style="padding:10px; border:1px solid #555; min-height:120px; white-space:pre-line;">
               <?= get_text($row['question']) ?>
             </div>
           </td>
@@ -68,18 +65,39 @@ $file_row = get_board_file('qna', $id, 0);
         <tr>
           <th scope="row">첨부파일</th>
           <td>
-            <?php if ($w === 'u' && !empty($file_row['bf_file'])) { ?>
-              <div style="margin-bottom:5px;">
-                현재 파일:
-                <a href="<?= G5_DATA_URL ?>/file/qna/<?= $file_row['bf_file'] ?>"
-                  download="<?= get_text($file_row['bf_source']) ?>">
-                  <?= get_text($file_row['bf_source']) ?>
-                </a>
+            <?php if ($w === 'u' && $file_list) { ?>
+              <div style="margin-bottom:10px;">
 
-                <!-- 파일 삭제 체크박스 -->
-                <label style="margin-left:10px;">
-                  <input type="checkbox" name="file_del" value="1"> 파일 삭제
-                </label>
+                <?php foreach ($file_list as $i => $f) {
+                  $file_url = G5_DATA_URL . "/file/qna/" . $f['bf_file'];
+                  $ext = strtolower(pathinfo($f['bf_file'], PATHINFO_EXTENSION));
+                  $is_image = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                ?>
+
+                  <div style="margin-bottom:6px; display:flex; align-items:center; gap:10px;">
+
+                    <?php if ($is_image) { ?>
+                      <div style="margin-bottom:6px;">
+                        <img src="<?= $file_url ?>"
+                          style="max-width:180px;border:1px solid #333;border-radius:6px;cursor:pointer"
+                          onclick="window.open('<?= $file_url ?>','_blank')">
+                      </div>
+                    <?php } ?>
+                    
+                    <!-- 다운로드 링크 -->
+                    <a href="<?= $file_url ?>" download="<?= get_text($f['bf_source']) ?>">
+                      <?= get_text($f['bf_source']) ?>
+                    </a>
+
+                    <!-- 삭제 체크 -->
+                    <label>
+                      <input type="checkbox" name="file_del[]" value="<?= $f['bf_no'] ?>"> 삭제
+                    </label>
+
+                  </div>
+
+                <?php } ?>
+
               </div>
             <?php } ?>
 
@@ -129,13 +147,13 @@ $file_row = get_board_file('qna', $id, 0);
       var formData = new FormData(form);
 
       QnaAPI.submit(formData)
-      .done(function(res) {
-        alert("저장되었습니다.");
-        location.href = "./qna_list.php";
-      })
-      .fail(function(err) {
-        alert(err.message || "저장 실패");
-      });
+        .done(function(res) {
+          alert("저장되었습니다.");
+          location.href = "./qna_list.php";
+        })
+        .fail(function(err) {
+          alert(err.message || "저장 실패");
+        });
 
     });
 

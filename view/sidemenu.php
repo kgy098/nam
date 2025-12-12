@@ -2,6 +2,17 @@
 // 로그인 여부 체크
 $is_login = isset($member['mb_id']) && $member['mb_id'] !== '';
 $mb_name = $is_login ? $member['mb_name'] : '';
+
+if ( $member['role']=='STUDENT' ) {
+  $consult_url = G5_VIEW_URL . "/consult/consult_list.php";
+  $mento_url = G5_VIEW_URL . "/mento/mento_list.php";
+  $qna_url = G5_VIEW_URL . "/qna/qna_list.php";
+} else if ( $member['role']=='TEACHER' ) {
+  $consult_url = G5_VIEW_URL . "/consult/consult_teacher_list.php";
+  $mento_url = G5_VIEW_URL . "/mento/mento_teacher_list.php";
+  $qna_url = G5_VIEW_URL . "/qna/qna_teacher_list.php";
+}
+
 ?>
 <div id="drawer-overlay"></div>
 
@@ -41,9 +52,9 @@ $mb_name = $is_login ? $member['mb_name'] : '';
     <? if ( $member['role']=='STUDENT' ) { ?>
     <a href="<?= G5_VIEW_URL ?>/lounge_reservation/lounge_reservation_list.php">스터디 라운지 예약</a>
     <? } ?>
-    <a href="<?= G5_VIEW_URL ?>/consult/consult_list.php">학과 상담</a>
-    <a href="<?= G5_VIEW_URL ?>/mento/mento_list.php">멘토 상담</a>
-    <a href="<?= G5_VIEW_URL ?>/qna/qna_list.php">비대면 질의 응답</a>
+    <a href="<?= $consult_url ?>">학과 상담</a>
+    <a href="<?= $mento_url ?>">멘토 상담</a>
+    <a href="<?= $qna_url ?>">비대면 질의 응답</a>
     <a href="<?= G5_VIEW_URL ?>/video/video_list.php">수업 영상</a>
     <a href="<?= G5_VIEW_URL ?>/study_report/study_report_list.php">학습 보고서</a>
     <? if ( $member['role']=='STUDENT' ) { ?>
@@ -65,7 +76,7 @@ $mb_name = $is_login ? $member['mb_name'] : '';
     <? } ?>
 
     <?php if ($is_login) { ?>
-      <a href="/myinfo.php">내 정보 변경</a>
+      <!-- <a href="/myinfo.php">내 정보 변경</a> -->
     <?php } ?>
   </div>
 

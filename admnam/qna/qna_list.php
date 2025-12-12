@@ -70,7 +70,7 @@ include_once(G5_NAM_ADM_PATH . '/admin.head.php');
         <th style="width:80px">번호</th>
         <th style="width:100px">학생명</th>
         <th style="width:60px">반</th>
-        <th>제목</th>
+        <th>질의</th>
         <th style="width:100px">선생님</th>
         <th style="width:100px">답변여부</th>
         <th style="width:120px">등록일</th>
@@ -188,7 +188,7 @@ function loadQnaList(page = 1) {
             <td>${rowNum}</td>
             <td>${row.student_name || '-'}</td>
             <td>${row.class_name || '-'}</td>
-            <td style="text-align:left; padding-left:10px;">${row.title || '-'}</td>
+            <td style="text-align:left; padding-left:10px;">${row.question || '-'}</td>
             <td>${row.teacher_name || '-'}</td>
             <td>${row.status || '-'}</td>
             <td>${(row.reg_dt || '').substring(0,10)}</td>
